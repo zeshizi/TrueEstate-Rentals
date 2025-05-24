@@ -7,7 +7,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <main>
+      <main className="relative">
         <HeroSection />
         <FeaturedProperties />
       </main>
