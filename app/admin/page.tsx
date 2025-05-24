@@ -15,14 +15,18 @@ export default function AdminPage() {
     if (status === "loading") return // Still loading
 
     if (!session) {
+      console.log("❌ No session found, redirecting to sign in")
       router.push("/auth/signin")
       return
     }
 
     if (session.user.role !== "admin") {
+      console.log("🚫 User is not admin, redirecting to home")
       router.push("/")
       return
     }
+
+    console.log("✅ Admin access granted for:", session.user.email)
   }, [session, status, router])
 
   if (status === "loading") {
@@ -37,6 +41,16 @@ export default function AdminPage() {
     return null
   }
 
+  // Ensure subscription exists with defaults
+  const userWithDefaults = {
+    ...session.user,
+    subscription: session.user.subscription || {
+      plan: "enterprise",
+      status: "active",
+      features: ["all_access", "admin_panel", "analytics", "api_access"],
+    },
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -44,6 +58,9 @@ export default function AdminPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
           <p className="text-gray-600">Manage the TrueEstate platform and monitor system health</p>
+          <div className="mt-2 text-sm text-gray-500">
+            Welcome, {userWithDefaults.email} | Plan: {userWithDefaults.subscription.plan}
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-4 gap-6 mb-8">

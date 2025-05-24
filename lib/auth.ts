@@ -45,13 +45,36 @@ export const authOptions: NextAuthOptions = {
         // For demo purposes, we'll allow any email with password "demo"
         if (credentials.password === "demo") {
           console.log("✅ Demo login successful for:", credentials.email)
+
+          // Determine role based on email
+          let role = "user"
+          if (credentials.email.includes("admin")) {
+            role = "admin"
+          } else if (credentials.email.includes("agent")) {
+            role = "agent"
+          }
+
+          // Create default subscription
+          const subscription = {
+            plan: role === "admin" ? "enterprise" : role === "agent" ? "premium" : "free",
+            status: "active",
+            features:
+              role === "admin"
+                ? ["all_access", "admin_panel", "analytics", "api_access"]
+                : role === "agent"
+                  ? ["property_search", "client_management", "analytics"]
+                  : ["basic_search", "property_view"],
+          }
+
           const user = {
             id: credentials.email,
             email: credentials.email,
             name: credentials.email.split("@")[0],
-            role: credentials.email.includes("admin") ? "admin" : "user",
+            role: role as "user" | "agent" | "admin",
+            subscription,
           }
-          console.log("👤 Returning user:", user)
+
+          console.log("👤 Returning user:", JSON.stringify(user, null, 2))
           return user
         }
 
@@ -63,8 +86,6 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async signIn({ user, account, profile }) {
       console.log("🚪 SignIn callback:", { user: user?.email, account: account?.provider })
-
-      // Always allow sign in for demo
       return true
     },
     async jwt({ token, user }) {
@@ -73,15 +94,29 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.role = user.role || (user.email?.includes("admin") ? "admin" : "user")
         token.userId = user.id
+        token.subscription = user.subscription || {
+          plan: "free",
+          status: "active",
+          features: ["basic_search"],
+        }
       }
       return token
     },
     async session({ session, token }) {
-      console.log("📋 Session callback:", { sessionEmail: session.user?.email, tokenRole: token.role })
+      console.log("📋 Session callback:", {
+        sessionEmail: session.user?.email,
+        tokenRole: token.role,
+        tokenSubscription: token.subscription,
+      })
 
       if (session.user) {
-        session.user.role = token.role as string
+        session.user.role = token.role as "user" | "agent" | "admin"
         session.user.userId = token.userId as string
+        session.user.subscription = token.subscription || {
+          plan: "free",
+          status: "active",
+          features: ["basic_search"],
+        }
       }
       return session
     },
