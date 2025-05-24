@@ -11,6 +11,14 @@ interface SearchResultsProps {
 }
 
 export function SearchResults({ results, loading, query }: SearchResultsProps) {
+  // At the beginning of the SearchResults component, add:
+  console.log("🎯 SearchResults component received:", {
+    resultsCount: results.length,
+    loading,
+    query,
+    firstResult: results[0] || null,
+  })
+
   if (loading) {
     return (
       <div className="space-y-4">

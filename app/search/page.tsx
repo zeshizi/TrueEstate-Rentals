@@ -34,12 +34,21 @@ export default function SearchPage() {
         location: filters.location,
       })
 
-      console.log("🔍 Searching with params:", params.toString())
+      console.log("🔍 Searching with params:", {
+        query,
+        filters,
+        url: `/api/search?${params.toString()}`,
+      })
 
       const response = await fetch(`/api/search?${params}`)
       const data = await response.json()
 
-      console.log("📊 Search results:", data)
+      console.log("📊 Search results:", {
+        resultsCount: data.results?.length || 0,
+        results: data.results,
+        query: data.query,
+        filters: data.filters,
+      })
       setResults(data.results || [])
     } catch (error) {
       console.error("❌ Search error:", error)
