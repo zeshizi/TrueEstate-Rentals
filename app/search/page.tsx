@@ -37,7 +37,7 @@ export default function SearchPage() {
       })
 
       console.log("🔍 Searching with params:", {
-        query,
+        query: query,
         type: filters.type,
         minValue: filters.minValue,
         maxValue: filters.maxValue,
@@ -53,11 +53,14 @@ export default function SearchPage() {
         totalResults: data.results?.length || 0,
         firstResult: data.results?.[0]?.title || "none",
         cached: data.cached || false,
+        mock: data.mock || false,
+        error: data.error || null,
       })
 
       setResults(data.results || [])
     } catch (error) {
       console.error("❌ Search error:", error)
+      setResults([])
     } finally {
       setLoading(false)
     }
@@ -67,7 +70,7 @@ export default function SearchPage() {
   useEffect(() => {
     if (query || filters.propertyType || filters.budget) {
       console.log("🚀 Auto-searching on page load with:", {
-        query,
+        query: query,
         propertyType: filters.propertyType,
         budget: filters.budget,
       })

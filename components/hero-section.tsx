@@ -96,10 +96,10 @@ export function HeroSection() {
 
           {/* CTA Buttons */}
           <div className="pt-12">
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
               <Button
                 size="lg"
-                className="h-14 px-10 bg-white text-slate-900 hover:bg-slate-100 font-semibold text-lg rounded-xl"
+                className="h-14 px-10 bg-white text-slate-900 hover:bg-slate-100 font-semibold text-lg rounded-xl shadow-lg"
                 onClick={() => router.push("/properties")}
               >
                 <TrendingUp className="mr-3 h-6 w-6" />
@@ -108,7 +108,7 @@ export function HeroSection() {
               <Button
                 size="lg"
                 variant="outline"
-                className="h-14 px-10 border-2 border-white text-white hover:bg-white/10 font-semibold text-lg rounded-xl"
+                className="h-14 px-10 border-2 border-white text-white hover:bg-white hover:text-slate-900 font-semibold text-lg rounded-xl transition-all duration-200 shadow-lg"
                 onClick={() => router.push("/wealth-map")}
               >
                 <MapPin className="mr-3 h-6 w-6" />
