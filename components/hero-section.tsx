@@ -107,8 +107,7 @@ export function HeroSection() {
               </Button>
               <Button
                 size="lg"
-                variant="outline"
-                className="h-14 px-10 border-2 border-white text-white hover:bg-white hover:text-slate-900 font-semibold text-lg rounded-xl transition-all duration-200 shadow-lg"
+                className="h-14 px-10 bg-slate-800/80 border-2 border-white text-white hover:bg-white hover:text-slate-900 font-semibold text-lg rounded-xl transition-all duration-200 shadow-lg backdrop-blur-sm"
                 onClick={() => router.push("/wealth-map")}
               >
                 <MapPin className="mr-3 h-6 w-6" />
