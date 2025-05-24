@@ -17,6 +17,8 @@ interface Property {
   confidence: "High" | "Medium" | "Low"
   propertyType: string
   featured?: boolean
+  state: string
+  city: string
 }
 
 interface MapboxWealthMapProps {
@@ -25,102 +27,1115 @@ interface MapboxWealthMapProps {
   filters: any
 }
 
-// Sample featured properties with real coordinates
-const SAMPLE_PROPERTIES: Property[] = [
+// Comprehensive property data for all 50 states + DC
+const ALL_STATE_PROPERTIES: Property[] = [
+  // Alabama
   {
-    id: "sample_1",
-    lat: 34.0901,
-    lng: -118.4065,
-    address: "912 N Beverly Dr, Beverly Hills, CA",
-    value: 15000000,
-    ownerWealth: 250000000,
-    ownerName: "Tech CEO Holdings LLC",
+    id: "al_1",
+    lat: 33.5186,
+    lng: -86.8104,
+    address: "123 Historic Mansion Drive",
+    city: "Birmingham",
+    state: "AL",
+    value: 2800000,
+    ownerWealth: 45000000,
+    ownerName: "Southern Heritage Trust",
     confidence: "High",
-    propertyType: "single-family",
-    featured: true,
+    propertyType: "mansion",
+    featured: false,
   },
   {
-    id: "sample_2",
-    lat: 40.7614,
-    lng: -73.9776,
-    address: "432 Park Ave, Manhattan, NY",
-    value: 8500000,
-    ownerWealth: 180000000,
-    ownerName: "Goldman Investment Trust",
-    confidence: "High",
-    propertyType: "condo",
-    featured: true,
+    id: "al_2",
+    lat: 32.3617,
+    lng: -86.2792,
+    address: "456 Capitol Hill Estate",
+    city: "Montgomery",
+    state: "AL",
+    value: 1900000,
+    ownerWealth: 35000000,
+    ownerName: "Alabama Holdings LLC",
+    confidence: "Medium",
+    propertyType: "estate",
+    featured: false,
   },
+
+  // Alaska
   {
-    id: "sample_3",
-    lat: 34.0259,
-    lng: -118.7798,
-    address: "23456 Pacific Coast Hwy, Malibu, CA",
-    value: 12000000,
-    ownerWealth: 320000000,
-    ownerName: "Entertainment Mogul Inc",
-    confidence: "High",
-    propertyType: "single-family",
-    featured: true,
-  },
-  {
-    id: "sample_4",
-    lat: 39.1911,
-    lng: -106.8175,
-    address: "789 Aspen Mountain Rd, Aspen, CO",
-    value: 6800000,
-    ownerWealth: 150000000,
-    ownerName: "Hedge Fund Partners",
-    confidence: "High",
-    propertyType: "single-family",
-    featured: true,
-  },
-  {
-    id: "sample_5",
-    lat: 40.9176,
-    lng: -72.3951,
-    address: "567 Meadow Ln, East Hampton, NY",
-    value: 9200000,
-    ownerWealth: 200000000,
-    ownerName: "Real Estate Dynasty LLC",
-    confidence: "High",
-    propertyType: "single-family",
-    featured: true,
-  },
-  {
-    id: "sample_6",
-    lat: 37.4419,
-    lng: -122.143,
-    address: "1234 University Ave, Palo Alto, CA",
+    id: "ak_1",
+    lat: 61.2181,
+    lng: -149.9003,
+    address: "456 Wilderness Lodge Road",
+    city: "Anchorage",
+    state: "AK",
     value: 4500000,
     ownerWealth: 85000000,
-    ownerName: "Startup Founder",
-    confidence: "Medium",
-    propertyType: "single-family",
+    ownerName: "Arctic Holdings Corp",
+    confidence: "High",
+    propertyType: "lodge",
     featured: true,
   },
   {
-    id: "sample_7",
-    lat: 41.0534,
-    lng: -73.5387,
-    address: "890 Round Hill Rd, Greenwich, CT",
-    value: 3800000,
-    ownerWealth: 95000000,
-    ownerName: "Finance Executive",
+    id: "ak_2",
+    lat: 64.8378,
+    lng: -147.7164,
+    address: "789 Northern Lights Estate",
+    city: "Fairbanks",
+    state: "AK",
+    value: 3200000,
+    ownerWealth: 65000000,
+    ownerName: "Midnight Sun Holdings",
     confidence: "Medium",
-    propertyType: "single-family",
-    featured: true,
+    propertyType: "estate",
+    featured: false,
   },
+
+  // Arizona
   {
-    id: "sample_8",
+    id: "az_1",
     lat: 33.4942,
     lng: -111.9261,
-    address: "345 Desert Mountain Dr, Scottsdale, AZ",
-    value: 2900000,
-    ownerWealth: 75000000,
-    ownerName: "Retired CEO",
+    address: "789 Desert Mountain Estate",
+    city: "Scottsdale",
+    state: "AZ",
+    value: 7200000,
+    ownerWealth: 125000000,
+    ownerName: "Desert Luxury Holdings",
+    confidence: "High",
+    propertyType: "estate",
+    featured: true,
+  },
+  {
+    id: "az_2",
+    lat: 33.4484,
+    lng: -112.074,
+    address: "456 Phoenix Desert Ridge",
+    city: "Phoenix",
+    state: "AZ",
+    value: 4800000,
+    ownerWealth: 95000000,
+    ownerName: "Southwest Holdings",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: false,
+  },
+
+  // Arkansas
+  {
+    id: "ar_1",
+    lat: 36.3729,
+    lng: -94.2088,
+    address: "321 Ozark Mountain Road",
+    city: "Bentonville",
+    state: "AR",
+    value: 4200000,
+    ownerWealth: 95000000,
+    ownerName: "Retail Dynasty Holdings",
+    confidence: "High",
+    propertyType: "estate",
+    featured: false,
+  },
+
+  // California
+  {
+    id: "ca_1",
+    lat: 34.0736,
+    lng: -118.4004,
+    address: "456 Beverly Hills Drive",
+    city: "Beverly Hills",
+    state: "CA",
+    value: 25000000,
+    ownerWealth: 450000000,
+    ownerName: "Entertainment Mogul Inc",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: true,
+  },
+  {
+    id: "ca_2",
+    lat: 34.0259,
+    lng: -118.7798,
+    address: "789 Pacific Coast Highway",
+    city: "Malibu",
+    state: "CA",
+    value: 18500000,
+    ownerWealth: 320000000,
+    ownerName: "Celebrity Holdings Trust",
+    confidence: "High",
+    propertyType: "estate",
+    featured: true,
+  },
+  {
+    id: "ca_3",
+    lat: 37.4419,
+    lng: -122.143,
+    address: "1234 University Ave",
+    city: "Palo Alto",
+    state: "CA",
+    value: 22000000,
+    ownerWealth: 15000000000,
+    ownerName: "Tech Billionaire Holdings",
+    confidence: "High",
+    propertyType: "estate",
+    featured: true,
+  },
+  {
+    id: "ca_4",
+    lat: 38.2975,
+    lng: -122.286,
+    address: "567 Napa Valley Vineyard",
+    city: "Napa",
+    state: "CA",
+    value: 18500000,
+    ownerWealth: 380000000,
+    ownerName: "Wine Dynasty Holdings",
+    confidence: "High",
+    propertyType: "vineyard",
+    featured: false,
+  },
+  {
+    id: "ca_5",
+    lat: 37.7749,
+    lng: -122.4194,
+    address: "890 Pacific Heights",
+    city: "San Francisco",
+    state: "CA",
+    value: 16800000,
+    ownerWealth: 850000000,
+    ownerName: "Tech Venture Capital",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: false,
+  },
+
+  // Colorado
+  {
+    id: "co_1",
+    lat: 39.1911,
+    lng: -106.8175,
+    address: "654 Aspen Mountain Road",
+    city: "Aspen",
+    state: "CO",
+    value: 15200000,
+    ownerWealth: 280000000,
+    ownerName: "Alpine Holdings Group",
+    confidence: "High",
+    propertyType: "lodge",
+    featured: true,
+  },
+  {
+    id: "co_2",
+    lat: 39.6403,
+    lng: -106.3742,
+    address: "321 Vail Ski Resort",
+    city: "Vail",
+    state: "CO",
+    value: 12800000,
+    ownerWealth: 485000000,
+    ownerName: "Mountain Resort Holdings",
+    confidence: "High",
+    propertyType: "lodge",
+    featured: false,
+  },
+
+  // Connecticut
+  {
+    id: "ct_1",
+    lat: 41.0534,
+    lng: -73.5387,
+    address: "987 Greenwich Gold Coast",
+    city: "Greenwich",
+    state: "CT",
+    value: 12500000,
+    ownerWealth: 650000000,
+    ownerName: "Wall Street Titan",
+    confidence: "High",
+    propertyType: "estate",
+    featured: true,
+  },
+
+  // Delaware
+  {
+    id: "de_1",
+    lat: 39.7391,
+    lng: -75.5398,
+    address: "234 Wilmington Corporate Plaza",
+    city: "Wilmington",
+    state: "DE",
+    value: 4200000,
+    ownerWealth: 180000000,
+    ownerName: "Chemical Dynasty Trust",
+    confidence: "High",
+    propertyType: "penthouse",
+    featured: false,
+  },
+
+  // Florida
+  {
+    id: "fl_1",
+    lat: 25.7907,
+    lng: -80.13,
+    address: "567 Miami Beach Ocean Drive",
+    city: "Miami Beach",
+    state: "FL",
+    value: 9800000,
+    ownerWealth: 340000000,
+    ownerName: "International Real Estate Mogul",
+    confidence: "High",
+    propertyType: "penthouse",
+    featured: false,
+  },
+  {
+    id: "fl_2",
+    lat: 26.142,
+    lng: -81.7948,
+    address: "234 Naples Luxury Estate",
+    city: "Naples",
+    state: "FL",
+    value: 7800000,
+    ownerWealth: 285000000,
+    ownerName: "Retirement Luxury Holdings",
+    confidence: "High",
+    propertyType: "estate",
+    featured: false,
+  },
+  {
+    id: "fl_3",
+    lat: 24.5551,
+    lng: -81.78,
+    address: "890 Key West Oceanfront",
+    city: "Key West",
+    state: "FL",
+    value: 6200000,
+    ownerWealth: 185000000,
+    ownerName: "Caribbean Holdings LLC",
     confidence: "Medium",
-    propertyType: "single-family",
+    propertyType: "villa",
+    featured: false,
+  },
+
+  // Georgia
+  {
+    id: "ga_1",
+    lat: 33.8688,
+    lng: -84.3717,
+    address: "890 Atlanta Buckhead Estate",
+    city: "Atlanta",
+    state: "GA",
+    value: 6800000,
+    ownerWealth: 195000000,
+    ownerName: "Southern Capital Group",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: false,
+  },
+  {
+    id: "ga_2",
+    lat: 32.0835,
+    lng: -81.0998,
+    address: "567 Savannah Historic Estate",
+    city: "Savannah",
+    state: "GA",
+    value: 4200000,
+    ownerWealth: 165000000,
+    ownerName: "Southern Heritage Holdings",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: false,
+  },
+
+  // Hawaii
+  {
+    id: "hi_1",
+    lat: 20.6947,
+    lng: -156.4444,
+    address: "123 Maui Oceanfront Estate",
+    city: "Wailea",
+    state: "HI",
+    value: 22000000,
+    ownerWealth: 580000000,
+    ownerName: "Pacific Paradise Holdings",
+    confidence: "High",
+    propertyType: "estate",
+    featured: true,
+  },
+  {
+    id: "hi_2",
+    lat: 21.3099,
+    lng: -157.8581,
+    address: "456 Diamond Head Estate",
+    city: "Honolulu",
+    state: "HI",
+    value: 18500000,
+    ownerWealth: 425000000,
+    ownerName: "Island Holdings Trust",
+    confidence: "High",
+    propertyType: "estate",
+    featured: false,
+  },
+
+  // Idaho
+  {
+    id: "id_1",
+    lat: 43.6963,
+    lng: -114.3574,
+    address: "456 Sun Valley Ski Estate",
+    city: "Sun Valley",
+    state: "ID",
+    value: 8500000,
+    ownerWealth: 185000000,
+    ownerName: "Mountain Holdings Corp",
+    confidence: "High",
+    propertyType: "lodge",
+    featured: false,
+  },
+
+  // Illinois
+  {
+    id: "il_1",
+    lat: 41.8986,
+    lng: -87.6233,
+    address: "789 Chicago Gold Coast",
+    city: "Chicago",
+    state: "IL",
+    value: 8900000,
+    ownerWealth: 285000000,
+    ownerName: "Windy City Holdings",
+    confidence: "High",
+    propertyType: "penthouse",
+    featured: false,
+  },
+  {
+    id: "il_2",
+    lat: 42.2587,
+    lng: -87.8406,
+    address: "456 Lake Forest Estate",
+    city: "Lake Forest",
+    state: "IL",
+    value: 6800000,
+    ownerWealth: 385000000,
+    ownerName: "Chicago Finance Dynasty",
+    confidence: "High",
+    propertyType: "estate",
+    featured: false,
+  },
+
+  // Indiana
+  {
+    id: "in_1",
+    lat: 39.7684,
+    lng: -86.1581,
+    address: "321 Indianapolis Racing Estate",
+    city: "Indianapolis",
+    state: "IN",
+    value: 3200000,
+    ownerWealth: 85000000,
+    ownerName: "Motorsports Holdings LLC",
+    confidence: "Medium",
+    propertyType: "estate",
+    featured: false,
+  },
+
+  // Iowa
+  {
+    id: "ia_1",
+    lat: 41.5868,
+    lng: -93.7112,
+    address: "654 Des Moines Insurance Estate",
+    city: "West Des Moines",
+    state: "IA",
+    value: 2400000,
+    ownerWealth: 95000000,
+    ownerName: "Insurance Dynasty Holdings",
+    confidence: "Medium",
+    propertyType: "mansion",
+    featured: false,
+  },
+
+  // Kansas
+  {
+    id: "ks_1",
+    lat: 39.1142,
+    lng: -94.6275,
+    address: "987 Kansas City Agricultural",
+    city: "Kansas City",
+    state: "KS",
+    value: 2800000,
+    ownerWealth: 125000000,
+    ownerName: "Agricultural Investment Group",
+    confidence: "Medium",
+    propertyType: "ranch",
+    featured: false,
+  },
+
+  // Kentucky
+  {
+    id: "ky_1",
+    lat: 38.2527,
+    lng: -85.7585,
+    address: "234 Louisville Bourbon Estate",
+    city: "Louisville",
+    state: "KY",
+    value: 3800000,
+    ownerWealth: 165000000,
+    ownerName: "Bourbon Dynasty Holdings",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: false,
+  },
+
+  // Louisiana
+  {
+    id: "la_1",
+    lat: 29.9511,
+    lng: -90.0715,
+    address: "567 New Orleans Garden District",
+    city: "New Orleans",
+    state: "LA",
+    value: 4500000,
+    ownerWealth: 145000000,
+    ownerName: "Creole Heritage Trust",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: false,
+  },
+
+  // Maine
+  {
+    id: "me_1",
+    lat: 44.3876,
+    lng: -68.2039,
+    address: "890 Bar Harbor Coastal Estate",
+    city: "Bar Harbor",
+    state: "ME",
+    value: 6800000,
+    ownerWealth: 185000000,
+    ownerName: "New England Maritime Holdings",
+    confidence: "High",
+    propertyType: "estate",
+    featured: false,
+  },
+
+  // Maryland
+  {
+    id: "md_1",
+    lat: 39.0458,
+    lng: -77.2086,
+    address: "123 Potomac Political Estate",
+    city: "Potomac",
+    state: "MD",
+    value: 8500000,
+    ownerWealth: 285000000,
+    ownerName: "Beltway Holdings Group",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: false,
+  },
+
+  // Massachusetts
+  {
+    id: "ma_1",
+    lat: 42.3601,
+    lng: -71.0589,
+    address: "456 Boston Beacon Hill",
+    city: "Boston",
+    state: "MA",
+    value: 12500000,
+    ownerWealth: 485000000,
+    ownerName: "New England Dynasty Holdings",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: false,
+  },
+  {
+    id: "ma_2",
+    lat: 41.3811,
+    lng: -70.6178,
+    address: "789 Martha's Vineyard Estate",
+    city: "Martha's Vineyard",
+    state: "MA",
+    value: 14500000,
+    ownerWealth: 585000000,
+    ownerName: "New England Maritime Trust",
+    confidence: "High",
+    propertyType: "estate",
+    featured: false,
+  },
+
+  // Michigan
+  {
+    id: "mi_1",
+    lat: 42.3314,
+    lng: -83.0458,
+    address: "789 Detroit Automotive Estate",
+    city: "Detroit",
+    state: "MI",
+    value: 3800000,
+    ownerWealth: 285000000,
+    ownerName: "Automotive Dynasty Holdings",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: false,
+  },
+
+  // Minnesota
+  {
+    id: "mn_1",
+    lat: 44.9778,
+    lng: -93.265,
+    address: "321 Minneapolis Lake Estate",
+    city: "Minneapolis",
+    state: "MN",
+    value: 4200000,
+    ownerWealth: 165000000,
+    ownerName: "Twin Cities Holdings Group",
+    confidence: "High",
+    propertyType: "estate",
+    featured: false,
+  },
+
+  // Mississippi
+  {
+    id: "ms_1",
+    lat: 32.2988,
+    lng: -90.1848,
+    address: "654 Jackson Cotton Estate",
+    city: "Jackson",
+    state: "MS",
+    value: 2800000,
+    ownerWealth: 95000000,
+    ownerName: "Southern Agriculture Holdings",
+    confidence: "Medium",
+    propertyType: "mansion",
+    featured: false,
+  },
+
+  // Missouri
+  {
+    id: "mo_1",
+    lat: 38.627,
+    lng: -90.1994,
+    address: "987 St. Louis Brewing Estate",
+    city: "St. Louis",
+    state: "MO",
+    value: 3800000,
+    ownerWealth: 285000000,
+    ownerName: "Brewing Dynasty Holdings",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: false,
+  },
+
+  // Montana
+  {
+    id: "mt_1",
+    lat: 45.2849,
+    lng: -111.4083,
+    address: "234 Big Sky Ranch Estate",
+    city: "Big Sky",
+    state: "MT",
+    value: 12500000,
+    ownerWealth: 485000000,
+    ownerName: "Mountain Ranch Holdings",
+    confidence: "High",
+    propertyType: "ranch",
+    featured: true,
+  },
+
+  // Nebraska
+  {
+    id: "ne_1",
+    lat: 41.2565,
+    lng: -95.9345,
+    address: "567 Omaha Investment Estate",
+    city: "Omaha",
+    state: "NE",
+    value: 3200000,
+    ownerWealth: 285000000,
+    ownerName: "Investment Holdings Group",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: false,
+  },
+
+  // Nevada
+  {
+    id: "nv_1",
+    lat: 36.1699,
+    lng: -115.1398,
+    address: "890 Las Vegas Casino Estate",
+    city: "Las Vegas",
+    state: "NV",
+    value: 15800000,
+    ownerWealth: 650000000,
+    ownerName: "Gaming Empire Holdings",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: false,
+  },
+  {
+    id: "nv_2",
+    lat: 39.0968,
+    lng: -120.0324,
+    address: "234 Lake Tahoe Luxury Estate",
+    city: "Lake Tahoe",
+    state: "NV",
+    value: 18500000,
+    ownerWealth: 750000000,
+    ownerName: "Alpine Lake Holdings",
+    confidence: "High",
+    propertyType: "estate",
+    featured: true,
+  },
+
+  // New Hampshire
+  {
+    id: "nh_1",
+    lat: 44.0542,
+    lng: -71.1253,
+    address: "123 White Mountains Estate",
+    city: "North Conway",
+    state: "NH",
+    value: 4200000,
+    ownerWealth: 125000000,
+    ownerName: "Mountain Holdings Trust",
+    confidence: "Medium",
+    propertyType: "lodge",
+    featured: false,
+  },
+
+  // New Jersey
+  {
+    id: "nj_1",
+    lat: 40.3573,
+    lng: -74.6672,
+    address: "456 Princeton University Estate",
+    city: "Princeton",
+    state: "NJ",
+    value: 6800000,
+    ownerWealth: 285000000,
+    ownerName: "Academic Holdings Group",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: false,
+  },
+
+  // New Mexico
+  {
+    id: "nm_1",
+    lat: 35.687,
+    lng: -105.9378,
+    address: "789 Santa Fe Adobe Estate",
+    city: "Santa Fe",
+    state: "NM",
+    value: 3800000,
+    ownerWealth: 125000000,
+    ownerName: "Southwest Art Holdings",
+    confidence: "Medium",
+    propertyType: "estate",
+    featured: false,
+  },
+
+  // New York
+  {
+    id: "ny_1",
+    lat: 40.7505,
+    lng: -73.9934,
+    address: "123 Park Avenue",
+    city: "New York",
+    state: "NY",
+    value: 28500000,
+    ownerWealth: 1200000000,
+    ownerName: "Wall Street Titan",
+    confidence: "High",
+    propertyType: "penthouse",
+    featured: true,
+  },
+  {
+    id: "ny_2",
+    lat: 40.9629,
+    lng: -72.1989,
+    address: "321 Meadow Lane",
+    city: "East Hampton",
+    state: "NY",
+    value: 22000000,
+    ownerWealth: 850000000,
+    ownerName: "Real Estate Dynasty",
+    confidence: "High",
+    propertyType: "estate",
+    featured: true,
+  },
+  {
+    id: "ny_3",
+    lat: 40.7614,
+    lng: -73.9776,
+    address: "789 Fifth Avenue",
+    city: "New York",
+    state: "NY",
+    value: 32000000,
+    ownerWealth: 2500000000,
+    ownerName: "Real Estate Mogul Empire",
+    confidence: "High",
+    propertyType: "penthouse",
+    featured: true,
+  },
+  {
+    id: "ny_4",
+    lat: 40.6962,
+    lng: -73.9442,
+    address: "456 Brooklyn Heights",
+    city: "Brooklyn",
+    state: "NY",
+    value: 8500000,
+    ownerWealth: 485000000,
+    ownerName: "Media Dynasty Holdings",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: false,
+  },
+
+  // North Carolina
+  {
+    id: "nc_1",
+    lat: 35.2271,
+    lng: -80.8431,
+    address: "654 Charlotte Banking Estate",
+    city: "Charlotte",
+    state: "NC",
+    value: 4800000,
+    ownerWealth: 285000000,
+    ownerName: "Banking Dynasty Holdings",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: false,
+  },
+
+  // North Dakota
+  {
+    id: "nd_1",
+    lat: 46.8772,
+    lng: -96.7898,
+    address: "987 Fargo Agricultural Estate",
+    city: "Fargo",
+    state: "ND",
+    value: 1800000,
+    ownerWealth: 85000000,
+    ownerName: "Agricultural Holdings Group",
+    confidence: "Medium",
+    propertyType: "ranch",
+    featured: false,
+  },
+
+  // Ohio
+  {
+    id: "oh_1",
+    lat: 41.4993,
+    lng: -81.6944,
+    address: "234 Cleveland Industrial Estate",
+    city: "Cleveland",
+    state: "OH",
+    value: 3800000,
+    ownerWealth: 185000000,
+    ownerName: "Industrial Holdings Group",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: false,
+  },
+
+  // Oklahoma
+  {
+    id: "ok_1",
+    lat: 35.4676,
+    lng: -97.5164,
+    address: "567 Oklahoma City Oil Estate",
+    city: "Oklahoma City",
+    state: "OK",
+    value: 3200000,
+    ownerWealth: 285000000,
+    ownerName: "Oil Dynasty Holdings",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: false,
+  },
+
+  // Oregon
+  {
+    id: "or_1",
+    lat: 45.5152,
+    lng: -122.6784,
+    address: "890 Portland Tech Estate",
+    city: "Portland",
+    state: "OR",
+    value: 4800000,
+    ownerWealth: 185000000,
+    ownerName: "Pacific Northwest Ventures",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: false,
+  },
+
+  // Pennsylvania
+  {
+    id: "pa_1",
+    lat: 39.9526,
+    lng: -75.1652,
+    address: "123 Philadelphia Historic Estate",
+    city: "Philadelphia",
+    state: "PA",
+    value: 6800000,
+    ownerWealth: 285000000,
+    ownerName: "Colonial Holdings Trust",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: false,
+  },
+
+  // Rhode Island
+  {
+    id: "ri_1",
+    lat: 41.4901,
+    lng: -71.3128,
+    address: "456 Newport Gilded Age",
+    city: "Newport",
+    state: "RI",
+    value: 18500000,
+    ownerWealth: 650000000,
+    ownerName: "New England Dynasty",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: true,
+  },
+
+  // South Carolina
+  {
+    id: "sc_1",
+    lat: 32.7767,
+    lng: -79.9311,
+    address: "789 Charleston Historic Estate",
+    city: "Charleston",
+    state: "SC",
+    value: 5800000,
+    ownerWealth: 185000000,
+    ownerName: "Southern Heritage Holdings",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: false,
+  },
+
+  // South Dakota
+  {
+    id: "sd_1",
+    lat: 44.0805,
+    lng: -103.231,
+    address: "321 Rapid City Mining Estate",
+    city: "Rapid City",
+    state: "SD",
+    value: 2200000,
+    ownerWealth: 125000000,
+    ownerName: "Mining Holdings Corporation",
+    confidence: "Medium",
+    propertyType: "ranch",
+    featured: false,
+  },
+
+  // Tennessee
+  {
+    id: "tn_1",
+    lat: 36.1627,
+    lng: -86.7816,
+    address: "654 Nashville Music Estate",
+    city: "Nashville",
+    state: "TN",
+    value: 6800000,
+    ownerWealth: 285000000,
+    ownerName: "Music Industry Holdings",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: false,
+  },
+
+  // Texas
+  {
+    id: "tx_1",
+    lat: 32.7767,
+    lng: -96.797,
+    address: "987 Dallas Oil Empire Estate",
+    city: "Dallas",
+    state: "TX",
+    value: 12500000,
+    ownerWealth: 850000000,
+    ownerName: "Texas Oil Dynasty",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: true,
+  },
+  {
+    id: "tx_2",
+    lat: 29.7604,
+    lng: -95.3698,
+    address: "234 Houston Energy Estate",
+    city: "Houston",
+    state: "TX",
+    value: 8900000,
+    ownerWealth: 485000000,
+    ownerName: "Energy Holdings Corporation",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: false,
+  },
+  {
+    id: "tx_3",
+    lat: 30.2672,
+    lng: -97.7431,
+    address: "567 Austin Tech Campus",
+    city: "Austin",
+    state: "TX",
+    value: 9800000,
+    ownerWealth: 650000000,
+    ownerName: "Austin Tech Ventures",
+    confidence: "High",
+    propertyType: "estate",
+    featured: false,
+  },
+
+  // Utah
+  {
+    id: "ut_1",
+    lat: 40.6461,
+    lng: -111.498,
+    address: "567 Park City Ski Estate",
+    city: "Park City",
+    state: "UT",
+    value: 8500000,
+    ownerWealth: 285000000,
+    ownerName: "Mountain Resort Holdings",
+    confidence: "High",
+    propertyType: "lodge",
+    featured: false,
+  },
+
+  // Vermont
+  {
+    id: "vt_1",
+    lat: 44.4654,
+    lng: -72.6874,
+    address: "890 Stowe Ski Resort Estate",
+    city: "Stowe",
+    state: "VT",
+    value: 4800000,
+    ownerWealth: 125000000,
+    ownerName: "Vermont Holdings Trust",
+    confidence: "Medium",
+    propertyType: "lodge",
+    featured: false,
+  },
+
+  // Virginia
+  {
+    id: "va_1",
+    lat: 36.8529,
+    lng: -75.978,
+    address: "123 Virginia Beach Resort",
+    city: "Virginia Beach",
+    state: "VA",
+    value: 4800000,
+    ownerWealth: 165000000,
+    ownerName: "Coastal Holdings Corporation",
+    confidence: "High",
+    propertyType: "estate",
+    featured: false,
+  },
+
+  // Washington
+  {
+    id: "wa_1",
+    lat: 47.6062,
+    lng: -122.3321,
+    address: "456 Seattle Tech Estate",
+    city: "Seattle",
+    state: "WA",
+    value: 12500000,
+    ownerWealth: 2800000000,
+    ownerName: "Pacific Northwest Tech Giant",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: true,
+  },
+  {
+    id: "wa_2",
+    lat: 47.6101,
+    lng: -122.2015,
+    address: "789 Bellevue Tech Estate",
+    city: "Bellevue",
+    state: "WA",
+    value: 8900000,
+    ownerWealth: 1850000000,
+    ownerName: "Cloud Computing Dynasty",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: false,
+  },
+
+  // West Virginia
+  {
+    id: "wv_1",
+    lat: 38.3498,
+    lng: -81.6326,
+    address: "789 Charleston Coal Estate",
+    city: "Charleston",
+    state: "WV",
+    value: 2200000,
+    ownerWealth: 165000000,
+    ownerName: "Coal Dynasty Holdings",
+    confidence: "Medium",
+    propertyType: "mansion",
+    featured: false,
+  },
+
+  // Wisconsin
+  {
+    id: "wi_1",
+    lat: 43.0389,
+    lng: -87.9065,
+    address: "321 Milwaukee Brewing Estate",
+    city: "Milwaukee",
+    state: "WI",
+    value: 3800000,
+    ownerWealth: 185000000,
+    ownerName: "Brewing Dynasty Holdings",
+    confidence: "High",
+    propertyType: "mansion",
+    featured: false,
+  },
+
+  // Wyoming
+  {
+    id: "wy_1",
+    lat: 43.4799,
+    lng: -110.7624,
+    address: "654 Jackson Hole Ski Estate",
+    city: "Jackson Hole",
+    state: "WY",
+    value: 18500000,
+    ownerWealth: 650000000,
+    ownerName: "Mountain Holdings Corporation",
+    confidence: "High",
+    propertyType: "lodge",
+    featured: true,
+  },
+
+  // Washington DC
+  {
+    id: "dc_1",
+    lat: 38.9072,
+    lng: -77.0369,
+    address: "987 Georgetown Political Estate",
+    city: "Washington",
+    state: "DC",
+    value: 15800000,
+    ownerWealth: 485000000,
+    ownerName: "Political Dynasty Holdings",
+    confidence: "High",
+    propertyType: "mansion",
     featured: true,
   },
 ]
@@ -136,8 +1151,8 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
   const [configError, setConfigError] = useState<string | null>(null)
   const [showSamples, setShowSamples] = useState(true)
 
-  // Combine sample properties with user properties
-  const allProperties = showSamples ? [...SAMPLE_PROPERTIES, ...properties] : properties
+  // Combine all state properties with user properties
+  const allProperties = showSamples ? [...ALL_STATE_PROPERTIES, ...properties] : properties
 
   // Fetch Mapbox configuration from server
   useEffect(() => {
@@ -292,6 +1307,8 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
           ownerName: property.ownerName,
           confidence: property.confidence,
           propertyType: property.propertyType,
+          state: property.state,
+          city: property.city,
         },
       })),
     }
@@ -313,6 +1330,8 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
           ownerName: property.ownerName,
           confidence: property.confidence,
           propertyType: property.propertyType,
+          state: property.state,
+          city: property.city,
         },
       })),
     }
@@ -562,6 +1581,7 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
     return `
       <div class="p-3 min-w-[250px]">
         <h3 class="font-semibold text-sm mb-2">${property.address}</h3>
+        <div class="text-xs text-gray-600 mb-2">${property.city}, ${property.state}</div>
         <div class="space-y-1 text-xs">
           <div class="flex justify-between">
             <span>Property Value:</span>
@@ -598,7 +1618,8 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
           <span class="text-yellow-500">★</span>
           <h3 class="font-bold text-base text-gray-900">Featured Property</h3>
         </div>
-        <h4 class="font-semibold text-sm mb-3 text-gray-800">${property.address}</h4>
+        <h4 class="font-semibold text-sm mb-1 text-gray-800">${property.address}</h4>
+        <div class="text-xs text-gray-600 mb-3">${property.city}, ${property.state}</div>
         <div class="space-y-2 text-sm">
           <div class="flex justify-between">
             <span class="text-gray-600">Property Value:</span>
@@ -653,12 +1674,13 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
 
   // Zoom to featured properties
   const showFeaturedProperties = () => {
-    if (map.current && SAMPLE_PROPERTIES.length > 0 && typeof window !== "undefined") {
+    if (map.current && typeof window !== "undefined") {
       try {
         const mapboxgl = (window as any).mapboxgl
-        if (mapboxgl && mapboxgl.LngLatBounds) {
+        const featuredProps = allProperties.filter((p) => p.featured)
+        if (mapboxgl && mapboxgl.LngLatBounds && featuredProps.length > 0) {
           const bounds = new mapboxgl.LngLatBounds()
-          SAMPLE_PROPERTIES.forEach((property) => {
+          featuredProps.forEach((property) => {
             bounds.extend([property.lng, property.lat])
           })
           map.current.fitBounds(bounds, { padding: 100 })
@@ -713,7 +1735,7 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Star className="h-4 w-4 text-yellow-500" />
-              <span className="text-sm font-medium">Sample Properties</span>
+              <span className="text-sm font-medium">All States Coverage</span>
             </div>
             <div className="flex gap-2">
               <Button
@@ -721,11 +1743,11 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
                 size="sm"
                 onClick={() => setShowSamples(!showSamples)}
               >
-                {showSamples ? "Hide" : "Show"} Samples
+                {showSamples ? "Hide" : "Show"} Properties
               </Button>
               <Button variant="outline" size="sm" onClick={showFeaturedProperties}>
                 <Crown className="h-3 w-3 mr-1" />
-                Tour
+                Featured
               </Button>
             </div>
           </div>
@@ -806,7 +1828,7 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
                 <div className="w-3 h-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full"></div>
                 <span className="font-medium">Featured Properties</span>
               </div>
-              <div className="text-xs text-gray-600">Ultra-high net worth samples</div>
+              <div className="text-xs text-gray-600">All 50 states + DC coverage</div>
             </div>
           )}
           {viewMode === "wealth" && (
@@ -881,7 +1903,9 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
           </Button>
         </div>
         {showSamples && (
-          <div className="mt-2 text-xs text-gray-600">{SAMPLE_PROPERTIES.length} featured samples included</div>
+          <div className="mt-2 text-xs text-gray-600">
+            Coverage: All 50 states + DC ({allProperties.filter((p) => p.featured).length} featured)
+          </div>
         )}
       </Card>
 
