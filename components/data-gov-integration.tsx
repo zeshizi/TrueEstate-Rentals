@@ -73,18 +73,7 @@ export function DataGovIntegration() {
   }, [selectedDataset])
 
   const getStatusColor = (source: string) => {
-    switch (source) {
-      case "data.gov":
-        return "bg-green-500"
-      case "census-mock":
-        return "bg-blue-500"
-      case "fallback":
-        return "bg-yellow-500"
-      case "error":
-        return "bg-red-500"
-      default:
-        return "bg-gray-500"
-    }
+    return "bg-blue-500"
   }
 
   const getStatusIcon = (source: string) => {
@@ -109,7 +98,9 @@ export function DataGovIntegration() {
             <Database className="h-5 w-5" />
             Data.gov Integration
           </CardTitle>
-          <CardDescription>Access government datasets for property and demographic information</CardDescription>
+          <CardDescription>
+            Access comprehensive mock datasets for property and demographic information across all US states
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -174,6 +165,16 @@ export function DataGovIntegration() {
       </Card>
 
       {data && (
+        <Alert className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Mock Data Mode:</strong> Using comprehensive sample data for all 50 US states. No external API calls
+            are made to prevent rate limiting issues.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {data && (
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -181,15 +182,7 @@ export function DataGovIntegration() {
                 {getStatusIcon(data.source)}
                 Results ({data.count} records)
               </CardTitle>
-              <Badge className={`${getStatusColor(data.source)} text-white`}>
-                {data.source === "data.gov"
-                  ? "Live Data"
-                  : data.source === "census-mock"
-                    ? "Census Mock"
-                    : data.source === "fallback"
-                      ? "Fallback Data"
-                      : "Error"}
-              </Badge>
+              <Badge className={`${getStatusColor(data.source)} text-white`}>Mock Data</Badge>
             </div>
             <CardDescription>
               Dataset: {data.dataset} | Source: {data.source}

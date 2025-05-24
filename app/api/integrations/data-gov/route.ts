@@ -3,143 +3,24 @@ import { type NextRequest, NextResponse } from "next/server"
 // Enhanced Data.gov API integration with better error handling and fallbacks
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const dataset = searchParams.get("dataset")
+  const dataset = searchParams.get("dataset") || "property-assessments"
   const query = searchParams.get("query")
   const location = searchParams.get("location")
-  const limit = searchParams.get("limit") || "50"
+  const limit = Number.parseInt(searchParams.get("limit") || "50")
 
-  try {
-    let apiUrl = ""
-    let response: Response
-    const apiKey = process.env.DATA_GOV_API_KEY
+  // Always use mock data - no external API calls
+  console.log(`Using mock data for dataset: ${dataset}`)
 
-    switch (dataset) {
-      case "property-assessments":
-        // Use NYC Open Data SODA API (more reliable)
-        apiUrl = `https://data.cityofnewyork.us/resource/rgy2-tti8.json?$limit=${limit}`
-        if (query) {
-          apiUrl += `&$where=upper(owner_name) like upper('%${encodeURIComponent(query)}%')`
-        }
-        if (apiKey) {
-          apiUrl += `&$$app_token=${apiKey}`
-        }
-        break
+  const mockData = getComprehensiveMockData(dataset, query, location, limit)
 
-      case "building-permits":
-        // NYC Building permits with better filtering
-        apiUrl = `https://data.cityofnewyork.us/resource/ipu4-2q9a.json?$limit=${limit}`
-        if (location) {
-          apiUrl += `&borough=${encodeURIComponent(location.toUpperCase())}`
-        }
-        if (apiKey) {
-          apiUrl += `&$$app_token=${apiKey}`
-        }
-        break
-
-      case "census-demographics":
-        // Use Census API with proper error handling
-        const censusKey = process.env.CENSUS_API_KEY
-        if (censusKey && censusKey !== "demo_key") {
-          // Get demographic data for NYC area
-          apiUrl = `https://api.census.gov/data/2021/acs/acs5?get=B25077_001E,B19013_001E,B25064_001E,NAME&for=tract:*&in=state:36+county:061,047,081,005,085&key=${censusKey}`
-        } else {
-          // Fallback to mock data if no valid key
-          return NextResponse.json({
-            dataset,
-            source: "census-mock",
-            count: 5,
-            data: getMockCensusData(),
-            note: "Using mock data - add CENSUS_API_KEY for real data",
-          })
-        }
-        break
-
-      case "housing-violations":
-        // NYC Housing violations
-        apiUrl = `https://data.cityofnewyork.us/resource/wvxf-dwi5.json?$limit=${limit}`
-        if (query) {
-          apiUrl += `&$where=upper(buildingid) like upper('%${encodeURIComponent(query)}%')`
-        }
-        if (apiKey) {
-          apiUrl += `&$$app_token=${apiKey}`
-        }
-        break
-
-      case "real-estate-sales":
-        // NYC Real estate sales with date filtering
-        apiUrl = `https://data.cityofnewyork.us/resource/5peb-684x.json?$limit=${limit}&$order=sale_date DESC`
-        if (location) {
-          apiUrl += `&borough=${encodeURIComponent(location.toUpperCase())}`
-        }
-        if (apiKey) {
-          apiUrl += `&$$app_token=${apiKey}`
-        }
-        break
-
-      case "federal-properties":
-        // Federal Real Property data
-        apiUrl = `https://data.gsa.gov/api/views/5peb-684x/rows.json?accessType=DOWNLOAD`
-        break
-
-      default:
-        return NextResponse.json({ error: "Unknown dataset" }, { status: 400 })
-    }
-
-    console.log(`Fetching from: ${apiUrl.replace(/key=[^&]*/, "key=***")}`)
-
-    // Add timeout and better headers
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
-
-    response = await fetch(apiUrl, {
-      signal: controller.signal,
-      headers: {
-        "User-Agent": "TrueEstate-Platform/1.0",
-        Accept: "application/json",
-      },
-    })
-
-    clearTimeout(timeoutId)
-
-    if (!response.ok) {
-      console.error(`API Error: ${response.status} - ${response.statusText}`)
-      throw new Error(`Data.gov API error: ${response.status} ${response.statusText}`)
-    }
-
-    const data = await response.json()
-    console.log(`Received ${Array.isArray(data) ? data.length : "non-array"} records`)
-
-    // Transform data based on dataset type
-    const transformedData = transformDataGovResponse(dataset!, data)
-
-    return NextResponse.json({
-      dataset,
-      source: "data.gov",
-      count: Array.isArray(transformedData) ? transformedData.length : 1,
-      data: transformedData,
-      apiUrl: apiUrl.replace(/key=[^&]*/, "key=***").replace(/app_token=[^&]*/, "app_token=***"),
-      timestamp: new Date().toISOString(),
-    })
-  } catch (error) {
-    console.error("Data.gov API error:", error)
-
-    // Provide enhanced fallback data
-    const fallbackData = getEnhancedMockData(dataset!, query, location)
-
-    return NextResponse.json(
-      {
-        error: "Failed to fetch data from data.gov",
-        errorDetails: error instanceof Error ? error.message : "Unknown error",
-        dataset,
-        source: "fallback",
-        count: Array.isArray(fallbackData) ? fallbackData.length : 1,
-        data: fallbackData,
-        note: "Using enhanced mock data due to API unavailability",
-        timestamp: new Date().toISOString(),
-      },
-      { status: 200 }, // Return 200 with fallback data instead of 500
-    )
-  }
+  return NextResponse.json({
+    dataset,
+    source: "mock-data",
+    count: Array.isArray(mockData) ? mockData.length : 1,
+    data: mockData,
+    note: "Using comprehensive mock data for all US states",
+    timestamp: new Date().toISOString(),
+  })
 }
 
 function transformDataGovResponse(dataset: string, rawData: any) {
@@ -231,32 +112,156 @@ function getMockCensusData() {
   ]
 }
 
-function getEnhancedMockData(dataset: string, query?: string | null, location?: string | null) {
-  const mockData = {
-    "property-assessments": Array.from({ length: 20 }, (_, i) => ({
-      id: `mock_${i + 1}`,
-      address: `${100 + i * 10} ${["Park Ave", "Madison Ave", "Fifth Ave", "Broadway", "Wall St"][i % 5]}, ${location || "MANHATTAN"}`,
-      ownerName:
-        query ||
-        ["Smith Holdings LLC", "Johnson Properties", "Williams Real Estate", "Brown Investment Group", "Davis Capital"][
-          i % 5
-        ],
-      assessedValue: Math.floor(Math.random() * 2000000) + 800000,
-      marketValue: Math.floor(Math.random() * 2500000) + 1000000,
+function getComprehensiveMockData(dataset: string, query?: string | null, location?: string | null, limit = 50) {
+  const allStatesMockData = {
+    "property-assessments": generatePropertyAssessments(limit, query, location),
+    "real-estate-sales": generateRealEstateSales(limit, location),
+    "census-demographics": generateCensusDemographics(limit),
+    "building-permits": generateBuildingPermits(limit, location),
+    "housing-violations": generateHousingViolations(limit, location),
+  }
+
+  return allStatesMockData[dataset as keyof typeof allStatesMockData] || []
+}
+
+function generatePropertyAssessments(limit: number, query?: string | null, location?: string | null) {
+  const states = [
+    "Alabama",
+    "Alaska",
+    "Arizona",
+    "Arkansas",
+    "California",
+    "Colorado",
+    "Connecticut",
+    "Delaware",
+    "Florida",
+    "Georgia",
+    "Hawaii",
+    "Idaho",
+    "Illinois",
+    "Indiana",
+    "Iowa",
+    "Kansas",
+    "Kentucky",
+    "Louisiana",
+    "Maine",
+    "Maryland",
+    "Massachusetts",
+    "Michigan",
+    "Minnesota",
+    "Mississippi",
+    "Missouri",
+    "Montana",
+    "Nebraska",
+    "Nevada",
+    "New Hampshire",
+    "New Jersey",
+    "New Mexico",
+    "New York",
+    "North Carolina",
+    "North Dakota",
+    "Ohio",
+    "Oklahoma",
+    "Oregon",
+    "Pennsylvania",
+    "Rhode Island",
+    "South Carolina",
+    "South Dakota",
+    "Tennessee",
+    "Texas",
+    "Utah",
+    "Vermont",
+    "Virginia",
+    "Washington",
+    "West Virginia",
+    "Wisconsin",
+    "Wyoming",
+    "Washington DC",
+  ]
+
+  return Array.from({ length: Math.min(limit, 100) }, (_, i) => {
+    const state = location || states[i % states.length]
+    const ownerName = query || `${["Smith", "Johnson", "Williams", "Brown", "Davis", "Miller"][i % 6]} Holdings LLC`
+
+    return {
+      id: `prop_${state.toLowerCase().replace(/\s+/g, "_")}_${i + 1}`,
+      address: `${100 + i * 10} ${["Main St", "Oak Ave", "Park Blvd", "First St", "Broadway"][i % 5]}, ${state}`,
+      ownerName,
+      assessedValue: Math.floor(Math.random() * 2000000) + 500000,
+      marketValue: Math.floor(Math.random() * 2500000) + 600000,
       propertyType: ["R4", "R6", "C1", "C2", "O"][i % 5],
       yearBuilt: Math.floor(Math.random() * 50) + 1970,
-      lotSize: Math.floor(Math.random() * 3000) + 1500,
-      buildingArea: Math.floor(Math.random() * 2500) + 1000,
-      borough: location || "MANHATTAN",
+      lotSize: Math.floor(Math.random() * 5000) + 1000,
+      buildingArea: Math.floor(Math.random() * 3000) + 800,
+      borough: state,
       block: Math.floor(Math.random() * 9999) + 1,
       lot: Math.floor(Math.random() * 999) + 1,
-    })),
+    }
+  })
+}
 
-    "real-estate-sales": Array.from({ length: 15 }, (_, i) => ({
-      id: `sale_mock_${i + 1}`,
-      address: `${200 + i * 15} ${["Central Park West", "Park Ave", "Fifth Ave", "Madison Ave"][i % 4]}`,
-      borough: location || "MANHATTAN",
-      neighborhood: ["Upper East Side", "Midtown", "Financial District", "Chelsea"][i % 4],
+function generateRealEstateSales(limit: number, location?: string | null) {
+  const states = [
+    "Alabama",
+    "Alaska",
+    "Arizona",
+    "Arkansas",
+    "California",
+    "Colorado",
+    "Connecticut",
+    "Delaware",
+    "Florida",
+    "Georgia",
+    "Hawaii",
+    "Idaho",
+    "Illinois",
+    "Indiana",
+    "Iowa",
+    "Kansas",
+    "Kentucky",
+    "Louisiana",
+    "Maine",
+    "Maryland",
+    "Massachusetts",
+    "Michigan",
+    "Minnesota",
+    "Mississippi",
+    "Missouri",
+    "Montana",
+    "Nebraska",
+    "Nevada",
+    "New Hampshire",
+    "New Jersey",
+    "New Mexico",
+    "New York",
+    "North Carolina",
+    "North Dakota",
+    "Ohio",
+    "Oklahoma",
+    "Oregon",
+    "Pennsylvania",
+    "Rhode Island",
+    "South Carolina",
+    "South Dakota",
+    "Tennessee",
+    "Texas",
+    "Utah",
+    "Vermont",
+    "Virginia",
+    "Washington",
+    "West Virginia",
+    "Wisconsin",
+    "Wyoming",
+    "Washington DC",
+  ]
+
+  return Array.from({ length: Math.min(limit, 100) }, (_, i) => {
+    const state = location || states[i % states.length]
+    return {
+      id: `sale_${state.toLowerCase().replace(/\s+/g, "_")}_${i + 1}`,
+      address: `${200 + i * 15} ${["Central Ave", "Park St", "Main St", "Oak Rd"][i % 4]}, ${state}`,
+      borough: state,
+      neighborhood: ["Downtown", "Uptown", "Midtown", "Westside"][i % 4],
       buildingClassCategory: "RESIDENTIAL",
       salePrice: Math.floor(Math.random() * 4000000) + 1000000,
       saleDate: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
@@ -264,14 +269,140 @@ function getEnhancedMockData(dataset: string, query?: string | null, location?: 
       landSqft: Math.floor(Math.random() * 2500) + 1200,
       yearBuilt: Math.floor(Math.random() * 40) + 1980,
       buildingClass: "R4",
-    })),
+    }
+  })
+}
 
-    "census-demographics": getMockCensusData(),
+function generateCensusDemographics(limit: number) {
+  const states = [
+    "Alabama",
+    "Alaska",
+    "Arizona",
+    "Arkansas",
+    "California",
+    "Colorado",
+    "Connecticut",
+    "Delaware",
+    "Florida",
+    "Georgia",
+    "Hawaii",
+    "Idaho",
+    "Illinois",
+    "Indiana",
+    "Iowa",
+    "Kansas",
+    "Kentucky",
+    "Louisiana",
+    "Maine",
+    "Maryland",
+    "Massachusetts",
+    "Michigan",
+    "Minnesota",
+    "Mississippi",
+    "Missouri",
+    "Montana",
+    "Nebraska",
+    "Nevada",
+    "New Hampshire",
+    "New Jersey",
+    "New Mexico",
+    "New York",
+    "North Carolina",
+    "North Dakota",
+    "Ohio",
+    "Oklahoma",
+    "Oregon",
+    "Pennsylvania",
+    "Rhode Island",
+    "South Carolina",
+    "South Dakota",
+    "Tennessee",
+    "Texas",
+    "Utah",
+    "Vermont",
+    "Virginia",
+    "Washington",
+    "West Virginia",
+    "Wisconsin",
+    "Wyoming",
+    "Washington DC",
+  ]
 
-    "building-permits": Array.from({ length: 10 }, (_, i) => ({
-      id: `permit_${i + 1}`,
-      address: `${300 + i * 20} Construction Ave`,
-      borough: location || "MANHATTAN",
+  return Array.from({ length: Math.min(limit, 50) }, (_, i) => {
+    const state = states[i % states.length]
+    return {
+      tract: String(i + 1).padStart(3, "0"),
+      state: state,
+      county: String(Math.floor(Math.random() * 100)).padStart(3, "0"),
+      medianHomeValue: Math.floor(Math.random() * 800000) + 400000,
+      medianHouseholdIncome: Math.floor(Math.random() * 80000) + 40000,
+      medianRent: Math.floor(Math.random() * 2000) + 1500,
+      name: `Census Tract ${i + 1}, ${state}`,
+    }
+  })
+}
+
+function generateBuildingPermits(limit: number, location?: string | null) {
+  const states = [
+    "Alabama",
+    "Alaska",
+    "Arizona",
+    "Arkansas",
+    "California",
+    "Colorado",
+    "Connecticut",
+    "Delaware",
+    "Florida",
+    "Georgia",
+    "Hawaii",
+    "Idaho",
+    "Illinois",
+    "Indiana",
+    "Iowa",
+    "Kansas",
+    "Kentucky",
+    "Louisiana",
+    "Maine",
+    "Maryland",
+    "Massachusetts",
+    "Michigan",
+    "Minnesota",
+    "Mississippi",
+    "Missouri",
+    "Montana",
+    "Nebraska",
+    "Nevada",
+    "New Hampshire",
+    "New Jersey",
+    "New Mexico",
+    "New York",
+    "North Carolina",
+    "North Dakota",
+    "Ohio",
+    "Oklahoma",
+    "Oregon",
+    "Pennsylvania",
+    "Rhode Island",
+    "South Carolina",
+    "South Dakota",
+    "Tennessee",
+    "Texas",
+    "Utah",
+    "Vermont",
+    "Virginia",
+    "Washington",
+    "West Virginia",
+    "Wisconsin",
+    "Wyoming",
+    "Washington DC",
+  ]
+
+  return Array.from({ length: Math.min(limit, 50) }, (_, i) => {
+    const state = location || states[i % states.length]
+    return {
+      id: `permit_${state.toLowerCase().replace(/\s+/g, "_")}_${i + 1}`,
+      address: `${300 + i * 20} Construction Ave, ${state}`,
+      borough: state,
       workType: ["New Building", "Alteration", "Demolition", "Renovation"][i % 4],
       permitType: "NB",
       filingDate: new Date(Date.now() - Math.random() * 180 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
@@ -279,8 +410,76 @@ function getEnhancedMockData(dataset: string, query?: string | null, location?: 
       jobDescription: `${["Residential", "Commercial", "Mixed Use"][i % 3]} construction project`,
       ownerName: `${["ABC", "XYZ", "DEF"][i % 3]} Development Corp`,
       ownerPhone: `555-${String(Math.floor(Math.random() * 900) + 100)}-${String(Math.floor(Math.random() * 9000) + 1000)}`,
-    })),
-  }
+    }
+  })
+}
 
-  return mockData[dataset as keyof typeof mockData] || []
+function generateHousingViolations(limit: number, location?: string | null) {
+  const states = [
+    "Alabama",
+    "Alaska",
+    "Arizona",
+    "Arkansas",
+    "California",
+    "Colorado",
+    "Connecticut",
+    "Delaware",
+    "Florida",
+    "Georgia",
+    "Hawaii",
+    "Idaho",
+    "Illinois",
+    "Indiana",
+    "Iowa",
+    "Kansas",
+    "Kentucky",
+    "Louisiana",
+    "Maine",
+    "Maryland",
+    "Massachusetts",
+    "Michigan",
+    "Minnesota",
+    "Mississippi",
+    "Missouri",
+    "Montana",
+    "Nebraska",
+    "Nevada",
+    "New Hampshire",
+    "New Jersey",
+    "New Mexico",
+    "New York",
+    "North Carolina",
+    "North Dakota",
+    "Ohio",
+    "Oklahoma",
+    "Oregon",
+    "Pennsylvania",
+    "Rhode Island",
+    "South Carolina",
+    "South Dakota",
+    "Tennessee",
+    "Texas",
+    "Utah",
+    "Vermont",
+    "Virginia",
+    "Washington",
+    "West Virginia",
+    "Wisconsin",
+    "Wyoming",
+    "Washington DC",
+  ]
+
+  return Array.from({ length: Math.min(limit, 50) }, (_, i) => {
+    const state = location || states[i % states.length]
+    return {
+      id: `violation_${state.toLowerCase().replace(/\s+/g, "_")}_${i + 1}`,
+      buildingId: String(Math.floor(Math.random() * 100000)),
+      address: `${400 + i * 10} Elm St, ${state}`,
+      violationDate: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+      violationType: ["Plumbing", "Electrical", "Structural", "Sanitation"][i % 4],
+      status: ["Open", "Closed"][i % 2],
+      inspector: `${["John", "Jane"][i % 2]} Doe`,
+      fineAmount: Math.floor(Math.random() * 500) + 100,
+    }
+  })
 }

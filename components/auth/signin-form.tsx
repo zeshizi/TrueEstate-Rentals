@@ -32,7 +32,12 @@ export function SignInForm() {
         redirect: false,
       })
 
-      console.log("Sign in result:", result)
+      console.log("Sign in result:", {
+        ok: result?.ok,
+        error: result?.error,
+        status: result?.status,
+        url: result?.url,
+      })
 
       if (result?.error) {
         console.error("Sign in error:", result.error)
@@ -40,7 +45,11 @@ export function SignInForm() {
       } else if (result?.ok) {
         console.log("Sign in successful, getting session...")
         const session = await getSession()
-        console.log("Session after sign in:", session)
+        console.log("Session after sign in:", {
+          user: session?.user?.email,
+          role: session?.user?.role,
+          expires: session?.expires,
+        })
 
         if (session?.user?.role === "admin") {
           console.log("Redirecting to admin")

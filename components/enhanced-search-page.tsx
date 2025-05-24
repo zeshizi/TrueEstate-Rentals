@@ -46,8 +46,12 @@ export function EnhancedSearchPage() {
       })
 
       console.log("🔍 Enhanced search with params:", {
-        query,
-        filters,
+        query: query,
+        type: filters.type,
+        minValue: filters.minValue[0],
+        maxValue: filters.maxValue[0],
+        propertyType: filters.propertyType,
+        ownerType: filters.ownerType,
         url: `/api/search?${params.toString()}`,
       })
 
@@ -57,8 +61,9 @@ export function EnhancedSearchPage() {
       console.log("📊 Enhanced search results:", {
         query: data.query,
         totalResults: data.results?.length || 0,
-        success: data.success,
-        error: data.error,
+        success: !!data.results,
+        error: data.error || null,
+        firstResult: data.results?.[0]?.title || null,
       })
 
       setResults(data.results || [])
