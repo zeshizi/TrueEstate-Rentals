@@ -37,27 +37,33 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-8">
-            <Link href="/rent" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+            <Link
+              href="/rent"
+              className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors px-3 py-2 rounded-md hover:bg-gray-50"
+            >
               Rent
             </Link>
-            <Link href="/buy" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+            <Link
+              href="/buy"
+              className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors px-3 py-2 rounded-md hover:bg-gray-50"
+            >
               Buy
             </Link>
             <Link
               href="/wealth-map"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+              className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors px-3 py-2 rounded-md hover:bg-gray-50"
             >
               Wealth Map
             </Link>
             <Link
               href="/for-owners"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+              className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors px-3 py-2 rounded-md hover:bg-gray-50"
             >
               For Owners
             </Link>
             <Link
               href="/for-agents"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+              className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors px-3 py-2 rounded-md hover:bg-gray-50"
             >
               For Agents
             </Link>
@@ -140,29 +146,35 @@ export function Header() {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-gray-100 py-4">
+          <div className="lg:hidden border-t border-gray-100 py-4 bg-white">
             <nav className="flex flex-col space-y-3">
-              <Link href="/rent" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+              <Link
+                href="/rent"
+                className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors px-3 py-2 rounded-md hover:bg-gray-50"
+              >
                 Rent
               </Link>
-              <Link href="/buy" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+              <Link
+                href="/buy"
+                className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors px-3 py-2 rounded-md hover:bg-gray-50"
+              >
                 Buy
               </Link>
               <Link
                 href="/wealth-map"
-                className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors px-3 py-2 rounded-md hover:bg-gray-50"
               >
                 Wealth Map
               </Link>
               <Link
                 href="/for-owners"
-                className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors px-3 py-2 rounded-md hover:bg-gray-50"
               >
                 For Owners
               </Link>
               <Link
                 href="/for-agents"
-                className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors px-3 py-2 rounded-md hover:bg-gray-50"
               >
                 For Agents
               </Link>

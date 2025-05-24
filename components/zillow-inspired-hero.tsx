@@ -85,8 +85,10 @@ export function ZillowInspiredHero() {
                     <Button
                       key={type.id}
                       variant={type.active ? "default" : "ghost"}
-                      className={`flex-1 ${
-                        type.active ? "bg-white shadow-sm" : "hover:bg-gray-200"
+                      className={`flex-1 font-medium text-sm ${
+                        type.active
+                          ? "bg-blue-600 text-white shadow-sm hover:bg-blue-700"
+                          : "bg-transparent text-gray-700 hover:bg-gray-200 hover:text-gray-900"
                       } transition-all duration-200`}
                       onClick={() => setSearchType(type.id)}
                     >
