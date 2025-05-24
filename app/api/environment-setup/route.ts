@@ -3,16 +3,19 @@ import { type NextRequest, NextResponse } from "next/server"
 // Helper route to check and validate environment variables
 export async function GET(request: NextRequest) {
   const requiredEnvVars = {
-    GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY,
-    CLEARBIT_API_KEY: process.env.CLEARBIT_API_KEY,
-    OPENCORPORATES_API_KEY: process.env.OPENCORPORATES_API_KEY,
-    HUNTER_IO_API_KEY: process.env.HUNTER_IO_API_KEY,
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     MONGODB_URI: process.env.MONGODB_URI,
   }
 
   const optionalEnvVars = {
     RAPIDAPI_KEY: process.env.RAPIDAPI_KEY,
     ZILLOW_API_KEY: process.env.ZILLOW_API_KEY,
+    HUNTER_IO_API_KEY: process.env.HUNTER_IO_API_KEY,
+    PEOPLE_DATA_LABS: process.env.PEOPLE_DATA_LABS,
+    GLOBAL_COMPANY_DATA: process.env.GLOBAL_COMPANY_DATA,
   }
 
   const status = {
@@ -34,15 +37,18 @@ export async function GET(request: NextRequest) {
     status.optional[key] = !!value
   }
 
-  // Add recommendations based on missing keys
-  if (!status.required.GOOGLE_MAPS_API_KEY) {
-    status.recommendations.push("Get Google Maps API key from Google Cloud Console")
+  // Add specific recommendations based on missing keys
+  if (!status.required.GOOGLE_CLIENT_ID || !status.required.GOOGLE_CLIENT_SECRET) {
+    status.recommendations.push("Configure Google OAuth in Google Cloud Console")
   }
-  if (!status.required.CLEARBIT_API_KEY) {
-    status.recommendations.push("Get Clearbit API key (free tier available) from clearbit.com")
+  if (!status.required.NEXTAUTH_SECRET) {
+    status.recommendations.push("Generate NEXTAUTH_SECRET with: openssl rand -base64 32")
   }
-  if (!status.optional.RAPIDAPI_KEY) {
-    status.recommendations.push("Consider RapidAPI key for additional real estate data sources")
+  if (!status.required.NEXTAUTH_URL) {
+    status.recommendations.push("Set NEXTAUTH_URL to your domain (e.g., https://yourdomain.com)")
+  }
+  if (!status.required.MONGODB_URI) {
+    status.recommendations.push("Set MONGODB_URI from MongoDB Atlas")
   }
 
   return NextResponse.json(status)
@@ -52,25 +58,32 @@ export async function POST(request: NextRequest) {
   const body = await request.json()
   const { action } = body
 
-  if (action === "validate-google-maps") {
-    const apiKey = process.env.GOOGLE_MAPS_API_KEY
-    if (!apiKey) {
-      return NextResponse.json({ valid: false, error: "API key not found" })
-    }
+  if (action === "validate-google-oauth") {
+    const clientId = process.env.GOOGLE_CLIENT_ID
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET
 
-    try {
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=${apiKey}`,
-      )
-      const data = await response.json()
-
+    if (!clientId || !clientSecret) {
       return NextResponse.json({
-        valid: data.status === "OK",
-        error: data.status !== "OK" ? data.error_message : null,
+        valid: false,
+        error: "Google OAuth credentials not configured",
       })
-    } catch (error) {
-      return NextResponse.json({ valid: false, error: "Failed to validate API key" })
     }
+
+    return NextResponse.json({
+      valid: true,
+      message: "Google OAuth credentials are configured",
+    })
+  }
+
+  if (action === "validate-nextauth") {
+    const secret = process.env.NEXTAUTH_SECRET
+    const url = process.env.NEXTAUTH_URL
+
+    return NextResponse.json({
+      secret: !!secret,
+      url: !!url,
+      valid: !!(secret && url),
+    })
   }
 
   return NextResponse.json({ error: "Unknown action" }, { status: 400 })
