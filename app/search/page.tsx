@@ -37,7 +37,7 @@ export default function SearchPage() {
       })
 
       console.log("🔍 Searching with params:", {
-        query: query,
+        query,
         type: filters.type,
         minValue: filters.minValue,
         maxValue: filters.maxValue,

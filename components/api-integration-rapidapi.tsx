@@ -76,26 +76,30 @@ export function ApiIntegrationRapidAPI() {
     {
       step: 1,
       title: "Get RapidAPI Account",
-      description: "Sign up for free at rapidapi.com",
-      action: "Visit RapidAPI",
+      description: "Sign up for free at rapidapi.com (takes 2 minutes)",
+      action: "Sign Up Free",
+      url: "https://rapidapi.com/auth/sign-up",
     },
     {
       step: 2,
       title: "Subscribe to APIs",
       description: "Subscribe to People Data Labs and Global Company Data APIs",
-      action: "Subscribe",
+      action: "Subscribe Now",
+      url: "https://rapidapi.com/peopledatalabs/api/people-data-labs-api",
     },
     {
       step: 3,
       title: "Get API Key",
       description: "Copy your RapidAPI key from the dashboard",
-      action: "Copy Key",
+      action: "Get Key",
+      url: "https://rapidapi.com/developer/dashboard",
     },
     {
       step: 4,
-      title: "Add to Environment",
-      description: "Add RAPIDAPI_KEY to your Vercel environment variables",
+      title: "Add to Vercel",
+      description: "Add RAPIDAPI_KEY to your environment variables",
       action: "Configure",
+      url: "#",
     },
   ]
 
@@ -179,9 +183,18 @@ export function ApiIntegrationRapidAPI() {
                   <h4 className="font-medium text-sm">{step.title}</h4>
                 </div>
                 <p className="text-xs text-gray-600 mb-3">{step.description}</p>
-                <Button variant="outline" size="sm" className="w-full">
-                  {step.action}
-                </Button>
+                {step.url !== "#" ? (
+                  <Button variant="outline" size="sm" className="w-full" asChild>
+                    <a href={step.url} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="h-3 w-3 mr-1" />
+                      {step.action}
+                    </a>
+                  </Button>
+                ) : (
+                  <Button variant="outline" size="sm" className="w-full">
+                    {step.action}
+                  </Button>
+                )}
               </div>
             ))}
           </div>
