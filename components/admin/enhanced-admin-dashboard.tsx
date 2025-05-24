@@ -1,41 +1,27 @@
-"use client"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { AdminDashboard } from "@/components/admin/admin-dashboard"
-import { EmployeeManagement } from "@/components/admin/employee-management"
-import { AccessLogging } from "@/components/security/access-logging"
-import { DataEncryptionStatus } from "@/components/security/data-encryption-status"
+import { Database, Users } from "lucide-react"
+import { UserTable } from "@/components/admin/user-table"
+import { RedisDashboard } from "./redis-dashboard"
 
-export function EnhancedAdminDashboard() {
+export default function EnhancedAdminDashboard() {
   return (
-    <div className="space-y-6">
-      <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="employees">Employees</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="compliance">Compliance</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview">
-          <AdminDashboard />
-        </TabsContent>
-
-        <TabsContent value="employees">
-          <EmployeeManagement />
-        </TabsContent>
-
-        <TabsContent value="security" className="space-y-6">
-          <AccessLogging />
-          <DataEncryptionStatus />
-        </TabsContent>
-
-        <TabsContent value="compliance">
-          <div className="grid gap-6">
-            <DataEncryptionStatus />
-            {/* Additional compliance components would go here */}
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
+    <Tabs defaultValue="users" className="space-y-4">
+      <TabsList>
+        <TabsTrigger value="users" className="flex items-center gap-2">
+          <Users className="h-4 w-4" />
+          Users
+        </TabsTrigger>
+        <TabsTrigger value="redis" className="flex items-center gap-2">
+          <Database className="h-4 w-4" />
+          Redis & Performance
+        </TabsTrigger>
+      </TabsList>
+      <TabsContent value="users" className="space-y-6">
+        <UserTable />
+      </TabsContent>
+      <TabsContent value="redis" className="space-y-6">
+        <RedisDashboard />
+      </TabsContent>
+    </Tabs>
   )
 }

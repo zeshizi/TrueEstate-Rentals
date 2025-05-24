@@ -1,18 +1,19 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-// US-focused business registry lookup using free APIs
+// Using Global Company Data API via RapidAPI as OpenCorporates alternative
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const companyName = searchParams.get("company")
   const state = searchParams.get("state") || "CA"
+  const country = searchParams.get("country") || "US"
 
   if (!companyName) {
     return NextResponse.json({ error: "Company name is required" }, { status: 400 })
   }
 
   try {
-    // Try multiple free US business registry sources
-    const companyData = await searchUSBusinessRegistries(companyName, state)
+    // Try Global Company Data API via RapidAPI
+    const companyData = await searchGlobalCompanyDataAPI(companyName, state, country)
 
     if (companyData) {
       return NextResponse.json({ company: companyData })
@@ -20,25 +21,115 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ error: "Company not found" }, { status: 404 })
   } catch (error) {
-    console.error("US business registry search error:", error)
-    return getMockUSRegistryData(companyName, state)
+    console.error("Global company registry search error:", error)
+    return getMockRegistryData(companyName, state, country)
   }
 }
 
-async function searchUSBusinessRegistries(companyName: string, state: string) {
+async function searchGlobalCompanyDataAPI(companyName: string, state: string, country: string) {
+  try {
+    // Global Company Data API via RapidAPI
+    const response = await fetch(`https://global-company-data-api.p.rapidapi.com/company/search`, {
+      method: "POST",
+      headers: {
+        "X-RapidAPI-Key": process.env.RAPIDAPI_KEY!,
+        "X-RapidAPI-Host": "global-company-data-api.p.rapidapi.com",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: companyName,
+        country: country,
+        state: state,
+        limit: 5,
+      }),
+    })
+
+    if (response.ok) {
+      const data = await response.json()
+      if (data.companies && data.companies.length > 0) {
+        const company = data.companies[0]
+        return {
+          name: company.name,
+          companyNumber: company.registration_number || company.company_id,
+          jurisdiction: `${country}-${state}`.toUpperCase(),
+          companyType: company.company_type || "Corporation",
+          status: company.status || "Active",
+          incorporationDate: company.incorporation_date,
+          address: `${company.address || company.city}, ${company.state || state} ${company.postal_code || ""}`,
+          industry: company.industry,
+          employees: company.employee_count,
+          revenue: company.annual_revenue,
+          website: company.website,
+          phone: company.phone,
+          officers:
+            company.officers?.map((officer: any) => ({
+              name: officer.name,
+              position: officer.title,
+              appointedDate: officer.start_date,
+            })) || [],
+          source: "Global Company Data API (RapidAPI)",
+          registryUrl: company.registry_url,
+        }
+      }
+    }
+
+    // Fallback to Business Registry API
+    return await searchBusinessRegistryAPI(companyName, state, country)
+  } catch (error) {
+    console.error("Global Company Data API failed:", error)
+    return await searchBusinessRegistryAPI(companyName, state, country)
+  }
+}
+
+async function searchBusinessRegistryAPI(companyName: string, state: string, country: string) {
+  try {
+    // Business Registry API via RapidAPI (alternative)
+    const response = await fetch(`https://business-registry-api.p.rapidapi.com/search`, {
+      method: "POST",
+      headers: {
+        "X-RapidAPI-Key": process.env.RAPIDAPI_KEY!,
+        "X-RapidAPI-Host": "business-registry-api.p.rapidapi.com",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: companyName,
+        jurisdiction: `${country}-${state}`,
+        limit: 1,
+      }),
+    })
+
+    if (response.ok) {
+      const data = await response.json()
+      if (data.results && data.results.length > 0) {
+        const company = data.results[0]
+        return {
+          name: company.name,
+          companyNumber: company.number,
+          jurisdiction: company.jurisdiction,
+          companyType: company.type,
+          status: company.status,
+          incorporationDate: company.incorporation_date,
+          address: company.address,
+          source: "Business Registry API (RapidAPI)",
+          registryUrl: company.url,
+        }
+      }
+    }
+
+    // Final fallback to free US registries
+    return await searchFreeUSRegistries(companyName, state)
+  } catch (error) {
+    console.error("Business Registry API failed:", error)
+    return await searchFreeUSRegistries(companyName, state)
+  }
+}
+
+async function searchFreeUSRegistries(companyName: string, state: string) {
   // 1. Try SEC EDGAR for US public companies (completely free)
   const secData = await searchSECEdgar(companyName)
   if (secData) return secData
 
-  // 2. Try OpenCorporates free tier for US companies
-  const openCorpData = await searchOpenCorporatesUS(companyName, state)
-  if (openCorpData) return openCorpData
-
-  // 3. Try IRS Business Master File (BMF) data
-  const irsData = await searchIRSBusinessData(companyName)
-  if (irsData) return irsData
-
-  // 4. Use business name analysis for basic info
+  // 2. Use business name analysis for basic info
   const basicData = await analyzeBusinessName(companyName, state)
   return basicData
 }
@@ -59,25 +150,6 @@ async function searchSECEdgar(companyName: string) {
       ) as any
 
       if (company) {
-        // Get additional company facts
-        const factsResponse = await fetch(
-          `https://data.sec.gov/api/xbrl/companyfacts/CIK${company.cik_str.padStart(10, "0")}.json`,
-          {
-            headers: {
-              "User-Agent": "TrueEstate Platform contact@trueestate.com",
-            },
-          },
-        )
-
-        let additionalData = {}
-        if (factsResponse.ok) {
-          const facts = await factsResponse.json()
-          additionalData = {
-            industry: facts.facts?.["dei:EntityCentralIndexKey"] ? "Public Company" : "Unknown",
-            employees: facts.facts?.["dei:EntityCommonStockSharesOutstanding"] ? "Public" : "Unknown",
-          }
-        }
-
         return {
           name: company.title,
           companyNumber: company.cik_str,
@@ -87,76 +159,11 @@ async function searchSECEdgar(companyName: string) {
           ticker: company.ticker,
           source: "SEC EDGAR",
           registryUrl: `https://www.sec.gov/cgi-bin/browse-edgar?CIK=${company.cik_str}`,
-          ...additionalData,
         }
       }
     }
   } catch (error) {
     console.error("SEC EDGAR search failed:", error)
-  }
-  return null
-}
-
-async function searchOpenCorporatesUS(companyName: string, state: string) {
-  try {
-    // OpenCorporates free tier (500 requests/month, no API key needed)
-    const response = await fetch(
-      `https://api.opencorporates.com/v0.4/companies/search?q=${encodeURIComponent(companyName)}&jurisdiction_code=us_${state.toLowerCase()}&per_page=1`,
-      {
-        headers: {
-          "User-Agent": "TrueEstate Platform",
-        },
-      },
-    )
-
-    if (response.ok) {
-      const data = await response.json()
-      if (data.results?.companies && data.results.companies.length > 0) {
-        const company = data.results.companies[0].company
-        return {
-          name: company.name,
-          companyNumber: company.company_number,
-          jurisdiction: company.jurisdiction_code?.toUpperCase(),
-          companyType: company.company_type,
-          status: company.current_status,
-          incorporationDate: company.incorporation_date,
-          address: company.registered_address_in_full,
-          source: "OpenCorporates Free",
-          registryUrl: company.registry_url,
-        }
-      }
-    }
-  } catch (error) {
-    console.error("OpenCorporates US search failed:", error)
-  }
-  return null
-}
-
-async function searchIRSBusinessData(companyName: string) {
-  try {
-    // IRS Business Master File data (available through data.gov)
-    const response = await fetch(
-      `https://api.data.gov/irs/bmf/v1/search?q=${encodeURIComponent(companyName)}&api_key=${process.env.DATA_GOV_API_KEY}`,
-    )
-
-    if (response.ok) {
-      const data = await response.json()
-      if (data.organizations && data.organizations.length > 0) {
-        const org = data.organizations[0]
-        return {
-          name: org.name,
-          companyNumber: org.ein,
-          jurisdiction: "US-IRS",
-          companyType: org.organization_type,
-          status: org.status,
-          address: `${org.city}, ${org.state} ${org.zip}`,
-          source: "IRS Business Master File",
-          taxExempt: org.tax_exempt_status,
-        }
-      }
-    }
-  } catch (error) {
-    console.error("IRS BMF search failed:", error)
   }
   return null
 }
@@ -186,7 +193,7 @@ async function analyzeBusinessName(companyName: string, state: string) {
     jurisdiction: `US-${state.toUpperCase()}`,
     companyType: companyType,
     status: "Search Required",
-    source: "Business Name Analysis",
+    source: "Business Name Analysis + RapidAPI Fallback",
     stateRegistryUrls: getStateRegistryUrls(state),
     note: `Manual verification recommended in ${state} state registry`,
   }
@@ -209,16 +216,19 @@ function getStateRegistryUrls(state: string) {
   return registryUrls[state.toUpperCase()] || "https://www.sos.state.gov/"
 }
 
-function getMockUSRegistryData(companyName: string, state: string) {
+function getMockRegistryData(companyName: string, state: string, country: string) {
   return NextResponse.json({
     company: {
       name: companyName,
       companyNumber: "LLC123456789",
-      jurisdiction: `US-${state.toUpperCase()}`,
+      jurisdiction: `${country}-${state}`.toUpperCase(),
       companyType: "Limited Liability Company",
       status: "Active",
       incorporationDate: "2018-01-15",
       address: `123 Business Ave, ${getStateName(state)} ${getRandomZip(state)}`,
+      industry: "Real Estate Investment",
+      employees: 25,
+      revenue: 5000000,
       officers: [
         {
           name: "John Smith",
@@ -226,7 +236,7 @@ function getMockUSRegistryData(companyName: string, state: string) {
           appointedDate: "2018-01-15",
         },
       ],
-      source: "Mock Data",
+      source: "Mock Data (RapidAPI Alternative)",
       registryUrl: getStateRegistryUrls(state),
     },
   })

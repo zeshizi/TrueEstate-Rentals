@@ -1,6 +1,15 @@
 import type { NextAuthOptions } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import CredentialsProvider from "next-auth/providers/credentials"
+import { Ratelimit } from "@upstash/ratelimit"
+import { Redis } from "@upstash/redis"
+
+// Add Redis rate limiting
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(5, "60 s"), // 5 login attempts per minute
+  analytics: true,
+})
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -21,6 +30,17 @@ export const authOptions: NextAuthOptions = {
           console.log("❌ Missing credentials")
           return null
         }
+
+        // Rate limiting for login attempts
+        const identifier = `login:${credentials.email}`
+        const { success, limit, reset, remaining } = await ratelimit.limit(identifier)
+
+        if (!success) {
+          console.log("🚫 Rate limit exceeded for:", credentials.email)
+          throw new Error(`Too many login attempts. Try again in ${Math.round((reset - Date.now()) / 1000)} seconds.`)
+        }
+
+        console.log(`🔄 Rate limit: ${remaining}/${limit} attempts remaining`)
 
         // For demo purposes, we'll allow any email with password "demo"
         if (credentials.password === "demo") {
