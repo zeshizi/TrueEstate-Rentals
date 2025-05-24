@@ -7,8 +7,9 @@ import { AuthProvider } from "@/components/auth/auth-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "TrueEstate - Real Estate Wealth Insights",
-  description: "Transparent real estate platform with verified ownership and wealth insights",
+  title: "TrueEstate - Clarity before Capital",
+  description:
+    "Transparent real estate platform with verified ownership and wealth insights. Get clarity before investing your capital.",
   generator: "v0.dev",
 }
 

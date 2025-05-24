@@ -56,6 +56,13 @@ export function HeroSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8">
+            {/* Tagline */}
+            <div className="inline-block">
+              <span className="text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Clarity before Capital
+              </span>
+            </div>
+
             <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
               Find Your Perfect Home with{" "}
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -64,8 +71,8 @@ export function HeroSection() {
             </h1>
 
             <p className="text-xl text-gray-600 leading-relaxed">
-              Share your space with verified owners. Discover transparent real estate with comprehensive wealth analysis
-              and verified ownership data.
+              Make informed decisions with complete transparency. Discover verified ownership data, wealth analysis, and
+              market intelligence before you invest your capital.
             </p>
 
             {/* Quick Stats */}
@@ -90,7 +97,7 @@ export function HeroSection() {
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
                 onClick={() => router.push("/search")}
               >
-                Explore Properties
+                Get Clarity First
               </Button>
               <Link href="/wealth-map">
                 <Button
@@ -108,7 +115,7 @@ export function HeroSection() {
             {/* Search Header */}
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900 mb-2">Start Your Search</h3>
-              <p className="text-gray-600">Find properties with complete ownership insights</p>
+              <p className="text-gray-600">Get clarity on properties and ownership before investing</p>
             </div>
 
             <Tabs defaultValue="rent" className="w-full">
@@ -176,7 +183,7 @@ export function HeroSection() {
                   size="lg"
                 >
                   <Search className="mr-2 h-5 w-5" />
-                  Search Rentals
+                  Search with Clarity
                 </Button>
               </TabsContent>
 
@@ -232,7 +239,7 @@ export function HeroSection() {
                   size="lg"
                 >
                   <Search className="mr-2 h-5 w-5" />
-                  Search Properties
+                  Invest with Clarity
                 </Button>
               </TabsContent>
 
@@ -288,7 +295,7 @@ export function HeroSection() {
                   size="lg"
                 >
                   <Search className="mr-2 h-5 w-5" />
-                  Explore Wealth Map
+                  Analyze with Clarity
                 </Button>
               </TabsContent>
             </Tabs>

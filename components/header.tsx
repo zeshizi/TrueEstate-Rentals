@@ -28,7 +28,10 @@ export function Header() {
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <Building2 className="h-5 w-5 text-white" />
               </div>
-              <span className="text-xl font-semibold text-gray-900 tracking-tight">TrueEstate</span>
+              <div className="flex flex-col">
+                <span className="text-xl font-semibold text-gray-900 tracking-tight">TrueEstate</span>
+                <span className="text-xs text-gray-500 font-medium -mt-1">Clarity before Capital</span>
+              </div>
             </Link>
           </div>
 
