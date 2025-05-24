@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { MapPin, Layers, Navigation, Eye } from "lucide-react"
+import { MapPin, Layers, Navigation, Eye, Crown, Star } from "lucide-react"
 
 interface Property {
   id: string
@@ -16,6 +16,7 @@ interface Property {
   ownerName: string
   confidence: "High" | "Medium" | "Low"
   propertyType: string
+  featured?: boolean
 }
 
 interface MapboxWealthMapProps {
@@ -23,6 +24,106 @@ interface MapboxWealthMapProps {
   onPropertySelect: (property: Property | null) => void
   filters: any
 }
+
+// Sample featured properties with real coordinates
+const SAMPLE_PROPERTIES: Property[] = [
+  {
+    id: "sample_1",
+    lat: 34.0901,
+    lng: -118.4065,
+    address: "912 N Beverly Dr, Beverly Hills, CA",
+    value: 15000000,
+    ownerWealth: 250000000,
+    ownerName: "Tech CEO Holdings LLC",
+    confidence: "High",
+    propertyType: "single-family",
+    featured: true,
+  },
+  {
+    id: "sample_2",
+    lat: 40.7614,
+    lng: -73.9776,
+    address: "432 Park Ave, Manhattan, NY",
+    value: 8500000,
+    ownerWealth: 180000000,
+    ownerName: "Goldman Investment Trust",
+    confidence: "High",
+    propertyType: "condo",
+    featured: true,
+  },
+  {
+    id: "sample_3",
+    lat: 34.0259,
+    lng: -118.7798,
+    address: "23456 Pacific Coast Hwy, Malibu, CA",
+    value: 12000000,
+    ownerWealth: 320000000,
+    ownerName: "Entertainment Mogul Inc",
+    confidence: "High",
+    propertyType: "single-family",
+    featured: true,
+  },
+  {
+    id: "sample_4",
+    lat: 39.1911,
+    lng: -106.8175,
+    address: "789 Aspen Mountain Rd, Aspen, CO",
+    value: 6800000,
+    ownerWealth: 150000000,
+    ownerName: "Hedge Fund Partners",
+    confidence: "High",
+    propertyType: "single-family",
+    featured: true,
+  },
+  {
+    id: "sample_5",
+    lat: 40.9176,
+    lng: -72.3951,
+    address: "567 Meadow Ln, East Hampton, NY",
+    value: 9200000,
+    ownerWealth: 200000000,
+    ownerName: "Real Estate Dynasty LLC",
+    confidence: "High",
+    propertyType: "single-family",
+    featured: true,
+  },
+  {
+    id: "sample_6",
+    lat: 37.4419,
+    lng: -122.143,
+    address: "1234 University Ave, Palo Alto, CA",
+    value: 4500000,
+    ownerWealth: 85000000,
+    ownerName: "Startup Founder",
+    confidence: "Medium",
+    propertyType: "single-family",
+    featured: true,
+  },
+  {
+    id: "sample_7",
+    lat: 41.0534,
+    lng: -73.5387,
+    address: "890 Round Hill Rd, Greenwich, CT",
+    value: 3800000,
+    ownerWealth: 95000000,
+    ownerName: "Finance Executive",
+    confidence: "Medium",
+    propertyType: "single-family",
+    featured: true,
+  },
+  {
+    id: "sample_8",
+    lat: 33.4942,
+    lng: -111.9261,
+    address: "345 Desert Mountain Dr, Scottsdale, AZ",
+    value: 2900000,
+    ownerWealth: 75000000,
+    ownerName: "Retired CEO",
+    confidence: "Medium",
+    propertyType: "single-family",
+    featured: true,
+  },
+]
 
 export function MapboxWealthMap({ properties, onPropertySelect, filters }: MapboxWealthMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null)
@@ -33,6 +134,10 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null)
   const [mapboxConfig, setMapboxConfig] = useState<any>(null)
   const [configError, setConfigError] = useState<string | null>(null)
+  const [showSamples, setShowSamples] = useState(true)
+
+  // Combine sample properties with user properties
+  const allProperties = showSamples ? [...SAMPLE_PROPERTIES, ...properties] : properties
 
   // Fetch Mapbox configuration from server
   useEffect(() => {
@@ -91,7 +196,7 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
         // Handle property clicks
         map.current.on("click", "properties-layer", (e: any) => {
           const property = e.features[0].properties
-          const propertyData = properties.find((p) => p.id === property.id)
+          const propertyData = allProperties.find((p) => p.id === property.id)
           if (propertyData) {
             setSelectedProperty(propertyData)
             onPropertySelect(propertyData)
@@ -101,12 +206,33 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
           }
         })
 
+        // Handle featured property clicks
+        map.current.on("click", "featured-properties-layer", (e: any) => {
+          const property = e.features[0].properties
+          const propertyData = allProperties.find((p) => p.id === property.id)
+          if (propertyData) {
+            setSelectedProperty(propertyData)
+            onPropertySelect(propertyData)
+
+            // Create enhanced popup for featured properties
+            new mapboxgl.Popup().setLngLat(e.lngLat).setHTML(createFeaturedPopupHTML(propertyData)).addTo(map.current)
+          }
+        })
+
         // Change cursor on hover
         map.current.on("mouseenter", "properties-layer", () => {
           map.current.getCanvas().style.cursor = "pointer"
         })
 
         map.current.on("mouseleave", "properties-layer", () => {
+          map.current.getCanvas().style.cursor = ""
+        })
+
+        map.current.on("mouseenter", "featured-properties-layer", () => {
+          map.current.getCanvas().style.cursor = "pointer"
+        })
+
+        map.current.on("mouseleave", "featured-properties-layer", () => {
           map.current.getCanvas().style.cursor = ""
         })
       } catch (error) {
@@ -131,10 +257,14 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
   const addPropertyLayers = () => {
     if (!map.current || !mapLoaded) return
 
-    // Convert properties to GeoJSON
-    const geojsonData = {
+    // Separate featured and regular properties
+    const featuredProperties = allProperties.filter((p) => p.featured)
+    const regularProperties = allProperties.filter((p) => !p.featured)
+
+    // Convert regular properties to GeoJSON
+    const regularGeojsonData = {
       type: "FeatureCollection",
-      features: properties.map((property) => ({
+      features: regularProperties.map((property) => ({
         type: "Feature",
         geometry: {
           type: "Point",
@@ -152,20 +282,51 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
       })),
     }
 
-    // Add data source
+    // Convert featured properties to GeoJSON
+    const featuredGeojsonData = {
+      type: "FeatureCollection",
+      features: featuredProperties.map((property) => ({
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: [property.lng, property.lat],
+        },
+        properties: {
+          id: property.id,
+          address: property.address,
+          value: property.value,
+          ownerWealth: property.ownerWealth,
+          ownerName: property.ownerName,
+          confidence: property.confidence,
+          propertyType: property.propertyType,
+        },
+      })),
+    }
+
+    // Add regular properties source
     if (map.current.getSource("properties")) {
-      map.current.getSource("properties").setData(geojsonData)
+      map.current.getSource("properties").setData(regularGeojsonData)
     } else {
       map.current.addSource("properties", {
         type: "geojson",
-        data: geojsonData,
+        data: regularGeojsonData,
         cluster: true,
         clusterMaxZoom: 14,
         clusterRadius: 50,
       })
     }
 
-    // Add cluster layer
+    // Add featured properties source
+    if (map.current.getSource("featured-properties")) {
+      map.current.getSource("featured-properties").setData(featuredGeojsonData)
+    } else {
+      map.current.addSource("featured-properties", {
+        type: "geojson",
+        data: featuredGeojsonData,
+      })
+    }
+
+    // Add cluster layer for regular properties
     if (!map.current.getLayer("clusters")) {
       map.current.addLayer({
         id: "clusters",
@@ -194,7 +355,7 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
       })
     }
 
-    // Add individual property points
+    // Add individual regular property points
     if (!map.current.getLayer("properties-layer")) {
       map.current.addLayer({
         id: "properties-layer",
@@ -210,7 +371,78 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
       })
     }
 
-    // Add property labels
+    // Add featured properties layer with special styling
+    if (!map.current.getLayer("featured-properties-layer")) {
+      map.current.addLayer({
+        id: "featured-properties-layer",
+        type: "circle",
+        source: "featured-properties",
+        paint: {
+          "circle-color": [
+            "interpolate",
+            ["linear"],
+            ["get", "ownerWealth"],
+            50000000,
+            "#fbbf24", // Gold for $50M+
+            100000000,
+            "#f59e0b", // Darker gold for $100M+
+            200000000,
+            "#d97706", // Orange for $200M+
+            300000000,
+            "#dc2626", // Red for $300M+
+          ],
+          "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 8, 16, 20],
+          "circle-stroke-width": 3,
+          "circle-stroke-color": "#ffffff",
+          "circle-opacity": 0.9,
+        },
+      })
+    }
+
+    // Add pulsing animation for featured properties
+    if (!map.current.getLayer("featured-properties-pulse")) {
+      map.current.addLayer({
+        id: "featured-properties-pulse",
+        type: "circle",
+        source: "featured-properties",
+        paint: {
+          "circle-color": "#fbbf24",
+          "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 15, 16, 30],
+          "circle-opacity": ["interpolate", ["linear"], ["zoom"], 8, 0.3, 16, 0.1],
+          "circle-stroke-width": 0,
+        },
+      })
+    }
+
+    // Add featured property labels
+    if (!map.current.getLayer("featured-property-labels")) {
+      map.current.addLayer({
+        id: "featured-property-labels",
+        type: "symbol",
+        source: "featured-properties",
+        layout: {
+          "text-field": [
+            "format",
+            "★ $",
+            { "font-scale": 0.8 },
+            ["number-format", ["get", "value"], { "min-fraction-digits": 0, "max-fraction-digits": 0 }],
+            {},
+          ],
+          "text-font": ["DIN Offc Pro Bold", "Arial Unicode MS Bold"],
+          "text-size": 12,
+          "text-offset": [0, 2],
+          "text-anchor": "top",
+        },
+        paint: {
+          "text-color": "#1f2937",
+          "text-halo-color": "#ffffff",
+          "text-halo-width": 2,
+        },
+        minzoom: 10,
+      })
+    }
+
+    // Add regular property labels
     if (!map.current.getLayer("property-labels")) {
       map.current.addLayer({
         id: "property-labels",
@@ -296,7 +528,7 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
     if (map.current && mapLoaded) {
       addPropertyLayers()
     }
-  }, [properties, mapLoaded])
+  }, [allProperties, mapLoaded, showSamples])
 
   // Change map style
   const changeMapStyle = (style: string) => {
@@ -311,7 +543,7 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
     }
   }
 
-  // Create popup HTML
+  // Create popup HTML for regular properties
   const createPopupHTML = (property: Property) => {
     return `
       <div class="p-3 min-w-[250px]">
@@ -344,14 +576,65 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
     `
   }
 
+  // Create enhanced popup HTML for featured properties
+  const createFeaturedPopupHTML = (property: Property) => {
+    return `
+      <div class="p-4 min-w-[300px] bg-gradient-to-br from-yellow-50 to-orange-50">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-yellow-500">★</span>
+          <h3 class="font-bold text-base text-gray-900">Featured Property</h3>
+        </div>
+        <h4 class="font-semibold text-sm mb-3 text-gray-800">${property.address}</h4>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-gray-600">Property Value:</span>
+            <span class="font-bold text-green-700">$${(property.value / 1000000).toFixed(1)}M</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">Owner:</span>
+            <span class="font-semibold text-gray-900">${property.ownerName}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">Estimated Net Worth:</span>
+            <span class="font-bold text-blue-700">$${(property.ownerWealth / 1000000).toFixed(0)}M</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">Analysis Confidence:</span>
+            <span class="inline-flex px-3 py-1 text-xs font-medium rounded-full ${
+              property.confidence === "High"
+                ? "bg-green-100 text-green-800"
+                : property.confidence === "Medium"
+                  ? "bg-yellow-100 text-yellow-800"
+                  : "bg-red-100 text-red-800"
+            }">${property.confidence}</span>
+          </div>
+        </div>
+        <div class="mt-3 pt-3 border-t border-yellow-200">
+          <p class="text-xs text-gray-600">Ultra-high net worth individual identified through our proprietary analysis</p>
+        </div>
+      </div>
+    `
+  }
+
   // Zoom to fit all properties
   const fitToProperties = () => {
-    if (map.current && properties.length > 0) {
+    if (map.current && allProperties.length > 0) {
       const bounds = new (window as any).mapboxgl.LngLatBounds()
-      properties.forEach((property) => {
+      allProperties.forEach((property) => {
         bounds.extend([property.lng, property.lat])
       })
       map.current.fitBounds(bounds, { padding: 50 })
+    }
+  }
+
+  // Zoom to featured properties
+  const showFeaturedProperties = () => {
+    if (map.current && SAMPLE_PROPERTIES.length > 0) {
+      const bounds = new (window as any).mapboxgl.LngLatBounds()
+      SAMPLE_PROPERTIES.forEach((property) => {
+        bounds.extend([property.lng, property.lat])
+      })
+      map.current.fitBounds(bounds, { padding: 100 })
     }
   }
 
@@ -392,6 +675,29 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
 
       {/* Map Controls */}
       <div className="absolute top-4 left-4 z-10 space-y-3">
+        {/* Featured Properties Toggle */}
+        <Card className="p-3">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Star className="h-4 w-4 text-yellow-500" />
+              <span className="text-sm font-medium">Sample Properties</span>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant={showSamples ? "default" : "outline"}
+                size="sm"
+                onClick={() => setShowSamples(!showSamples)}
+              >
+                {showSamples ? "Hide" : "Show"} Samples
+              </Button>
+              <Button variant="outline" size="sm" onClick={showFeaturedProperties}>
+                <Crown className="h-3 w-3 mr-1" />
+                Tour
+              </Button>
+            </div>
+          </div>
+        </Card>
+
         {/* View Mode Selector */}
         <Card className="p-3">
           <div className="space-y-2">
@@ -461,6 +767,15 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
           {viewMode === "property-type" && "Property Type"}
         </h3>
         <div className="space-y-2 text-xs">
+          {showSamples && (
+            <div className="mb-3 pb-2 border-b border-gray-200">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-3 h-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full"></div>
+                <span className="font-medium">Featured Properties</span>
+              </div>
+              <div className="text-xs text-gray-600">Ultra-high net worth samples</div>
+            </div>
+          )}
           {viewMode === "wealth" && (
             <>
               <div className="flex items-center gap-2">
@@ -525,13 +840,16 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <MapPin className="h-4 w-4 text-blue-600" />
-            <span className="text-sm font-medium">{properties.length} Properties</span>
+            <span className="text-sm font-medium">{allProperties.length} Properties</span>
           </div>
           <Button variant="outline" size="sm" onClick={fitToProperties}>
             <Navigation className="h-4 w-4 mr-1" />
             Fit All
           </Button>
         </div>
+        {showSamples && (
+          <div className="mt-2 text-xs text-gray-600">{SAMPLE_PROPERTIES.length} featured samples included</div>
+        )}
       </Card>
 
       {/* Loading Overlay */}
