@@ -27,6 +27,10 @@ export async function GET(request: NextRequest) {
 }
 
 async function searchGlobalCompanyDataAPI(companyName: string, state: string, country: string) {
+  if (!process.env.RAPIDAPI_KEY) {
+    console.warn("RAPIDAPI_KEY not found, using mock data")
+    return null
+  }
   try {
     // Global Company Data API via RapidAPI
     const response = await fetch(`https://global-company-data-api.p.rapidapi.com/company/search`, {
@@ -48,7 +52,7 @@ async function searchGlobalCompanyDataAPI(companyName: string, state: string, co
       const data = await response.json()
       if (data.companies && data.companies.length > 0) {
         const company = data.companies[0]
-        return {
+        const formattedCompany = {
           name: company.name,
           companyNumber: company.registration_number || company.company_id,
           jurisdiction: `${country}-${state}`.toUpperCase(),
@@ -70,6 +74,8 @@ async function searchGlobalCompanyDataAPI(companyName: string, state: string, co
           source: "Global Company Data API (RapidAPI)",
           registryUrl: company.registry_url,
         }
+        console.log("✅ Global Company Data API successful:", { company: companyName, source: "Global Company Data" })
+        return formattedCompany
       }
     }
 

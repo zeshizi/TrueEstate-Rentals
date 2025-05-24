@@ -32,6 +32,10 @@ export async function GET(request: NextRequest) {
 }
 
 async function enrichCompanyDataRapidAPI(domain?: string | null, companyName?: string | null) {
+  if (!process.env.RAPIDAPI_KEY) {
+    console.warn("RAPIDAPI_KEY not found, using mock data")
+    return null
+  }
   try {
     // Global Company Data API via RapidAPI
     const searchQuery = domain || companyName
@@ -80,6 +84,10 @@ async function enrichCompanyDataRapidAPI(domain?: string | null, companyName?: s
 }
 
 async function enrichPersonDataRapidAPI(email: string) {
+  if (!process.env.RAPIDAPI_KEY) {
+    console.warn("RAPIDAPI_KEY not found, using mock data")
+    return null
+  }
   try {
     // People Data Labs API via RapidAPI
     const response = await fetch(`https://people-data-labs-api.p.rapidapi.com/person/enrich`, {
@@ -98,6 +106,7 @@ async function enrichPersonDataRapidAPI(email: string) {
       const data = await response.json()
       if (data.person) {
         const person = data.person
+        console.log("✅ People Data Labs API successful:", { email, source: "People Data Labs" })
         return {
           name: `${person.first_name} ${person.last_name}`,
           email: email,

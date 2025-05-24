@@ -49,10 +49,10 @@ export default function SearchPage() {
       const data = await response.json()
 
       console.log("📊 Search results:", {
-        query: data.query,
+        query: data.query || "none",
         totalResults: data.results?.length || 0,
-        results: data.results,
-        suggestions: data.suggestions,
+        firstResult: data.results?.[0]?.title || "none",
+        cached: data.cached || false,
       })
 
       setResults(data.results || [])
