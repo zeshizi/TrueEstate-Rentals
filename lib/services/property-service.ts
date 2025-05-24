@@ -1,14 +1,15 @@
-import { getDatabase } from "@/lib/mongodb"
 import type { Property, PropertyFilter } from "@/lib/models/property"
 
 export class PropertyService {
-  private async getCollection() {
-    const db = await getDatabase()
-    return db.collection<Property>("properties")
+  // Mock data service - no database connection needed
+  private mockProperties: Property[] = []
+
+  constructor() {
+    console.log("🎭 PropertyService initialized with mock data for all states")
   }
 
   async createProperty(property: Omit<Property, "_id" | "createdAt" | "updatedAt">): Promise<Property> {
-    const collection = await this.getCollection()
+    console.log("🎭 Creating mock property:", property.address)
 
     const newProperty: Property = {
       ...property,
@@ -16,301 +17,67 @@ export class PropertyService {
       updatedAt: new Date(),
     }
 
-    const result = await collection.insertOne(newProperty)
-    return { ...newProperty, _id: result.insertedId }
+    // Add to mock array
+    this.mockProperties.push(newProperty)
+    return newProperty
   }
 
   async getProperty(id: string): Promise<Property | null> {
-    const collection = await this.getCollection()
-    return await collection.findOne({ id })
+    console.log("🎭 Getting mock property:", id)
+
+    // Return mock property or null
+    const mockProperty = this.mockProperties.find((p) => p.id === id)
+    return mockProperty || null
   }
 
   async searchProperties(filters: PropertyFilter, limit = 50, skip = 0): Promise<Property[]> {
-    try {
-      const collection = await this.getCollection()
+    console.log("🎭 Searching mock properties with filters:", filters)
 
-      // Test connection first
-      await collection.findOne({}, { limit: 1 })
-
-      const query: any = { isActive: true }
-
-      // Build query more safely
-      if (filters.minValue && filters.minValue > 0) {
-        query.value = { ...query.value, $gte: filters.minValue }
-      }
-      if (filters.maxValue && filters.maxValue > 0) {
-        query.value = { ...query.value, $lte: filters.maxValue }
-      }
-
-      if (filters.propertyType) {
-        query.propertyType = { $regex: filters.propertyType, $options: "i" }
-      }
-
-      if (filters.ownerType) {
-        query.ownerType = { $regex: filters.ownerType, $options: "i" }
-      }
-
-      if (filters.location) {
-        query.$or = [
-          { address: { $regex: filters.location, $options: "i" } },
-          { city: { $regex: filters.location, $options: "i" } },
-          { state: { $regex: filters.location, $options: "i" } },
-        ]
-      }
-
-      // Bedrooms filter
-      if (filters.bedrooms && filters.bedrooms > 0) {
-        query.bedrooms = { $gte: filters.bedrooms }
-      }
-
-      // Bathrooms filter
-      if (filters.bathrooms && filters.bathrooms > 0) {
-        query.bathrooms = { $gte: filters.bathrooms }
-      }
-
-      // Square footage filter
-      if (filters.minSqft || filters.maxSqft) {
-        query.sqft = {}
-        if (filters.minSqft && filters.minSqft > 0) query.sqft.$gte = filters.minSqft
-        if (filters.maxSqft && filters.maxSqft > 0) query.sqft.$lte = filters.maxSqft
-      }
-
-      // Wealth range filter
-      if (filters.wealthRange && filters.wealthRange !== "all") {
-        const wealthRanges: Record<string, [number, number]> = {
-          "1m-5m": [1000000, 5000000],
-          "5m-10m": [5000000, 10000000],
-          "10m-25m": [10000000, 25000000],
-          "25m-50m": [25000000, 50000000],
-          "50m+": [50000000, 999999999],
-        }
-
-        const range = wealthRanges[filters.wealthRange]
-        if (range) {
-          query.ownerWealth = { $gte: range[0], $lte: range[1] }
-        }
-      }
-
-      console.log("🔍 MongoDB Query:", JSON.stringify(query, null, 2))
-
-      const results = await collection.find(query).sort({ value: -1 }).skip(skip).limit(limit).toArray()
-
-      console.log("✅ MongoDB returned:", results.length, "properties")
-      return results
-    } catch (error) {
-      console.error("❌ Property search error:", error)
-      throw new Error(`Database search failed: ${error instanceof Error ? error.message : "Unknown error"}`)
-    }
+    // Always return empty array to force fallback to API mock data
+    // This ensures the API layer handles all mock data consistently
+    return []
   }
 
   async getPropertiesByOwner(ownerName: string): Promise<Property[]> {
-    const collection = await this.getCollection()
-    return await collection
-      .find({ ownerName: { $regex: ownerName, $options: "i" }, isActive: true })
-      .sort({ value: -1 })
-      .toArray()
+    console.log("🎭 Getting mock properties by owner:", ownerName)
+
+    // Return empty array to force API fallback
+    return []
   }
 
   async updateProperty(id: string, updates: Partial<Property>): Promise<boolean> {
-    const collection = await this.getCollection()
-    const result = await collection.updateOne(
-      { id },
-      {
-        $set: {
-          ...updates,
-          updatedAt: new Date(),
-        },
-      },
-    )
-    return result.modifiedCount > 0
+    console.log("🎭 Updating mock property:", id)
+
+    // Mock update - always return true
+    return true
   }
 
   async deleteProperty(id: string): Promise<boolean> {
-    const collection = await this.getCollection()
-    const result = await collection.updateOne(
-      { id },
-      {
-        $set: {
-          isActive: false,
-          updatedAt: new Date(),
-        },
-      },
-    )
-    return result.modifiedCount > 0
+    console.log("🎭 Deleting mock property:", id)
+
+    // Mock delete - always return true
+    return true
   }
 
   async getMarketStats(location?: string): Promise<any> {
-    const collection = await this.getCollection()
+    console.log("🎭 Getting mock market stats for:", location || "all locations")
 
-    const matchStage: any = { isActive: true }
-    if (location) {
-      matchStage.address = { $regex: location, $options: "i" }
+    // Return mock market stats
+    return {
+      totalProperties: 120,
+      averageValue: 8500000,
+      medianValue: 6800000,
+      minValue: 1800000,
+      maxValue: 32000000,
+      averageWealthOwner: 385000000,
+      dataSource: "mock_data_all_states",
     }
-
-    const stats = await collection
-      .aggregate([
-        { $match: matchStage },
-        {
-          $group: {
-            _id: null,
-            totalProperties: { $sum: 1 },
-            averageValue: { $avg: "$value" },
-            medianValue: { $median: { input: "$value", method: "approximate" } },
-            minValue: { $min: "$value" },
-            maxValue: { $max: "$value" },
-            averageWealthOwner: { $avg: "$ownerWealth" },
-          },
-        },
-      ])
-      .toArray()
-
-    return stats[0] || {}
   }
 
   async seedSampleData(): Promise<void> {
-    const collection = await this.getCollection()
+    console.log("🎭 Mock data seeding - no action needed, using API mock data")
 
-    // Check if data already exists
-    const existingCount = await collection.countDocuments()
-    if (existingCount > 0) {
-      console.log("Sample data already exists, skipping seed")
-      return
-    }
-
-    const sampleProperties = [
-      {
-        id: "prop_beverly_hills_1",
-        address: "456 Beverly Hills Drive",
-        city: "Beverly Hills",
-        state: "CA",
-        zipCode: "90210",
-        value: 15000000,
-        bedrooms: 6,
-        bathrooms: 8,
-        sqft: 8500,
-        propertyType: "Single Family",
-        yearBuilt: 2018,
-        lotSize: 25000,
-        ownerName: "Sarah Johnson",
-        ownerType: "Individual",
-        ownerWealth: 250000000,
-        lastSaleDate: "2022-03-20",
-        lastSalePrice: 14200000,
-        images: ["/placeholder.svg?height=300&width=400&text=Beverly+Hills+Mansion"],
-        features: ["Pool", "Wine Cellar", "Home Theater", "Tennis Court"],
-        isActive: true,
-        dataSource: "manual",
-        coordinates: { lat: 34.0736, lng: -118.4004 },
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: "prop_manhattan_1",
-        address: "123 Park Avenue",
-        city: "New York",
-        state: "NY",
-        zipCode: "10016",
-        value: 8500000,
-        bedrooms: 4,
-        bathrooms: 4,
-        sqft: 3200,
-        propertyType: "Condo",
-        yearBuilt: 2019,
-        lotSize: 0,
-        ownerName: "Goldman Investment LLC",
-        ownerType: "LLC",
-        ownerWealth: 180000000,
-        lastSaleDate: "2023-06-15",
-        lastSalePrice: 8000000,
-        images: ["/placeholder.svg?height=300&width=400&text=Manhattan+Penthouse"],
-        features: ["Doorman", "Gym", "Rooftop Deck", "Central Park View"],
-        isActive: true,
-        dataSource: "manual",
-        coordinates: { lat: 40.7505, lng: -73.9934 },
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: "prop_malibu_1",
-        address: "789 Pacific Coast Highway",
-        city: "Malibu",
-        state: "CA",
-        zipCode: "90265",
-        value: 12000000,
-        bedrooms: 5,
-        bathrooms: 6,
-        sqft: 6800,
-        propertyType: "Single Family",
-        yearBuilt: 2020,
-        lotSize: 15000,
-        ownerName: "Entertainment Mogul Trust",
-        ownerType: "Trust",
-        ownerWealth: 320000000,
-        lastSaleDate: "2023-01-10",
-        lastSalePrice: 11500000,
-        images: ["/placeholder.svg?height=300&width=400&text=Malibu+Oceanfront"],
-        features: ["Ocean View", "Private Beach", "Guest House", "Infinity Pool"],
-        isActive: true,
-        dataSource: "manual",
-        coordinates: { lat: 34.0259, lng: -118.7798 },
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: "prop_hamptons_1",
-        address: "321 Meadow Lane",
-        city: "East Hampton",
-        state: "NY",
-        zipCode: "11937",
-        value: 9200000,
-        bedrooms: 7,
-        bathrooms: 9,
-        sqft: 9500,
-        propertyType: "Single Family",
-        yearBuilt: 2017,
-        lotSize: 35000,
-        ownerName: "Real Estate Dynasty Corp",
-        ownerType: "Corporate",
-        ownerWealth: 200000000,
-        lastSaleDate: "2022-08-05",
-        lastSalePrice: 8800000,
-        images: ["/placeholder.svg?height=300&width=400&text=Hamptons+Estate"],
-        features: ["Tennis Court", "Pool House", "Wine Cellar", "Ocean Access"],
-        isActive: true,
-        dataSource: "manual",
-        coordinates: { lat: 40.9629, lng: -72.1989 },
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: "prop_aspen_1",
-        address: "654 Aspen Mountain Road",
-        city: "Aspen",
-        state: "CO",
-        zipCode: "81611",
-        value: 6800000,
-        bedrooms: 5,
-        bathrooms: 6,
-        sqft: 5200,
-        propertyType: "Single Family",
-        yearBuilt: 2021,
-        lotSize: 12000,
-        ownerName: "Hedge Fund Partners LLC",
-        ownerType: "LLC",
-        ownerWealth: 150000000,
-        lastSaleDate: "2023-04-12",
-        lastSalePrice: 6500000,
-        images: ["/placeholder.svg?height=300&width=400&text=Aspen+Ski+Lodge"],
-        features: ["Ski Access", "Hot Tub", "Fireplace", "Mountain Views"],
-        isActive: true,
-        dataSource: "manual",
-        coordinates: { lat: 39.1911, lng: -106.8175 },
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ]
-
-    await collection.insertMany(sampleProperties)
-    console.log(`✅ Seeded ${sampleProperties.length} sample properties to MongoDB`)
+    // No seeding needed for mock mode
+    return
   }
 }
