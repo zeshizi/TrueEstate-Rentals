@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { Header } from "@/components/header"
 import { SearchResults } from "@/components/search-results"
 import { SearchFilters } from "@/components/search-filters"
@@ -9,7 +10,8 @@ import { Button } from "@/components/ui/button"
 import { Search } from "lucide-react"
 
 export default function SearchPage() {
-  const [query, setQuery] = useState("")
+  const searchParams = useSearchParams()
+  const [query, setQuery] = useState(searchParams.get("q") || "")
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
   const [filters, setFilters] = useState({
@@ -17,11 +19,11 @@ export default function SearchPage() {
     minValue: 0,
     maxValue: 10000000,
     location: "",
+    propertyType: searchParams.get("propertyType") || "",
+    budget: searchParams.get("budget") || "",
   })
 
   const handleSearch = async () => {
-    if (!query.trim()) return
-
     setLoading(true)
     try {
       const params = new URLSearchParams({
@@ -32,16 +34,28 @@ export default function SearchPage() {
         location: filters.location,
       })
 
+      console.log("🔍 Searching with params:", params.toString())
+
       const response = await fetch(`/api/search?${params}`)
       const data = await response.json()
+
+      console.log("📊 Search results:", data)
       setResults(data.results || [])
     } catch (error) {
-      console.error("Search error:", error)
+      console.error("❌ Search error:", error)
     } finally {
       setLoading(false)
     }
   }
 
+  // Auto-search when page loads with parameters
+  useEffect(() => {
+    if (query || filters.propertyType || filters.budget) {
+      handleSearch()
+    }
+  }, [])
+
+  // Debounced search when query changes
   useEffect(() => {
     if (query) {
       const debounceTimer = setTimeout(handleSearch, 300)
@@ -56,6 +70,17 @@ export default function SearchPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">Search Properties & Owners</h1>
+
+          {/* Show search context if coming from hero */}
+          {(filters.propertyType || filters.budget) && (
+            <div className="mb-4 p-4 bg-blue-50 rounded-lg">
+              <p className="text-blue-800">
+                Searching for: {query && `"${query}"`}
+                {filters.propertyType && ` • ${filters.propertyType}`}
+                {filters.budget && ` • ${filters.budget}`}
+              </p>
+            </div>
+          )}
 
           <div className="flex gap-4 mb-6">
             <div className="flex-1 relative">

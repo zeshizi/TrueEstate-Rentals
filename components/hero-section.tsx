@@ -7,15 +7,38 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Search, MapPin } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 export function HeroSection() {
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
   const [propertyType, setPropertyType] = useState("")
   const [budget, setBudget] = useState("")
 
   const handleSearch = () => {
-    // Implement search functionality
     console.log("Searching for:", { searchQuery, propertyType, budget })
+
+    // Build search URL with parameters
+    const params = new URLSearchParams()
+    if (searchQuery) params.set("q", searchQuery)
+    if (propertyType && propertyType !== "any") params.set("propertyType", propertyType)
+    if (budget && budget !== "any") params.set("budget", budget)
+
+    // Navigate to search page with parameters
+    router.push(`/search?${params.toString()}`)
+  }
+
+  const handleWealthMapSearch = () => {
+    console.log("Wealth Map search for:", { searchQuery, propertyType, budget })
+
+    // Build wealth map URL with parameters
+    const params = new URLSearchParams()
+    if (searchQuery) params.set("location", searchQuery)
+    if (propertyType && propertyType !== "any") params.set("wealthRange", propertyType)
+    if (budget && budget !== "any") params.set("ownerType", budget)
+
+    // Navigate to wealth map with parameters
+    router.push(`/wealth-map?${params.toString()}`)
   }
 
   return (
@@ -38,7 +61,7 @@ export function HeroSection() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="bg-gray-900 hover:bg-gray-800">
+              <Button size="lg" className="bg-gray-900 hover:bg-gray-800" onClick={() => router.push("/search")}>
                 Explore Properties
               </Button>
               <Link href="/wealth-map">
@@ -65,6 +88,7 @@ export function HeroSection() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10"
+                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                   />
                 </div>
 
@@ -104,7 +128,7 @@ export function HeroSection() {
 
                 <Button onClick={handleSearch} className="w-full bg-gray-900 hover:bg-gray-800" size="lg">
                   <Search className="mr-2 h-5 w-5" />
-                  Search Properties
+                  Search Rentals
                 </Button>
               </TabsContent>
 
@@ -116,6 +140,7 @@ export function HeroSection() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10"
+                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                   />
                 </div>
 
@@ -167,6 +192,7 @@ export function HeroSection() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10"
+                    onKeyDown={(e) => e.key === "Enter" && handleWealthMapSearch()}
                   />
                 </div>
 
@@ -204,12 +230,10 @@ export function HeroSection() {
                   </div>
                 </div>
 
-                <Link href="/wealth-map" className="block">
-                  <Button className="w-full bg-gray-900 hover:bg-gray-800" size="lg">
-                    <Search className="mr-2 h-5 w-5" />
-                    Explore Wealth Map
-                  </Button>
-                </Link>
+                <Button onClick={handleWealthMapSearch} className="w-full bg-gray-900 hover:bg-gray-800" size="lg">
+                  <Search className="mr-2 h-5 w-5" />
+                  Explore Wealth Map
+                </Button>
               </TabsContent>
             </Tabs>
           </div>

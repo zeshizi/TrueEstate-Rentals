@@ -4,10 +4,14 @@ import { useState, useEffect } from "react"
 import { Header } from "@/components/header"
 import { MapboxWealthMap } from "@/components/mapbox-wealth-map"
 import { PropertyFilters } from "@/components/property-filters"
-import { PropertyDetails } from "@/components/property-details"
+import { EnhancedPropertyDetails } from "@/components/enhanced-property-details"
 import { WealthAnalysis } from "@/components/wealth-analysis"
 import { DataGovIntegration } from "@/components/data-gov-integration"
 import { MapDataSeeder } from "@/components/map-data-seeder"
+import { PropertyBookmarkManager } from "@/components/property-bookmark-manager"
+import { SavedSearches } from "@/components/saved-searches"
+import { PropertyExportManager } from "@/components/property-export-manager"
+import { OwnerComparisonTool } from "@/components/owner-comparison-tool"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default function WealthMapPage() {
@@ -44,8 +48,11 @@ export default function WealthMapPage() {
   }
 
   const handleDataSeeded = () => {
-    // Refresh properties after seeding
     fetchProperties()
+  }
+
+  const handleLoadSearch = (searchFilters: any) => {
+    setFilters(searchFilters)
   }
 
   return (
@@ -57,9 +64,10 @@ export default function WealthMapPage() {
         <div className="w-80 bg-white border-r border-gray-200 overflow-y-auto">
           <div className="p-6">
             <Tabs defaultValue="filters" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="filters">Filters</TabsTrigger>
-                <TabsTrigger value="data">Data Sources</TabsTrigger>
+                <TabsTrigger value="data">Data</TabsTrigger>
+                <TabsTrigger value="tools">Tools</TabsTrigger>
               </TabsList>
 
               <TabsContent value="filters" className="space-y-6">
@@ -70,9 +78,11 @@ export default function WealthMapPage() {
 
                 <PropertyFilters filters={filters} onFiltersChange={setFilters} />
 
+                <SavedSearches currentFilters={filters} onLoadSearch={handleLoadSearch} />
+
                 {selectedProperty && (
                   <div className="space-y-4">
-                    <PropertyDetails property={selectedProperty} />
+                    <EnhancedPropertyDetails property={selectedProperty} />
                     <WealthAnalysis property={selectedProperty} />
                   </div>
                 )}
@@ -87,6 +97,21 @@ export default function WealthMapPage() {
                 <div className="border-t pt-4">
                   <h3 className="text-lg font-semibold mb-4">Government Data</h3>
                   <DataGovIntegration />
+                </div>
+
+                <div className="border-t pt-4">
+                  <PropertyBookmarkManager />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="tools" className="space-y-4">
+                <PropertyExportManager
+                  properties={properties}
+                  selectedProperties={selectedProperty ? [selectedProperty.id] : []}
+                />
+
+                <div className="border-t pt-4">
+                  <OwnerComparisonTool />
                 </div>
               </TabsContent>
             </Tabs>
