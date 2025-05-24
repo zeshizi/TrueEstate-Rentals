@@ -181,6 +181,11 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
           bearing: 0,
         })
 
+        // Make mapboxgl available globally for bounds operations
+        if (typeof window !== "undefined") {
+          ;(window as any).mapboxgl = mapboxgl
+        }
+
         // Add navigation controls
         map.current.addControl(new mapboxgl.NavigationControl(), "top-right")
 
@@ -197,12 +202,21 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
         map.current.on("click", "properties-layer", (e: any) => {
           const property = e.features[0].properties
           const propertyData = allProperties.find((p) => p.id === property.id)
-          if (propertyData) {
+          if (propertyData && map.current) {
             setSelectedProperty(propertyData)
             onPropertySelect(propertyData)
 
-            // Create popup
-            new mapboxgl.Popup().setLngLat(e.lngLat).setHTML(createPopupHTML(propertyData)).addTo(map.current)
+            // Safely create popup with dynamic import
+            import("mapbox-gl")
+              .then((mapboxgl) => {
+                new mapboxgl.default.Popup()
+                  .setLngLat(e.lngLat)
+                  .setHTML(createPopupHTML(propertyData))
+                  .addTo(map.current)
+              })
+              .catch((error) => {
+                console.error("Failed to create popup:", error)
+              })
           }
         })
 
@@ -618,23 +632,42 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
 
   // Zoom to fit all properties
   const fitToProperties = () => {
-    if (map.current && allProperties.length > 0) {
-      const bounds = new (window as any).mapboxgl.LngLatBounds()
-      allProperties.forEach((property) => {
-        bounds.extend([property.lng, property.lat])
-      })
-      map.current.fitBounds(bounds, { padding: 50 })
+    if (map.current && allProperties.length > 0 && typeof window !== "undefined") {
+      try {
+        // Check if mapboxgl is available on window
+        const mapboxgl = (window as any).mapboxgl
+        if (mapboxgl && mapboxgl.LngLatBounds) {
+          const bounds = new mapboxgl.LngLatBounds()
+          allProperties.forEach((property) => {
+            bounds.extend([property.lng, property.lat])
+          })
+          map.current.fitBounds(bounds, { padding: 50 })
+        } else {
+          console.warn("Mapbox not fully loaded yet")
+        }
+      } catch (error) {
+        console.error("Error fitting bounds:", error)
+      }
     }
   }
 
   // Zoom to featured properties
   const showFeaturedProperties = () => {
-    if (map.current && SAMPLE_PROPERTIES.length > 0) {
-      const bounds = new (window as any).mapboxgl.LngLatBounds()
-      SAMPLE_PROPERTIES.forEach((property) => {
-        bounds.extend([property.lng, property.lat])
-      })
-      map.current.fitBounds(bounds, { padding: 100 })
+    if (map.current && SAMPLE_PROPERTIES.length > 0 && typeof window !== "undefined") {
+      try {
+        const mapboxgl = (window as any).mapboxgl
+        if (mapboxgl && mapboxgl.LngLatBounds) {
+          const bounds = new mapboxgl.LngLatBounds()
+          SAMPLE_PROPERTIES.forEach((property) => {
+            bounds.extend([property.lng, property.lat])
+          })
+          map.current.fitBounds(bounds, { padding: 100 })
+        } else {
+          console.warn("Mapbox not fully loaded yet")
+        }
+      } catch (error) {
+        console.error("Error showing featured properties:", error)
+      }
     }
   }
 

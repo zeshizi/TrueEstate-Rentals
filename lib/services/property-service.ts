@@ -26,66 +26,81 @@ export class PropertyService {
   }
 
   async searchProperties(filters: PropertyFilter, limit = 50, skip = 0): Promise<Property[]> {
-    const collection = await this.getCollection()
+    try {
+      const collection = await this.getCollection()
 
-    const query: any = { isActive: true }
+      // Test connection first
+      await collection.findOne({}, { limit: 1 })
 
-    // Value range filter
-    if (filters.minValue || filters.maxValue) {
-      query.value = {}
-      if (filters.minValue) query.value.$gte = filters.minValue
-      if (filters.maxValue) query.value.$lte = filters.maxValue
-    }
+      const query: any = { isActive: true }
 
-    // Property type filter
-    if (filters.propertyType && filters.propertyType !== "all") {
-      query.propertyType = filters.propertyType
-    }
-
-    // Owner type filter
-    if (filters.ownerType && filters.ownerType !== "all") {
-      query.ownerType = filters.ownerType
-    }
-
-    // Location filter
-    if (filters.location) {
-      query.address = { $regex: filters.location, $options: "i" }
-    }
-
-    // Bedrooms filter
-    if (filters.bedrooms) {
-      query.bedrooms = filters.bedrooms
-    }
-
-    // Bathrooms filter
-    if (filters.bathrooms) {
-      query.bathrooms = filters.bathrooms
-    }
-
-    // Square footage filter
-    if (filters.minSqft || filters.maxSqft) {
-      query.sqft = {}
-      if (filters.minSqft) query.sqft.$gte = filters.minSqft
-      if (filters.maxSqft) query.sqft.$lte = filters.maxSqft
-    }
-
-    // Wealth range filter
-    if (filters.wealthRange && filters.wealthRange !== "all") {
-      const wealthRanges: Record<string, [number, number]> = {
-        "1m-5m": [1000000, 5000000],
-        "5m-10m": [5000000, 10000000],
-        "10m-25m": [10000000, 25000000],
-        "25m-50m": [25000000, 50000000],
-        "50m+": [50000000, Number.POSITIVE_INFINITY],
+      // Build query more safely
+      if (filters.minValue && filters.minValue > 0) {
+        query.value = { ...query.value, $gte: filters.minValue }
+      }
+      if (filters.maxValue && filters.maxValue > 0) {
+        query.value = { ...query.value, $lte: filters.maxValue }
       }
 
-      const range = wealthRanges[filters.wealthRange]
-      if (range) {
-        query.ownerWealth = { $gte: range[0], $lte: range[1] === Number.POSITIVE_INFINITY ? 999999999 : range[1] }
+      if (filters.propertyType) {
+        query.propertyType = { $regex: filters.propertyType, $options: "i" }
       }
-    }
 
-    return await collection.find(query).sort({ value: -1 }).skip(skip).limit(limit).toArray()
+      if (filters.ownerType) {
+        query.ownerType = { $regex: filters.ownerType, $options: "i" }
+      }
+
+      if (filters.location) {
+        query.$or = [
+          { address: { $regex: filters.location, $options: "i" } },
+          { city: { $regex: filters.location, $options: "i" } },
+          { state: { $regex: filters.location, $options: "i" } },
+        ]
+      }
+
+      // Bedrooms filter
+      if (filters.bedrooms && filters.bedrooms > 0) {
+        query.bedrooms = { $gte: filters.bedrooms }
+      }
+
+      // Bathrooms filter
+      if (filters.bathrooms && filters.bathrooms > 0) {
+        query.bathrooms = { $gte: filters.bathrooms }
+      }
+
+      // Square footage filter
+      if (filters.minSqft || filters.maxSqft) {
+        query.sqft = {}
+        if (filters.minSqft && filters.minSqft > 0) query.sqft.$gte = filters.minSqft
+        if (filters.maxSqft && filters.maxSqft > 0) query.sqft.$lte = filters.maxSqft
+      }
+
+      // Wealth range filter
+      if (filters.wealthRange && filters.wealthRange !== "all") {
+        const wealthRanges: Record<string, [number, number]> = {
+          "1m-5m": [1000000, 5000000],
+          "5m-10m": [5000000, 10000000],
+          "10m-25m": [10000000, 25000000],
+          "25m-50m": [25000000, 50000000],
+          "50m+": [50000000, 999999999],
+        }
+
+        const range = wealthRanges[filters.wealthRange]
+        if (range) {
+          query.ownerWealth = { $gte: range[0], $lte: range[1] }
+        }
+      }
+
+      console.log("🔍 MongoDB Query:", JSON.stringify(query, null, 2))
+
+      const results = await collection.find(query).sort({ value: -1 }).skip(skip).limit(limit).toArray()
+
+      console.log("✅ MongoDB returned:", results.length, "properties")
+      return results
+    } catch (error) {
+      console.error("❌ Property search error:", error)
+      throw new Error(`Database search failed: ${error instanceof Error ? error.message : "Unknown error"}`)
+    }
   }
 
   async getPropertiesByOwner(ownerName: string): Promise<Property[]> {

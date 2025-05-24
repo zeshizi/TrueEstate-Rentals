@@ -1,16 +1,14 @@
-import { Header } from "@/components/header"
-import { HeroSection } from "@/components/hero-section"
+import { ProfessionalHeader } from "@/components/professional-header"
+import { EnhancedHeroSection } from "@/components/enhanced-hero-section"
 import { FeaturedProperties } from "@/components/featured-properties"
 import { Footer } from "@/components/footer"
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <main className="relative">
-        <HeroSection />
-        <FeaturedProperties />
-      </main>
+    <div className="min-h-screen">
+      <ProfessionalHeader />
+      <EnhancedHeroSection />
+      <FeaturedProperties />
       <Footer />
     </div>
   )
