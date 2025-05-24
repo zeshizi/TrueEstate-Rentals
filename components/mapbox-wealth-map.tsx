@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { MapPin, Layers, Navigation, Eye, Crown, Star } from "lucide-react"
+import { MapPin, Layers, Navigation, Eye, Crown, Star, ChevronDown, ChevronUp, Settings } from "lucide-react"
 
 interface Property {
   id: string
@@ -1150,6 +1150,8 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
   const [mapboxConfig, setMapboxConfig] = useState<any>(null)
   const [configError, setConfigError] = useState<string | null>(null)
   const [showSamples, setShowSamples] = useState(true)
+  const [showControls, setShowControls] = useState(true)
+  const [showLegend, setShowLegend] = useState(true)
 
   // Combine all state properties with user properties
   const allProperties = showSamples ? [...ALL_STATE_PROPERTIES, ...properties] : properties
@@ -1541,8 +1543,7 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
           ["==", ["get", "propertyType"], "townhouse"],
           "#06b6d4",
           ["==", ["get", "propertyType"], "multi-family"],
-          "#10b981",
-          "#6b7280", // Default
+          "#10b981", // Default
         ]
       default:
         return "#3b82f6"
@@ -1730,165 +1731,207 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
 
       {/* Map Controls */}
       <div className="absolute top-4 left-4 z-10 space-y-3">
-        {/* Featured Properties Toggle */}
-        <Card className="p-3">
-          <div className="space-y-2">
+        {/* Controls Toggle Button */}
+        <Card className="p-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowControls(!showControls)}
+            className="w-full flex items-center justify-between"
+          >
             <div className="flex items-center gap-2">
-              <Star className="h-4 w-4 text-yellow-500" />
-              <span className="text-sm font-medium">All States Coverage</span>
+              <Settings className="h-4 w-4" />
+              <span className="text-sm font-medium">Map Controls</span>
             </div>
-            <div className="flex gap-2">
-              <Button
-                variant={showSamples ? "default" : "outline"}
-                size="sm"
-                onClick={() => setShowSamples(!showSamples)}
-              >
-                {showSamples ? "Hide" : "Show"} Properties
-              </Button>
-              <Button variant="outline" size="sm" onClick={showFeaturedProperties}>
-                <Crown className="h-3 w-3 mr-1" />
-                Featured
-              </Button>
-            </div>
-          </div>
+            {showControls ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </Button>
         </Card>
 
-        {/* View Mode Selector */}
-        <Card className="p-3">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Eye className="h-4 w-4" />
-              <span className="text-sm font-medium">View Mode</span>
-            </div>
-            <Select value={viewMode} onValueChange={(value: any) => setViewMode(value)}>
-              <SelectTrigger className="w-40">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="wealth">Owner Wealth</SelectItem>
-                <SelectItem value="confidence">Confidence Level</SelectItem>
-                <SelectItem value="property-type">Property Type</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </Card>
+        {/* Collapsible Controls */}
+        {showControls && (
+          <>
+            {/* All States Coverage Toggle */}
+            <Card className="p-3">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Star className="h-4 w-4 text-yellow-500" />
+                  <span className="text-sm font-medium">All States Coverage</span>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant={showSamples ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setShowSamples(!showSamples)}
+                  >
+                    {showSamples ? "Hide" : "Show"} Properties
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={showFeaturedProperties}>
+                    <Crown className="h-3 w-3 mr-1" />
+                    Featured
+                  </Button>
+                </div>
+              </div>
+            </Card>
 
-        {/* Style Selector */}
-        <Card className="p-3">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Layers className="h-4 w-4" />
-              <span className="text-sm font-medium">Map Style</span>
-            </div>
-            <div className="grid grid-cols-2 gap-1">
-              <Button
-                variant={mapStyle === "streets-v12" ? "default" : "outline"}
-                size="sm"
-                onClick={() => changeMapStyle("streets-v12")}
-              >
-                Streets
-              </Button>
-              <Button
-                variant={mapStyle === "satellite-v9" ? "default" : "outline"}
-                size="sm"
-                onClick={() => changeMapStyle("satellite-v9")}
-              >
-                Satellite
-              </Button>
-              <Button
-                variant={mapStyle === "light-v11" ? "default" : "outline"}
-                size="sm"
-                onClick={() => changeMapStyle("light-v11")}
-              >
-                Light
-              </Button>
-              <Button
-                variant={mapStyle === "dark-v11" ? "default" : "outline"}
-                size="sm"
-                onClick={() => changeMapStyle("dark-v11")}
-              >
-                Dark
-              </Button>
-            </div>
-          </div>
-        </Card>
+            {/* View Mode Selector */}
+            <Card className="p-3">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Eye className="h-4 w-4" />
+                  <span className="text-sm font-medium">View Mode</span>
+                </div>
+                <Select value={viewMode} onValueChange={(value: any) => setViewMode(value)}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="wealth">Owner Wealth</SelectItem>
+                    <SelectItem value="confidence">Confidence Level</SelectItem>
+                    <SelectItem value="property-type">Property Type</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </Card>
+
+            {/* Style Selector */}
+            <Card className="p-3">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Layers className="h-4 w-4" />
+                  <span className="text-sm font-medium">Map Style</span>
+                </div>
+                <div className="grid grid-cols-2 gap-1">
+                  <Button
+                    variant={mapStyle === "streets-v12" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => changeMapStyle("streets-v12")}
+                  >
+                    Streets
+                  </Button>
+                  <Button
+                    variant={mapStyle === "satellite-v9" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => changeMapStyle("satellite-v9")}
+                  >
+                    Satellite
+                  </Button>
+                  <Button
+                    variant={mapStyle === "light-v11" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => changeMapStyle("light-v11")}
+                  >
+                    Light
+                  </Button>
+                  <Button
+                    variant={mapStyle === "dark-v11" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => changeMapStyle("dark-v11")}
+                  >
+                    Dark
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </>
+        )}
       </div>
 
       {/* Legend */}
-      <Card className="absolute bottom-4 left-4 z-10 p-4">
-        <h3 className="font-semibold mb-3 text-sm">
-          {viewMode === "wealth" && "Owner Wealth"}
-          {viewMode === "confidence" && "Confidence Level"}
-          {viewMode === "property-type" && "Property Type"}
-        </h3>
-        <div className="space-y-2 text-xs">
-          {showSamples && (
-            <div className="mb-3 pb-2 border-b border-gray-200">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-3 h-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full"></div>
-                <span className="font-medium">Featured Properties</span>
-              </div>
-              <div className="text-xs text-gray-600">All 50 states + DC coverage</div>
+      <div className="absolute bottom-4 left-4 z-10 space-y-2">
+        {/* Legend Toggle Button */}
+        <Card className="p-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowLegend(!showLegend)}
+            className="w-full flex items-center justify-between"
+          >
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-gradient-to-r from-green-500 to-red-500 rounded-full"></div>
+              <span className="text-sm font-medium">Legend</span>
             </div>
-          )}
-          {viewMode === "wealth" && (
-            <>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span>$1M - $5M</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                <span>$5M - $10M</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                <span>$10M - $25M</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                <span>$25M+</span>
-              </div>
-            </>
-          )}
-          {viewMode === "confidence" && (
-            <>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span>High Confidence</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                <span>Medium Confidence</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                <span>Low Confidence</span>
-              </div>
-            </>
-          )}
-          {viewMode === "property-type" && (
-            <>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                <span>Single Family</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                <span>Condo</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-cyan-500 rounded-full"></div>
-                <span>Townhouse</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
-                <span>Multi-Family</span>
-              </div>
-            </>
-          )}
-        </div>
-      </Card>
+            {showLegend ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </Button>
+        </Card>
+
+        {/* Collapsible Legend */}
+        {showLegend && (
+          <Card className="p-4">
+            <h3 className="font-semibold mb-3 text-sm">
+              {viewMode === "wealth" && "Owner Wealth"}
+              {viewMode === "confidence" && "Confidence Level"}
+              {viewMode === "property-type" && "Property Type"}
+            </h3>
+            <div className="space-y-2 text-xs">
+              {showSamples && (
+                <div className="mb-3 pb-2 border-b border-gray-200">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-3 h-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full"></div>
+                    <span className="font-medium">Featured Properties</span>
+                  </div>
+                  <div className="text-xs text-gray-600">All 50 states + DC coverage</div>
+                </div>
+              )}
+              {viewMode === "wealth" && (
+                <>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span>$1M - $5M</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                    <span>$5M - $10M</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                    <span>$10M - $25M</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                    <span>$25M+</span>
+                  </div>
+                </>
+              )}
+              {viewMode === "confidence" && (
+                <>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span>High Confidence</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                    <span>Medium Confidence</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                    <span>Low Confidence</span>
+                  </div>
+                </>
+              )}
+              {viewMode === "property-type" && (
+                <>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <span>Single Family</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                    <span>Condo</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-cyan-500 rounded-full"></div>
+                    <span>Townhouse</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
+                    <span>Multi-Family</span>
+                  </div>
+                </>
+              )}
+            </div>
+          </Card>
+        )}
+      </div>
 
       {/* Property Count & Controls */}
       <Card className="absolute top-4 right-4 z-10 p-3">
