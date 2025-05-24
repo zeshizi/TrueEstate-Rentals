@@ -1,6 +1,109 @@
 import { NextResponse, type NextRequest } from "next/server"
-import { PropertyService } from "@/lib/services/property-service"
-import { CacheService } from "@/lib/redis/cache-service"
+
+// Use the same sample data from properties API
+const sampleProperties = [
+  // Sample data for search (subset for faster response)
+  {
+    id: "search_ny_1",
+    type: "property",
+    title: "123 Park Avenue Penthouse",
+    subtitle: "New York, NY • Luxury Penthouse",
+    address: "123 Park Avenue",
+    city: "New York",
+    state: "NY",
+    zipCode: "10016",
+    value: 28500000,
+    ownerName: "Wall Street Titan",
+    ownerWealth: 1200000000,
+    propertyType: "penthouse",
+    coordinates: { lat: 40.7505, lng: -73.9934 },
+    bedrooms: 6,
+    bathrooms: 8,
+    sqft: 10000,
+    images: ["/placeholder.svg?height=300&width=400&text=Manhattan+Penthouse"],
+    features: ["Central Park Views", "Rooftop Deck", "Wine Cellar", "Concierge"],
+  },
+  {
+    id: "search_ca_1",
+    type: "property",
+    title: "456 Beverly Hills Drive Mansion",
+    subtitle: "Beverly Hills, CA • Luxury Mansion",
+    address: "456 Beverly Hills Drive",
+    city: "Beverly Hills",
+    state: "CA",
+    zipCode: "90210",
+    value: 25000000,
+    ownerName: "Entertainment Mogul Inc",
+    ownerWealth: 450000000,
+    propertyType: "mansion",
+    coordinates: { lat: 34.0736, lng: -118.4004 },
+    bedrooms: 12,
+    bathrooms: 15,
+    sqft: 25000,
+    images: ["/placeholder.svg?height=300&width=400&text=Beverly+Hills+Mansion"],
+    features: ["Pool", "Wine Cellar", "Home Theater", "Tennis Court"],
+  },
+  {
+    id: "search_fl_1",
+    type: "property",
+    title: "567 Miami Beach Ocean Drive",
+    subtitle: "Miami Beach, FL • Oceanfront Penthouse",
+    address: "567 Miami Beach Ocean Drive",
+    city: "Miami Beach",
+    state: "FL",
+    zipCode: "33139",
+    value: 9800000,
+    ownerName: "International Real Estate Mogul",
+    ownerWealth: 340000000,
+    propertyType: "penthouse",
+    coordinates: { lat: 25.7907, lng: -80.13 },
+    bedrooms: 5,
+    bathrooms: 6,
+    sqft: 8500,
+    images: ["/placeholder.svg?height=300&width=400&text=Miami+Beach+Penthouse"],
+    features: ["Ocean View", "Private Beach", "Rooftop Pool", "Concierge"],
+  },
+  {
+    id: "search_co_1",
+    type: "property",
+    title: "654 Aspen Mountain Road Lodge",
+    subtitle: "Aspen, CO • Ski Lodge",
+    address: "654 Aspen Mountain Road",
+    city: "Aspen",
+    state: "CO",
+    zipCode: "81611",
+    value: 15200000,
+    ownerName: "Alpine Holdings Group",
+    ownerWealth: 280000000,
+    propertyType: "lodge",
+    coordinates: { lat: 39.1911, lng: -106.8175 },
+    bedrooms: 8,
+    bathrooms: 9,
+    sqft: 16000,
+    images: ["/placeholder.svg?height=300&width=400&text=Aspen+Ski+Lodge"],
+    features: ["Ski Access", "Hot Tub", "Fireplace", "Mountain Views"],
+  },
+  {
+    id: "search_tx_1",
+    type: "property",
+    title: "987 Dallas Oil Empire Estate",
+    subtitle: "Dallas, TX • Oil Executive Mansion",
+    address: "987 Dallas Oil Empire Estate",
+    city: "Dallas",
+    state: "TX",
+    zipCode: "75201",
+    value: 12500000,
+    ownerName: "Texas Oil Dynasty",
+    ownerWealth: 850000000,
+    propertyType: "mansion",
+    coordinates: { lat: 32.7767, lng: -96.797 },
+    bedrooms: 8,
+    bathrooms: 10,
+    sqft: 16000,
+    images: ["/placeholder.svg?height=300&width=400&text=Texas+Oil+Mansion"],
+    features: ["Pool", "Tennis Court", "Wine Cellar", "Guest House"],
+  },
+]
 
 export async function GET(request: NextRequest) {
   try {
@@ -23,117 +126,44 @@ export async function GET(request: NextRequest) {
       ownerType,
     })
 
-    // Create cache key from search parameters
-    const cacheKey = `search:${JSON.stringify({
-      query,
-      type,
-      minValue,
-      maxValue,
-      location,
-      propertyType,
-      ownerType,
-    })}`
-
-    // Check cache first (with error handling)
-    let cachedResults = null
-    try {
-      cachedResults = await CacheService.getCachedSearchResults(cacheKey)
-      if (cachedResults) {
-        console.log("⚡ Returning cached search results:", {
-          count: cachedResults.length,
-          query,
-        })
-        return NextResponse.json({
-          results: cachedResults,
-          total: cachedResults.length,
-          cached: true,
-          timestamp: new Date().toISOString(),
-        })
-      }
-    } catch (cacheError) {
-      console.warn("⚠️ Cache error (continuing without cache):", cacheError)
-    }
-
-    // Initialize PropertyService with error handling
-    let propertyService: PropertyService
-    try {
-      propertyService = new PropertyService()
-    } catch (serviceError) {
-      console.error("❌ PropertyService initialization error:", serviceError)
-      // Return mock data if service fails
-      return NextResponse.json({
-        results: getMockSearchResults(query),
-        total: getMockSearchResults(query).length,
-        cached: false,
-        mock: true,
-        timestamp: new Date().toISOString(),
-      })
-    }
-
-    // Build search filters
-    const filters: any = {}
-    if (minValue !== undefined) filters.minValue = minValue
-    if (maxValue !== undefined) filters.maxValue = maxValue
-    if (location) filters.location = location
-    if (propertyType && propertyType !== "all") filters.propertyType = propertyType
-    if (ownerType && ownerType !== "all") filters.ownerType = ownerType
-
-    console.log("🔧 Built filters:", filters)
-
-    let results: any[] = []
-
-    try {
+    // Filter sample properties based on search criteria
+    const results = sampleProperties.filter((property) => {
+      // Query filter
       if (query) {
-        // Search by query (could be owner name, address, etc.)
-        if (
-          query.toLowerCase().includes("llc") ||
-          query.toLowerCase().includes("corp") ||
-          query.toLowerCase().includes("trust")
-        ) {
-          // Likely searching for owner
-          const ownerProperties = await propertyService.getPropertiesByOwner(query)
-          results = ownerProperties.map((prop) => ({
-            type: "property",
-            title: prop.address,
-            subtitle: `${prop.city}, ${prop.state} • Owner: ${prop.ownerName}`,
-            value: prop.value,
-            ownerWealth: prop.ownerWealth,
-            ...prop,
-          }))
-        } else {
-          // General search
-          const searchFilters = { ...filters, location: query }
-          const properties = await propertyService.searchProperties(searchFilters, 50)
-          results = properties.map((prop) => ({
-            type: "property",
-            title: prop.address,
-            subtitle: `${prop.city}, ${prop.state} • ${prop.propertyType}`,
-            value: prop.value,
-            ownerWealth: prop.ownerWealth,
-            ...prop,
-          }))
-        }
-      } else {
-        // Filter-only search
-        const properties = await propertyService.searchProperties(filters, 50)
-        results = properties.map((prop) => ({
-          type: "property",
-          title: prop.address,
-          subtitle: `${prop.city}, ${prop.state} • ${prop.propertyType}`,
-          value: prop.value,
-          ownerWealth: prop.ownerWealth,
-          ...prop,
-        }))
+        const queryLower = query.toLowerCase()
+        const titleMatch = property.title.toLowerCase().includes(queryLower)
+        const cityMatch = property.city.toLowerCase().includes(queryLower)
+        const stateMatch = property.state.toLowerCase().includes(queryLower)
+        const ownerMatch = property.ownerName.toLowerCase().includes(queryLower)
+        if (!titleMatch && !cityMatch && !stateMatch && !ownerMatch) return false
       }
-    } catch (searchError) {
-      console.error("❌ Search operation error:", searchError)
-      // Return mock results if search fails
-      results = getMockSearchResults(query)
-    }
+
+      // Value range filter
+      if (minValue && property.value < minValue) return false
+      if (maxValue && property.value > maxValue) return false
+
+      // Property type filter
+      if (propertyType && propertyType !== "all") {
+        if (!property.propertyType.toLowerCase().includes(propertyType.toLowerCase())) return false
+      }
+
+      // Location filter
+      if (location) {
+        const locationLower = location.toLowerCase()
+        const cityMatch = property.city.toLowerCase().includes(locationLower)
+        const stateMatch = property.state.toLowerCase().includes(locationLower)
+        if (!cityMatch && !stateMatch) return false
+      }
+
+      return true
+    })
+
+    // Sort by value (highest first)
+    results.sort((a, b) => b.value - a.value)
 
     console.log("📊 Search completed:", {
       query,
-      filtersUsed: Object.keys(filters).length,
+      filtersUsed: [minValue, maxValue, propertyType, location].filter(Boolean).length,
       resultsFound: results.length,
       sampleResult: results[0]
         ? {
@@ -143,20 +173,14 @@ export async function GET(request: NextRequest) {
         : null,
     })
 
-    // Cache the results before returning (skip cache errors)
-    try {
-      await CacheService.cacheSearchResults(cacheKey, results, 300) // 5 minutes
-    } catch (cacheError) {
-      console.warn("⚠️ Failed to cache results:", cacheError)
-    }
-
     return NextResponse.json({
       results: results,
       total: results.length,
       cached: false,
       query,
-      filters,
+      filters: { minValue, maxValue, propertyType, location },
       timestamp: new Date().toISOString(),
+      dataSource: "sample",
     })
   } catch (error) {
     console.error("❌ Search API error:", {
@@ -164,79 +188,15 @@ export async function GET(request: NextRequest) {
       stack: error instanceof Error ? error.stack : undefined,
     })
 
-    // Return mock data instead of error
-    const query = new URL(request.url).searchParams.get("q") || ""
-    const mockResults = getMockSearchResults(query)
-
+    // Return sample data instead of error
     return NextResponse.json({
-      results: mockResults,
-      total: mockResults.length,
+      results: sampleProperties.slice(0, 3),
+      total: 3,
       cached: false,
       mock: true,
       error: "Search service unavailable, showing sample data",
       timestamp: new Date().toISOString(),
+      dataSource: "sample",
     })
   }
-}
-
-// Mock search results for fallback
-function getMockSearchResults(query: string) {
-  const mockProperties = [
-    {
-      id: "mock-1",
-      type: "property",
-      title: "123 Park Avenue",
-      subtitle: "New York, NY • Luxury Penthouse",
-      address: "123 Park Avenue",
-      city: "New York",
-      state: "NY",
-      value: 15000000,
-      ownerName: "Manhattan Holdings LLC",
-      ownerWealth: 250000000,
-      propertyType: "Penthouse",
-      coordinates: [-73.9712, 40.7831],
-    },
-    {
-      id: "mock-2",
-      type: "property",
-      title: "456 Beverly Hills Drive",
-      subtitle: "Beverly Hills, CA • Mansion",
-      address: "456 Beverly Hills Drive",
-      city: "Beverly Hills",
-      state: "CA",
-      value: 28500000,
-      ownerName: "Pacific Estates Trust",
-      ownerWealth: 500000000,
-      propertyType: "Mansion",
-      coordinates: [-118.4065, 34.0901],
-    },
-    {
-      id: "mock-3",
-      type: "property",
-      title: "789 Ocean Drive",
-      subtitle: "Miami Beach, FL • Waterfront Estate",
-      address: "789 Ocean Drive",
-      city: "Miami Beach",
-      state: "FL",
-      value: 12000000,
-      ownerName: "Coastal Properties Inc",
-      ownerWealth: 180000000,
-      propertyType: "Estate",
-      coordinates: [-80.13, 25.7907],
-    },
-  ]
-
-  // Filter based on query
-  if (query) {
-    const lowerQuery = query.toLowerCase()
-    return mockProperties.filter(
-      (prop) =>
-        prop.city.toLowerCase().includes(lowerQuery) ||
-        prop.state.toLowerCase().includes(lowerQuery) ||
-        prop.address.toLowerCase().includes(lowerQuery) ||
-        prop.ownerName.toLowerCase().includes(lowerQuery),
-    )
-  }
-
-  return mockProperties
 }
