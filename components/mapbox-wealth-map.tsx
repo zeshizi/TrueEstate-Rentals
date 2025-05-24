@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { MapPin, Layers, Navigation, Eye, Crown, Star, ChevronDown, ChevronUp, Settings } from "lucide-react"
+import { MapPin, Layers, Eye, Crown, Star, ChevronDown, ChevronUp, Settings } from "lucide-react"
 
 interface Property {
   id: string
@@ -1932,25 +1932,6 @@ export function MapboxWealthMap({ properties, onPropertySelect, filters }: Mapbo
           </Card>
         )}
       </div>
-
-      {/* Property Count & Controls */}
-      <Card className="absolute top-4 right-4 z-10 p-3">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-blue-600" />
-            <span className="text-sm font-medium">{allProperties.length} Properties</span>
-          </div>
-          <Button variant="outline" size="sm" onClick={fitToProperties}>
-            <Navigation className="h-4 w-4 mr-1" />
-            Fit All
-          </Button>
-        </div>
-        {showSamples && (
-          <div className="mt-2 text-xs text-gray-600">
-            Coverage: All 50 states + DC ({allProperties.filter((p) => p.featured).length} featured)
-          </div>
-        )}
-      </Card>
 
       {/* Loading Overlay */}
       {!mapLoaded && mapboxConfig && (

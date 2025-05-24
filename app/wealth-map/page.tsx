@@ -87,7 +87,6 @@ export default function WealthMapPage() {
             <div className="flex items-center justify-between">
               <div className="bg-white rounded-lg shadow-lg p-2">
                 <h1 className="text-sm font-semibold text-gray-900">US Wealth Map</h1>
-                <p className="text-xs text-gray-600">{properties.length} properties</p>
               </div>
 
               {/* Mobile Filter Button */}
