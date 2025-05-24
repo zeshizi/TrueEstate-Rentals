@@ -2,190 +2,238 @@
 
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { MapPin, Bed, Bath, Square, DollarSign, Heart, TrendingUp } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { MapPin, Search, Bed, Bath, Square, DollarSign, Heart, TrendingUp, Shield } from "lucide-react"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 
-const properties = [
+const topCities = [
+  "Beverly Hills",
+  "Manhattan",
+  "Malibu",
+  "Aspen",
+  "Miami Beach",
+  "Napa Valley",
+  "The Hamptons",
+  "Scottsdale",
+]
+
+const featuredProperties = [
   {
     id: 1,
-    name: "Luxury Estate in Beverly Hills",
+    title: "Beverly Hills Estate",
+    location: "Beverly Hills, CA",
     price: 12500000,
     beds: 6,
     baths: 8,
     sqft: 8500,
-    location: "Beverly Hills, CA",
-    image: "https://source.unsplash.com/random/800x600?luxury,house",
-    investmentPotential: "High",
-    ownerWealth: "Extremely High",
+    image: "/placeholder.svg?height=200&width=300&text=Beverly+Hills+Estate",
+    investmentGrade: "A+",
+    ownerWealth: "Ultra High",
   },
   {
     id: 2,
-    name: "Waterfront Property in Miami",
-    price: 8900000,
-    beds: 5,
-    baths: 6,
-    sqft: 6200,
-    location: "Miami, FL",
-    image: "https://source.unsplash.com/random/800x600?waterfront,house",
-    investmentPotential: "Very High",
-    ownerWealth: "Very High",
+    title: "Manhattan Penthouse",
+    location: "New York, NY",
+    price: 22000000,
+    beds: 4,
+    baths: 5,
+    sqft: 4800,
+    image: "/placeholder.svg?height=200&width=300&text=Manhattan+Penthouse",
+    investmentGrade: "A+",
+    ownerWealth: "Extremely High",
   },
   {
     id: 3,
-    name: "Modern Home in Aspen",
-    price: 15000000,
-    beds: 4,
-    baths: 5,
-    sqft: 7000,
-    location: "Aspen, CO",
-    image: "https://source.unsplash.com/random/800x600?modern,house",
-    investmentPotential: "High",
-    ownerWealth: "Extremely High",
-  },
-  {
-    id: 4,
-    name: "Penthouse in New York City",
-    price: 22000000,
-    beds: 3,
-    baths: 4,
-    sqft: 4800,
-    location: "New York, NY",
-    image: "https://source.unsplash.com/random/800x600?penthouse,city",
-    investmentPotential: "Very High",
-    ownerWealth: "Extremely High",
-  },
-  {
-    id: 5,
-    name: "Vineyard Estate in Napa Valley",
-    price: 9750000,
-    beds: 7,
-    baths: 9,
-    sqft: 9200,
-    location: "Napa Valley, CA",
-    image: "https://source.unsplash.com/random/800x600?vineyard,house",
-    investmentPotential: "High",
-    ownerWealth: "Very High",
-  },
-  {
-    id: 6,
-    name: "Ocean View Villa in Malibu",
-    price: 25000000,
+    title: "Malibu Ocean Villa",
+    location: "Malibu, CA",
+    price: 18750000,
     beds: 5,
     baths: 7,
-    sqft: 7800,
-    location: "Malibu, CA",
-    image: "https://source.unsplash.com/random/800x600?ocean,villa",
-    investmentPotential: "Extremely High",
-    ownerWealth: "Extremely High",
+    sqft: 6200,
+    image: "/placeholder.svg?height=200&width=300&text=Malibu+Ocean+Villa",
+    investmentGrade: "A",
+    ownerWealth: "Very High",
   },
 ]
 
 export default function BuyPage() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [filterPrice, setFilterPrice] = useState("")
-  const [filterLocation, setFilterLocation] = useState("")
+  const [searchQuery, setSearchQuery] = useState("")
+  const router = useRouter()
 
-  const filteredProperties = properties.filter((property) => {
-    const searchRegex = new RegExp(searchTerm, "i")
-    const locationRegex = new RegExp(filterLocation, "i")
-
-    return (
-      searchRegex.test(property.name) &&
-      locationRegex.test(property.location) &&
-      (filterPrice === "" || property.price <= Number.parseInt(filterPrice))
-    )
-  })
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery)}&type=buy`)
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
       <Header />
-      <main className="container mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Buy Properties</h1>
-          <p className="text-xl text-gray-600">Find your perfect investment property</p>
-        </div>
 
-        {/* Advanced Search and Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Input
-            type="text"
-            placeholder="Search by property name"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <Input
-            type="number"
-            placeholder="Max Price"
-            value={filterPrice}
-            onChange={(e) => setFilterPrice(e.target.value)}
-          />
-          <Input
-            type="text"
-            placeholder="Location"
-            value={filterLocation}
-            onChange={(e) => setFilterLocation(e.target.value)}
-          />
-        </div>
+      {/* Hero Section */}
+      <div className="container mx-auto px-4 py-16">
+        <div className="text-center max-w-4xl mx-auto">
+          {/* Trust Badge */}
+          <div className="mb-6">
+            <Badge className="bg-emerald-100 text-emerald-800 px-4 py-2 text-sm font-medium">
+              Trusted by luxury investors worldwide
+            </Badge>
+          </div>
 
-        {/* Property Listings */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProperties.map((property) => (
-            <Card key={property.id}>
-              <img
-                src={property.image || "/placeholder.svg"}
-                alt={property.name}
-                className="w-full h-48 object-cover rounded-md"
-              />
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold">{property.name}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-gray-600 flex items-center gap-1">
-                    <MapPin className="h-4 w-4" />
-                    {property.location}
-                  </span>
-                  <Badge variant="secondary">
-                    <TrendingUp className="h-4 w-4 mr-1" />
-                    {property.investmentPotential}
+          {/* Main Headlines */}
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-4">Discover luxury properties</h1>
+          <h2 className="text-2xl sm:text-3xl text-gray-700 mb-4">Estates & Investment Opportunities</h2>
+          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+            Find premium properties with verified owner wealth analysis
+          </p>
+
+          {/* Search Bar */}
+          <Card className="bg-white shadow-lg border-0 max-w-2xl mx-auto mb-8">
+            <CardContent className="p-6">
+              <div className="relative">
+                <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Input
+                  placeholder="Search Luxury Properties..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                  className="pl-12 h-14 text-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-lg"
+                />
+                <Button
+                  onClick={handleSearch}
+                  className="absolute right-2 top-2 h-10 px-6 bg-emerald-600 hover:bg-emerald-700"
+                >
+                  <Search className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Top Cities */}
+          <div className="mb-12">
+            <p className="text-sm text-gray-600 mb-4">
+              <span className="font-medium">Premium Locations:</span>
+            </p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {topCities.map((city) => (
+                <Button
+                  key={city}
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full bg-white hover:bg-emerald-50 border-gray-300"
+                  onClick={() => {
+                    setSearchQuery(city)
+                    handleSearch()
+                  }}
+                >
+                  {city}
+                </Button>
+              ))}
+              <Button variant="outline" size="sm" className="rounded-full bg-white hover:bg-emerald-50 border-gray-300">
+                More →
+              </Button>
+            </div>
+          </div>
+
+          {/* Illustration */}
+          <div className="relative mb-12">
+            <div
+              className="w-full h-64 bg-cover bg-center bg-no-repeat rounded-lg"
+              style={{
+                backgroundImage: `url('/placeholder.svg?height=256&width=600&text=Luxury+Real+Estate+Investment+Illustration')`,
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Featured Properties Section */}
+      <div className="bg-white py-16">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h3 className="text-3xl font-bold text-gray-900 mb-4">Featured Investment Properties</h3>
+            <p className="text-gray-600">Curated luxury estates with comprehensive wealth analysis</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {featuredProperties.map((property) => (
+              <Card key={property.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                <div className="relative">
+                  <img
+                    src={property.image || "/placeholder.svg"}
+                    alt={property.title}
+                    className="w-full h-48 object-cover"
+                  />
+                  <Button variant="ghost" size="icon" className="absolute top-2 right-2 bg-white/80 hover:bg-white">
+                    <Heart className="h-4 w-4" />
+                  </Button>
+                  <Badge className="absolute top-2 left-2 bg-emerald-500 text-white">
+                    <Shield className="h-3 w-3 mr-1" />
+                    Verified
                   </Badge>
                 </div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl font-bold flex items-center gap-1">
-                    <DollarSign className="h-5 w-5" />
-                    {property.price.toLocaleString()}
-                  </span>
-                </div>
-                <div className="grid grid-cols-2 gap-2 mb-4">
-                  <div className="flex items-center gap-1 text-gray-600">
-                    <Bed className="h-4 w-4" />
-                    {property.beds} Beds
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-lg">{property.title}</h4>
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                      <TrendingUp className="h-3 w-3 mr-1" />
+                      {property.investmentGrade}
+                    </Badge>
                   </div>
-                  <div className="flex items-center gap-1 text-gray-600">
-                    <Bath className="h-4 w-4" />
-                    {property.baths} Baths
+
+                  <div className="flex items-center gap-2 mb-3">
+                    <MapPin className="h-4 w-4 text-gray-500" />
+                    <span className="text-gray-600">{property.location}</span>
                   </div>
-                  <div className="flex items-center gap-1 text-gray-600 col-span-2">
-                    <Square className="h-4 w-4" />
-                    {property.sqft} Sqft
+
+                  <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
+                    <div className="flex items-center gap-1">
+                      <Bed className="h-4 w-4" />
+                      <span>{property.beds}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Bath className="h-4 w-4" />
+                      <span>{property.baths}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Square className="h-4 w-4" />
+                      <span>{property.sqft.toLocaleString()} sqft</span>
+                    </div>
                   </div>
-                </div>
-                <div className="flex justify-between">
-                  <Button>
-                    <Heart className="h-4 w-4 mr-2" />
-                    Save
-                  </Button>
-                  <Button variant="outline">View Details</Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+
+                  <div className="mb-4">
+                    <div className="text-xs text-gray-500 mb-1">Owner Wealth Level</div>
+                    <Badge variant="outline" className="text-xs">
+                      {property.ownerWealth}
+                    </Badge>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <DollarSign className="h-5 w-5 text-gray-500" />
+                      <span className="text-xl font-bold">${(property.price / 1000000).toFixed(1)}M</span>
+                    </div>
+                    <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700">
+                      View Analysis
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700">
+              Explore All Properties
+            </Button>
+          </div>
         </div>
-      </main>
+      </div>
+
       <Footer />
     </div>
   )
