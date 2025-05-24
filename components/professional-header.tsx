@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
-const ProfessionalHeader = () => {
+export function ProfessionalHeader() {
   return (
     <header className="bg-white shadow-md">
       <div className="container mx-auto py-4 px-6 flex items-center justify-between">
@@ -24,5 +24,3 @@ const ProfessionalHeader = () => {
     </header>
   )
 }
-
-export default ProfessionalHeader

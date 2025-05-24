@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
-const EnhancedHeroSection = () => {
+export function EnhancedHeroSection() {
   return (
     <section className="bg-gray-100 py-20">
       <div className="container mx-auto text-center">
@@ -16,5 +16,3 @@ const EnhancedHeroSection = () => {
     </section>
   )
 }
-
-export default EnhancedHeroSection
