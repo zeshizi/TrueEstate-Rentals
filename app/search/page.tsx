@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { Header } from "@/components/header"
@@ -35,20 +37,24 @@ export default function SearchPage() {
       })
 
       console.log("🔍 Searching with params:", {
-        query,
-        filters,
-        url: `/api/search?${params.toString()}`,
+        query: query,
+        type: filters.type,
+        minValue: filters.minValue,
+        maxValue: filters.maxValue,
+        location: filters.location,
+        fullURL: `/api/search?${params.toString()}`,
       })
 
       const response = await fetch(`/api/search?${params}`)
       const data = await response.json()
 
       console.log("📊 Search results:", {
-        resultsCount: data.results?.length || 0,
-        results: data.results,
         query: data.query,
-        filters: data.filters,
+        totalResults: data.results?.length || 0,
+        results: data.results,
+        suggestions: data.suggestions,
       })
+
       setResults(data.results || [])
     } catch (error) {
       console.error("❌ Search error:", error)
@@ -60,6 +66,11 @@ export default function SearchPage() {
   // Auto-search when page loads with parameters
   useEffect(() => {
     if (query || filters.propertyType || filters.budget) {
+      console.log("🚀 Auto-searching on page load with:", {
+        query,
+        propertyType: filters.propertyType,
+        budget: filters.budget,
+      })
       handleSearch()
     }
   }, [])
@@ -67,10 +78,20 @@ export default function SearchPage() {
   // Debounced search when query changes
   useEffect(() => {
     if (query) {
-      const debounceTimer = setTimeout(handleSearch, 300)
+      const debounceTimer = setTimeout(() => {
+        console.log("⏱️ Debounced search triggered for:", query)
+        handleSearch()
+      }, 300)
       return () => clearTimeout(debounceTimer)
     }
   }, [query, filters])
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      console.log("⌨️ Enter key pressed, searching for:", query)
+      handleSearch()
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -98,6 +119,7 @@ export default function SearchPage() {
                 placeholder="Search by address, owner name, or location..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
+                onKeyPress={handleKeyPress}
                 className="pl-10 text-lg h-12"
               />
             </div>
