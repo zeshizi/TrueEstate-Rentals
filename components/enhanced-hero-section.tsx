@@ -162,7 +162,7 @@ export function EnhancedHeroSection() {
               <Link href="/wealth-map">
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg font-semibold shadow-lg border-0"
                 >
                   <Eye className="h-5 w-5 mr-2" />
                   View Wealth Map
@@ -170,9 +170,8 @@ export function EnhancedHeroSection() {
               </Link>
               <Link href="/properties">
                 <Button
-                  variant="outline"
                   size="lg"
-                  className="border-white/30 text-white hover:bg-white/10 px-8 py-4 text-lg"
+                  className="bg-white text-slate-900 hover:bg-gray-100 px-8 py-4 text-lg font-semibold shadow-lg border-0"
                 >
                   <Building className="h-5 w-5 mr-2" />
                   Browse Properties
