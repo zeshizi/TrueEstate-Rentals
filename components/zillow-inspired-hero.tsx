@@ -214,15 +214,17 @@ export function ZillowInspiredHero() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/auth/signin">
-              <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold">
+              <Button
+                size="lg"
+                className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold shadow-lg border-2 border-white"
+              >
                 Get Started Free
               </Button>
             </Link>
             <Link href="/wealth-map">
               <Button
                 size="lg"
-                variant="outline"
-                className="border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 text-lg font-semibold"
+                className="bg-blue-700 hover:bg-blue-800 text-white border-2 border-white px-8 py-4 text-lg font-semibold shadow-lg"
               >
                 <TrendingUp className="h-5 w-5 mr-2" />
                 Explore Wealth Map

@@ -99,7 +99,7 @@ export function HeroSection() {
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
               <Button
                 size="lg"
-                className="h-14 px-10 bg-white text-slate-900 hover:bg-slate-100 font-semibold text-lg rounded-xl shadow-lg"
+                className="h-14 px-10 bg-white text-slate-900 hover:bg-slate-100 font-semibold text-lg rounded-xl shadow-lg border-2 border-white"
                 onClick={() => router.push("/properties")}
               >
                 <TrendingUp className="mr-3 h-6 w-6" />
@@ -107,7 +107,7 @@ export function HeroSection() {
               </Button>
               <Button
                 size="lg"
-                className="h-14 px-10 bg-slate-800/80 border-2 border-white text-white hover:bg-white hover:text-slate-900 font-semibold text-lg rounded-xl transition-all duration-200 shadow-lg backdrop-blur-sm"
+                className="h-14 px-10 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-lg rounded-xl shadow-lg border-2 border-blue-600"
                 onClick={() => router.push("/wealth-map")}
               >
                 <MapPin className="mr-3 h-6 w-6" />

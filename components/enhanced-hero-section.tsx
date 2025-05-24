@@ -131,7 +131,7 @@ export function EnhancedHeroSection() {
               <Link href="/wealth-map">
                 <Button
                   size="lg"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg font-semibold shadow-lg"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg font-semibold shadow-lg border-2 border-blue-600"
                 >
                   <Eye className="h-5 w-5 mr-2" />
                   View Wealth Map
@@ -140,8 +140,7 @@ export function EnhancedHeroSection() {
               <Link href="/rent">
                 <Button
                   size="lg"
-                  variant="outline"
-                  className="bg-white/90 text-gray-900 hover:bg-white px-8 py-4 text-lg font-semibold shadow-lg border-white"
+                  className="bg-white text-gray-900 hover:bg-gray-100 px-8 py-4 text-lg font-semibold shadow-lg border-2 border-white"
                 >
                   <Building className="h-5 w-5 mr-2" />
                   Find Rentals
