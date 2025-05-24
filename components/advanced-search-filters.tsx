@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Slider } from "@/components/ui/slider"
 import { Badge } from "@/components/ui/badge"
 import { X, Filter, MapPin, DollarSign, Home, User, TrendingUp } from "lucide-react"
 
@@ -133,6 +132,15 @@ export function AdvancedSearchFilters({ onFiltersChange, onSearch }: AdvancedSea
     return `$${price.toLocaleString()}`
   }
 
+  const handlePriceRangeChange = (newRange: [number, number]) => {
+    console.log("💰 Advanced filter price range changed:", {
+      from: formatPrice(newRange[0]),
+      to: formatPrice(newRange[1]),
+      rawValues: newRange,
+    })
+    updateFilter("priceRange", newRange)
+  }
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -169,18 +177,45 @@ export function AdvancedSearchFilters({ onFiltersChange, onSearch }: AdvancedSea
               Price Range
             </Label>
             <div className="px-3 py-2">
-              <Slider
-                value={filters.priceRange}
-                onValueChange={(value) => {
-                  console.log("Price range changed:", value)
-                  updateFilter("priceRange", value)
-                }}
-                max={50000000}
-                min={0}
-                step={100000}
-                className="w-full"
-              />
-              <div className="flex justify-between text-sm text-gray-500 mt-1">
+              {/* Custom Dual Range Slider */}
+              <div className="relative mb-4">
+                <input
+                  type="range"
+                  min="0"
+                  max="50000000"
+                  step="100000"
+                  value={filters.priceRange[0]}
+                  onChange={(e) => {
+                    const newMin = Number(e.target.value)
+                    const newMax = Math.max(newMin, filters.priceRange[1])
+                    handlePriceRangeChange([newMin, newMax])
+                  }}
+                  className="absolute w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer range-slider"
+                />
+                <input
+                  type="range"
+                  min="0"
+                  max="50000000"
+                  step="100000"
+                  value={filters.priceRange[1]}
+                  onChange={(e) => {
+                    const newMax = Number(e.target.value)
+                    const newMin = Math.min(filters.priceRange[0], newMax)
+                    handlePriceRangeChange([newMin, newMax])
+                  }}
+                  className="absolute w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer range-slider"
+                />
+                <div className="relative h-2 bg-gray-200 rounded-lg">
+                  <div
+                    className="absolute h-2 bg-blue-600 rounded-lg"
+                    style={{
+                      left: `${(filters.priceRange[0] / 50000000) * 100}%`,
+                      width: `${((filters.priceRange[1] - filters.priceRange[0]) / 50000000) * 100}%`,
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between text-sm text-gray-500">
                 <span>{formatPrice(filters.priceRange[0])}</span>
                 <span>{formatPrice(filters.priceRange[1])}</span>
               </div>
@@ -237,14 +272,44 @@ export function AdvancedSearchFilters({ onFiltersChange, onSearch }: AdvancedSea
             <div>
               <Label className="text-base font-semibold mb-3 block">Square Footage</Label>
               <div className="px-3">
-                <Slider
-                  value={filters.sqftRange}
-                  onValueChange={(value) => updateFilter("sqftRange", value)}
-                  max={20000}
-                  step={100}
-                  className="w-full"
-                />
-                <div className="flex justify-between text-sm text-gray-500 mt-1">
+                <div className="relative mb-4">
+                  <input
+                    type="range"
+                    min="0"
+                    max="20000"
+                    step="100"
+                    value={filters.sqftRange[0]}
+                    onChange={(e) => {
+                      const newMin = Number(e.target.value)
+                      const newMax = Math.max(newMin, filters.sqftRange[1])
+                      updateFilter("sqftRange", [newMin, newMax])
+                    }}
+                    className="absolute w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer range-slider"
+                  />
+                  <input
+                    type="range"
+                    min="0"
+                    max="20000"
+                    step="100"
+                    value={filters.sqftRange[1]}
+                    onChange={(e) => {
+                      const newMax = Number(e.target.value)
+                      const newMin = Math.min(filters.sqftRange[0], newMax)
+                      updateFilter("sqftRange", [newMin, newMax])
+                    }}
+                    className="absolute w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer range-slider"
+                  />
+                  <div className="relative h-2 bg-gray-200 rounded-lg">
+                    <div
+                      className="absolute h-2 bg-blue-600 rounded-lg"
+                      style={{
+                        left: `${(filters.sqftRange[0] / 20000) * 100}%`,
+                        width: `${((filters.sqftRange[1] - filters.sqftRange[0]) / 20000) * 100}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-between text-sm text-gray-500">
                   <span>{filters.sqftRange[0].toLocaleString()} sqft</span>
                   <span>{filters.sqftRange[1].toLocaleString()} sqft</span>
                 </div>
@@ -439,6 +504,31 @@ export function AdvancedSearchFilters({ onFiltersChange, onSearch }: AdvancedSea
           </Button>
         </div>
       </CardContent>
+
+      {/* Custom CSS for range sliders */}
+      <style jsx>{`
+        .range-slider::-webkit-slider-thumb {
+          appearance: none;
+          height: 20px;
+          width: 20px;
+          border-radius: 50%;
+          background: #2563eb;
+          cursor: pointer;
+          border: 2px solid #ffffff;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          z-index: 10;
+        }
+        
+        .range-slider::-moz-range-thumb {
+          height: 20px;
+          width: 20px;
+          border-radius: 50%;
+          background: #2563eb;
+          cursor: pointer;
+          border: 2px solid #ffffff;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+      `}</style>
     </Card>
   )
 }

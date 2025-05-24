@@ -1,240 +1,301 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Search, MapPin, TrendingUp, Users, Building, Eye, Star } from "lucide-react"
-import Link from "next/link"
+import { Search, MapPin, Home, TrendingUp } from "lucide-react"
+import { useRouter } from "next/navigation"
+
+interface SearchFilters {
+  searchType: "buy" | "rent" | "wealth-map"
+  location: string
+  priceRange: [number, number]
+  propertyType: string
+}
 
 export function ZillowInspiredHero() {
   const router = useRouter()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [searchType, setSearchType] = useState("buy")
-  const [isLoading, setIsLoading] = useState(false)
+  const [filters, setFilters] = useState<SearchFilters>({
+    searchType: "buy",
+    location: "",
+    priceRange: [0, 10000000],
+    propertyType: "all",
+  })
 
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      const params = new URLSearchParams({
-        q: searchQuery,
-        type: searchType,
+  const [isSearching, setIsSearching] = useState(false)
+
+  const quickCities = ["New York, NY", "Los Angeles, CA", "Miami, FL", "San Francisco, CA", "Chicago, IL", "Boston, MA"]
+
+  const handleSearch = async () => {
+    setIsSearching(true)
+
+    console.log("🔍 Search initiated with filters:", {
+      searchType: filters.searchType,
+      location: filters.location,
+      priceMin: filters.priceRange[0],
+      priceMax: filters.priceRange[1],
+      propertyType: filters.propertyType,
+    })
+
+    try {
+      // Build search URL with parameters
+      const searchParams = new URLSearchParams({
+        q: filters.location,
+        type: filters.searchType,
+        minValue: filters.priceRange[0].toString(),
+        maxValue: filters.priceRange[1].toString(),
+        propertyType: filters.propertyType,
       })
 
-      console.log("🔍 Search initiated:", {
-        query: searchQuery,
-        type: searchType,
-        url: `/search?${params.toString()}`,
-      })
-
-      router.push(`/search?${params.toString()}`)
+      if (filters.searchType === "wealth-map") {
+        router.push(`/wealth-map?${searchParams.toString()}`)
+      } else {
+        router.push(`/search?${searchParams.toString()}`)
+      }
+    } catch (error) {
+      console.error("Search navigation error:", error)
+    } finally {
+      setIsSearching(false)
     }
   }
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleSearch()
-    }
+  const handleQuickCitySearch = (city: string) => {
+    setFilters((prev) => ({ ...prev, location: city }))
+    console.log("🏙️ Quick city selected:", city)
   }
 
-  const searchTypes = [
-    { id: "buy", label: "Buy", active: searchType === "buy" },
-    { id: "rent", label: "Rent", active: searchType === "rent" },
-    { id: "wealth", label: "Wealth Map", active: searchType === "wealth" },
-  ]
+  const formatPrice = (price: number) => {
+    if (price >= 1000000) return `$${(price / 1000000).toFixed(1)}M`
+    if (price >= 1000) return `$${(price / 1000).toFixed(0)}K`
+    return `$${price.toLocaleString()}`
+  }
+
+  const handlePriceRangeChange = (newRange: [number, number]) => {
+    console.log("💰 Price range changed:", {
+      from: formatPrice(newRange[0]),
+      to: formatPrice(newRange[1]),
+      rawValues: newRange,
+    })
+    setFilters((prev) => ({ ...prev, priceRange: newRange }))
+  }
 
   return (
-    <div className="relative bg-white">
-      {/* Hero Section with Background Image - Zillow Style */}
+    <div className="relative bg-gradient-to-br from-blue-50 to-indigo-100 min-h-[600px] flex items-center">
+      {/* Background Image */}
       <div
-        className="relative h-[500px] bg-cover bg-center bg-no-repeat"
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('/placeholder.svg?height=500&width=1200&text=Beautiful+Modern+Home+with+Family')`,
+          backgroundImage: "url('/placeholder.svg?height=600&width=1200&text=Luxury+Real+Estate')",
         }}
-      >
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-            {/* Trust Badge */}
-            <div className="mb-6">
-              <Badge className="bg-white/20 text-white border-white/30 px-4 py-2 text-sm backdrop-blur-sm">
-                <Star className="h-4 w-4 mr-2" />
-                Trusted by millions of users
-              </Badge>
-            </div>
+      />
 
-            {/* Main Headlines - Zillow Style */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight">
-              Agents. Tours.
-              <br />
-              Wealth. Homes.
-            </h1>
-
-            <p className="text-xl text-white/90 mb-8 max-w-3xl mx-auto">
-              The only platform that shows you properties AND their owners' wealth data
-            </p>
-
-            {/* Search Card - Zillow Style */}
-            <Card className="bg-white shadow-2xl border-0 max-w-3xl mx-auto">
-              <CardContent className="p-6">
-                {/* Search Type Tabs */}
-                <div className="flex mb-4 bg-gray-100 rounded-lg p-1">
-                  {searchTypes.map((type) => (
-                    <Button
-                      key={type.id}
-                      variant={type.active ? "default" : "ghost"}
-                      className={`flex-1 font-medium text-sm ${
-                        type.active
-                          ? "bg-blue-600 text-white shadow-sm hover:bg-blue-700"
-                          : "bg-transparent text-gray-700 hover:bg-gray-200 hover:text-gray-900"
-                      } transition-all duration-200`}
-                      onClick={() => setSearchType(type.id)}
-                    >
-                      {type.label}
-                    </Button>
-                  ))}
-                </div>
-
-                {/* Search Input */}
-                <div className="relative">
-                  <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <Input
-                    placeholder="Enter an address, neighborhood, city, or ZIP code"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    className="pl-12 h-14 text-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg"
-                  />
-                  <Button
-                    onClick={handleSearch}
-                    disabled={isLoading}
-                    className="absolute right-2 top-2 h-10 px-6 bg-blue-600 hover:bg-blue-700"
-                  >
-                    <Search className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                {/* Quick Actions */}
-                <div className="flex flex-wrap gap-3 mt-4 justify-center">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="rounded-full"
-                    onClick={() => {
-                      setSearchQuery("Beverly Hills")
-                      setSearchType("buy")
-                    }}
-                  >
-                    Beverly Hills
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="rounded-full"
-                    onClick={() => {
-                      setSearchQuery("Manhattan")
-                      setSearchType("buy")
-                    }}
-                  >
-                    Manhattan
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="rounded-full"
-                    onClick={() => {
-                      setSearchQuery("Malibu")
-                      setSearchType("buy")
-                    }}
-                  >
-                    Malibu
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="rounded-full"
-                    onClick={() => {
-                      setSearchQuery("Miami Beach")
-                      setSearchType("buy")
-                    }}
-                  >
-                    Miami Beach
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-
-      {/* Value Propositions - Flatmate Style */}
-      <div className="bg-gray-50 py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose TrueEstate?</h2>
-            <p className="text-lg text-gray-600">
-              The most comprehensive real estate platform with wealth intelligence
-            </p>
+      {/* Content */}
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-8">
+          {/* Trust Badge */}
+          <div className="inline-flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 mb-6 shadow-sm">
+            <TrendingUp className="h-4 w-4 text-green-600" />
+            <span className="text-sm font-medium text-gray-700">Trusted by millions of users</span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Eye className="h-8 w-8 text-blue-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Wealth Transparency</h3>
-              <p className="text-gray-600">See property owners' estimated net worth and investment patterns</p>
-            </div>
+          {/* Main Headline */}
+          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4">
+            Wealth. Properties.
+            <br />
+            <span className="text-blue-600">Intelligence.</span>
+          </h1>
 
-            <div className="text-center">
-              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Building className="h-8 w-8 text-green-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Premium Properties</h3>
-              <p className="text-gray-600">Access to exclusive listings and luxury real estate nationwide</p>
-            </div>
-
-            <div className="text-center">
-              <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users className="h-8 w-8 text-purple-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Expert Agents</h3>
-              <p className="text-gray-600">Connect with top-rated agents who understand luxury markets</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* CTA Section */}
-      <div className="bg-blue-600 py-12">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-white mb-4">Ready to find your dream home?</h2>
-          <p className="text-xl text-blue-100 mb-8">
-            Join millions of users who trust TrueEstate for their real estate needs
+          {/* Tagline */}
+          <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
+            Clarity before Capital - Discover luxury properties with owner wealth insights
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/auth/signin">
-              <Button
-                size="lg"
-                className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold shadow-lg border-2 border-white"
-              >
-                Get Started Free
-              </Button>
-            </Link>
-            <Link href="/wealth-map">
-              <Button
-                size="lg"
-                className="bg-blue-700 hover:bg-blue-800 text-white border-2 border-white px-8 py-4 text-lg font-semibold shadow-lg"
-              >
-                <TrendingUp className="h-5 w-5 mr-2" />
-                Explore Wealth Map
-              </Button>
-            </Link>
+        </div>
+
+        {/* Search Interface */}
+        <div className="max-w-4xl mx-auto">
+          {/* Search Type Tabs */}
+          <div className="flex justify-center mb-6">
+            <div className="inline-flex bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">
+              {[
+                { key: "buy", label: "Buy", icon: Home },
+                { key: "rent", label: "Rent", icon: MapPin },
+                { key: "wealth-map", label: "Wealth Map", icon: TrendingUp, badge: "NEW" },
+              ].map(({ key, label, icon: Icon, badge }) => (
+                <button
+                  key={key}
+                  onClick={() => setFilters((prev) => ({ ...prev, searchType: key as any }))}
+                  className={`
+                    flex items-center gap-2 px-6 py-3 rounded-md font-medium transition-all duration-200
+                    ${
+                      filters.searchType === key
+                        ? "bg-blue-600 text-white shadow-md"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }
+                  `}
+                >
+                  <Icon className="h-4 w-4" />
+                  {label}
+                  {badge && (
+                    <Badge variant="secondary" className="ml-1 text-xs bg-green-100 text-green-700">
+                      {badge}
+                    </Badge>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Search Form */}
+          <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-white/20">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-end">
+              {/* Location Input */}
+              <div className="lg:col-span-5">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Input
+                    type="text"
+                    placeholder="Enter an address, neighborhood, city, or ZIP code"
+                    value={filters.location}
+                    onChange={(e) => setFilters((prev) => ({ ...prev, location: e.target.value }))}
+                    className="pl-10 h-12 text-base border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              {/* Price Range */}
+              <div className="lg:col-span-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Price Range</label>
+                <div className="space-y-2">
+                  {/* Custom Range Slider */}
+                  <div className="relative">
+                    <input
+                      type="range"
+                      min="0"
+                      max="10000000"
+                      step="100000"
+                      value={filters.priceRange[0]}
+                      onChange={(e) => {
+                        const newMin = Number(e.target.value)
+                        const newMax = Math.max(newMin, filters.priceRange[1])
+                        handlePriceRangeChange([newMin, newMax])
+                      }}
+                      className="absolute w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb"
+                    />
+                    <input
+                      type="range"
+                      min="0"
+                      max="10000000"
+                      step="100000"
+                      value={filters.priceRange[1]}
+                      onChange={(e) => {
+                        const newMax = Number(e.target.value)
+                        const newMin = Math.min(filters.priceRange[0], newMax)
+                        handlePriceRangeChange([newMin, newMax])
+                      }}
+                      className="absolute w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb"
+                    />
+                    <div className="relative h-2 bg-gray-200 rounded-lg">
+                      <div
+                        className="absolute h-2 bg-blue-600 rounded-lg"
+                        style={{
+                          left: `${(filters.priceRange[0] / 10000000) * 100}%`,
+                          width: `${((filters.priceRange[1] - filters.priceRange[0]) / 10000000) * 100}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>{formatPrice(filters.priceRange[0])}</span>
+                    <span>{formatPrice(filters.priceRange[1])}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Search Button */}
+              <div className="lg:col-span-3">
+                <Button
+                  onClick={handleSearch}
+                  disabled={isSearching}
+                  className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base shadow-lg"
+                >
+                  {isSearching ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Searching...
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Search className="h-5 w-5" />
+                      Search
+                    </div>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick City Buttons */}
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-600 mb-3">Top Cities:</p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {quickCities.map((city) => (
+                <button
+                  key={city}
+                  onClick={() => handleQuickCitySearch(city)}
+                  className="px-4 py-2 bg-white/80 hover:bg-white text-gray-700 hover:text-blue-600 rounded-full text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md border border-gray-200"
+                >
+                  {city}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+            <Button
+              size="lg"
+              className="bg-white text-blue-600 hover:bg-gray-50 border-2 border-white shadow-lg min-w-[200px] font-semibold"
+              onClick={() => router.push("/auth/signup")}
+            >
+              Get Started Free
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="bg-blue-700 hover:bg-blue-800 text-white border-2 border-white shadow-lg min-w-[200px] font-semibold"
+              onClick={() => router.push("/wealth-map")}
+            >
+              Explore Wealth Map
+            </Button>
           </div>
         </div>
       </div>
+
+      {/* Custom CSS for range sliders */}
+      <style jsx>{`
+        .slider-thumb::-webkit-slider-thumb {
+          appearance: none;
+          height: 20px;
+          width: 20px;
+          border-radius: 50%;
+          background: #2563eb;
+          cursor: pointer;
+          border: 2px solid #ffffff;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .slider-thumb::-moz-range-thumb {
+          height: 20px;
+          width: 20px;
+          border-radius: 50%;
+          background: #2563eb;
+          cursor: pointer;
+          border: 2px solid #ffffff;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+      `}</style>
     </div>
   )
 }
