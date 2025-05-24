@@ -1,114 +1,98 @@
 "use client"
 
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { MapPin, Building, User, DollarSign } from "lucide-react"
+import type React from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/router"
+import { PropertyCard } from "./property-card"
 
-interface SearchResultsProps {
-  results: any[]
-  loading: boolean
-  query: string
+interface Filters {
+  minValue: number
+  maxValue: number
+  propertyType: string
+  ownerType: string
+  wealthRange: string
+  location: string
 }
 
-export function SearchResults({ results, loading, query }: SearchResultsProps) {
-  // At the beginning of the SearchResults component, add:
-  console.log("🎯 SearchResults component received:", {
-    resultsCount: results.length,
-    loading,
-    query,
-    firstResult: results[0] || null,
-  })
+interface SearchResultsProps {
+  initialSearchQuery?: string
+}
 
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        {[...Array(5)].map((_, i) => (
-          <Card key={i} className="animate-pulse">
-            <CardContent className="p-6">
-              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    )
+const defaultFilters = {
+  minValue: 0,
+  maxValue: 10000000,
+  propertyType: "all",
+  ownerType: "all",
+  wealthRange: "all",
+  location: "",
+}
+
+export const SearchResults: React.FC<SearchResultsProps> = ({ initialSearchQuery }) => {
+  const [properties, setProperties] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery || "")
+  const [filters, setFilters] = useState(defaultFilters)
+  const router = useRouter()
+
+  useEffect(() => {
+    if (initialSearchQuery) {
+      setSearchQuery(initialSearchQuery)
+      handleSearch()
+    }
+  }, [initialSearchQuery])
+
+  const handleSearch = async () => {
+    if (!searchQuery?.trim()) return
+
+    setIsLoading(true)
+    try {
+      const params = new URLSearchParams({
+        q: searchQuery.trim(),
+        type: filters?.propertyType || "all",
+        minValue: (filters?.minValue || 0).toString(),
+        maxValue: (filters?.maxValue || 10000000).toString(),
+        location: filters?.location || "",
+      })
+
+      const response = await fetch(`/api/search?${params.toString()}`)
+      const data = await response.json()
+      setProperties(data)
+    } catch (error) {
+      console.error("Search error:", error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  if (!results.length && query) {
-    return (
-      <div className="text-center py-12">
-        <div className="text-gray-500 text-lg">No results found for "{query}"</div>
-        <div className="text-gray-400 mt-2">Try adjusting your search terms or filters</div>
-      </div>
-    )
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value)
+  }
+
+  const handleFilterChange = (newFilters: Filters) => {
+    setFilters(newFilters)
   }
 
   return (
-    <div className="space-y-4">
-      <div className="text-sm text-gray-600 mb-4">{results.length} results found</div>
+    <div>
+      <input type="text" placeholder="Search..." value={searchQuery} onChange={handleInputChange} />
+      <button onClick={handleSearch} disabled={isLoading}>
+        {isLoading ? "Searching..." : "Search"}
+      </button>
 
-      {results.map((result, index) => (
-        <Card key={index} className="hover:shadow-md transition-shadow cursor-pointer">
-          <CardContent className="p-6">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  {result.type === "property" && <Building className="h-5 w-5 text-blue-600" />}
-                  {result.type === "owner" && <User className="h-5 w-5 text-green-600" />}
-                  {result.type === "address" && <MapPin className="h-5 w-5 text-purple-600" />}
+      {/* Implement filter UI here, passing filters and handleFilterChange as props */}
+      {/* <FilterComponent filters={filters} onFilterChange={handleFilterChange} /> */}
 
-                  <Badge variant="outline" className="text-xs">
-                    {result.type}
-                  </Badge>
-                </div>
-
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">{result.title}</h3>
-
-                <p className="text-gray-600 mb-3">{result.subtitle}</p>
-
-                {result.type === "property" && (
-                  <div className="flex items-center gap-4 text-sm text-gray-500">
-                    <div className="flex items-center">
-                      <DollarSign className="h-4 w-4 mr-1" />
-                      <span>Value: ${(result.value / 1000000).toFixed(1)}M</span>
-                    </div>
-                    <div className="flex items-center">
-                      <User className="h-4 w-4 mr-1" />
-                      <span>Owner Wealth: ${(result.ownerWealth / 1000000).toFixed(1)}M</span>
-                    </div>
-                  </div>
-                )}
-
-                {result.type === "owner" && (
-                  <div className="flex items-center gap-4 text-sm text-gray-500">
-                    <div className="flex items-center">
-                      <Building className="h-4 w-4 mr-1" />
-                      <span>{result.properties} properties</span>
-                    </div>
-                    <div className="flex items-center">
-                      <DollarSign className="h-4 w-4 mr-1" />
-                      <span>Total Value: ${(result.totalValue / 1000000).toFixed(1)}M</span>
-                    </div>
-                  </div>
-                )}
-
-                {result.type === "address" && (
-                  <div className="flex items-center gap-4 text-sm text-gray-500">
-                    <div className="flex items-center">
-                      <Building className="h-4 w-4 mr-1" />
-                      <span>{result.propertyCount.toLocaleString()} properties</span>
-                    </div>
-                    <div className="flex items-center">
-                      <DollarSign className="h-4 w-4 mr-1" />
-                      <span>Avg: ${(result.averageValue / 1000000).toFixed(1)}M</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+      {isLoading ? (
+        <p>Loading...</p>
+      ) : properties.length > 0 ? (
+        <div style={{ display: "flex", flexWrap: "wrap" }}>
+          {properties.map((property: any) => (
+            <PropertyCard key={property.id} property={property} />
+          ))}
+        </div>
+      ) : (
+        <p>No properties found.</p>
+      )}
     </div>
   )
 }

@@ -103,69 +103,6 @@ export default function ApiAccessPage() {
                 "https://api.trueestate.com/v1/properties?location=manhattan&min_value=1000000" \
               </div>
               <div className="mb-4 ml-4">-H "Authorization: Bearer YOUR_API_KEY"</div>
-
-              <div className="mb-4">
-                <span className="text-gray-500"># Get property details</span>
-              </div>
-              <div className="mb-2">
-                <span className="text-blue-400">curl</span> -X GET \
-              </div>
-              <div className="mb-2 ml-4">"https://api.trueestate.com/v1/properties/123456" \</div>
-              <div className="ml-4">-H "Authorization: Bearer YOUR_API_KEY"</div>
-            </div>
-          </div>
-        </section>
-
-        {/* Pricing */}
-        <section className="py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">API Pricing</h2>
-              <p className="text-gray-600">Flexible pricing based on your usage needs.</p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              <div className="bg-white rounded-lg p-8 border border-gray-200">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Starter</h3>
-                <div className="text-4xl font-bold text-gray-900 mb-6">Free</div>
-                <ul className="space-y-3 mb-8 text-gray-600">
-                  <li>• 1,000 requests/month</li>
-                  <li>• Basic property data</li>
-                  <li>• Community support</li>
-                  <li>• Rate limit: 10 req/min</li>
-                </ul>
-                <Button className="w-full" variant="outline">
-                  Get Started
-                </Button>
-              </div>
-
-              <div className="bg-white rounded-lg p-8 border-2 border-blue-500">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Professional</h3>
-                <div className="text-4xl font-bold text-gray-900 mb-6">
-                  $49<span className="text-lg text-gray-600">/month</span>
-                </div>
-                <ul className="space-y-3 mb-8 text-gray-600">
-                  <li>• 50,000 requests/month</li>
-                  <li>• Full property & wealth data</li>
-                  <li>• Email support</li>
-                  <li>• Rate limit: 100 req/min</li>
-                </ul>
-                <Button className="w-full">Choose Plan</Button>
-              </div>
-
-              <div className="bg-white rounded-lg p-8 border border-gray-200">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Enterprise</h3>
-                <div className="text-4xl font-bold text-gray-900 mb-6">Custom</div>
-                <ul className="space-y-3 mb-8 text-gray-600">
-                  <li>• Unlimited requests</li>
-                  <li>• Premium data sources</li>
-                  <li>• Dedicated support</li>
-                  <li>• Custom rate limits</li>
-                </ul>
-                <Button className="w-full" variant="outline">
-                  Contact Sales
-                </Button>
-              </div>
             </div>
           </div>
         </section>

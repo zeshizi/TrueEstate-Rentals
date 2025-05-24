@@ -48,38 +48,7 @@ export default function TermsPage() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">4. Account Responsibilities</h2>
-            <p className="text-gray-600 mb-4">Users are responsible for:</p>
-            <ul className="list-disc pl-6 text-gray-600 space-y-2">
-              <li>Maintaining account security</li>
-              <li>All activities under their account</li>
-              <li>Providing accurate information</li>
-              <li>Notifying us of unauthorized access</li>
-            </ul>
-          </section>
-
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">5. Disclaimer</h2>
-            <p className="text-gray-600">
-              The materials on TrueEstate are provided on an 'as is' basis. TrueEstate makes no warranties, expressed or
-              implied, and hereby disclaims all other warranties including, without limitation, implied warranties or
-              conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual
-              property or other violation of rights.
-            </p>
-          </section>
-
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">6. Limitations</h2>
-            <p className="text-gray-600">
-              In no event shall TrueEstate or its suppliers be liable for any damages (including, without limitation,
-              damages for loss of data or profit, or due to business interruption) arising out of the use or inability
-              to use TrueEstate, even if TrueEstate or an authorized representative has been notified orally or in
-              writing of the possibility of such damage.
-            </p>
-          </section>
-
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">7. Contact Information</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">4. Contact Information</h2>
             <p className="text-gray-600">Questions about the Terms of Service should be sent to us at:</p>
             <div className="bg-gray-50 p-4 rounded-lg mt-4">
               <p className="text-gray-600">

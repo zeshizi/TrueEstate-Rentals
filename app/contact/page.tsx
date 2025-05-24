@@ -1,6 +1,6 @@
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { Mail, Phone, MapPin, Clock } from "lucide-react"
+import { Mail, Phone, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -60,26 +60,6 @@ export default function ContactPage() {
                   </p>
                 </div>
               </div>
-
-              <div className="flex items-start space-x-4">
-                <div className="bg-orange-100 p-3 rounded-lg">
-                  <Clock className="h-6 w-6 text-orange-600" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900">Business Hours</h3>
-                  <p className="text-gray-600">
-                    Monday - Friday: 9:00 AM - 6:00 PM EST
-                    <br />
-                    Saturday - Sunday: Closed
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <h3 className="font-semibold text-gray-900 mb-2">Enterprise Sales</h3>
-              <p className="text-gray-600 mb-4">Looking for enterprise solutions or custom integrations?</p>
-              <Button className="w-full">Contact Sales Team</Button>
             </div>
           </div>
 
@@ -108,13 +88,6 @@ export default function ContactPage() {
                     Email
                   </label>
                   <Input id="email" type="email" placeholder="john@company.com" />
-                </div>
-
-                <div>
-                  <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-2">
-                    Company
-                  </label>
-                  <Input id="company" placeholder="Your Company" />
                 </div>
 
                 <div>

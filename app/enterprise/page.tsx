@@ -102,10 +102,6 @@ export default function EnterprisePage() {
                     <Check className="h-5 w-5 text-green-500 mr-3" />
                     Email support
                   </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-500 mr-3" />
-                    Basic analytics
-                  </li>
                 </ul>
                 <Button className="w-full">Get Started</Button>
               </div>
@@ -131,14 +127,6 @@ export default function EnterprisePage() {
                     <Check className="h-5 w-5 text-green-500 mr-3" />
                     Priority support
                   </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-500 mr-3" />
-                    Advanced analytics
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-500 mr-3" />
-                    Custom integrations
-                  </li>
                 </ul>
                 <Button className="w-full bg-blue-600 hover:bg-blue-700">Contact Sales</Button>
               </div>
@@ -160,14 +148,6 @@ export default function EnterprisePage() {
                   <li className="flex items-center">
                     <Check className="h-5 w-5 text-green-500 mr-3" />
                     Dedicated support
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-500 mr-3" />
-                    Custom features
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-500 mr-3" />
-                    On-premise deployment
                   </li>
                 </ul>
                 <Button variant="outline" className="w-full">

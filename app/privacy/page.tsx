@@ -53,33 +53,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">4. Data Sharing</h2>
-            <p className="text-gray-600 mb-4">
-              We do not sell, trade, or otherwise transfer your personal information to third parties, except as
-              described in this policy:
-            </p>
-            <ul className="list-disc pl-6 text-gray-600 space-y-2">
-              <li>With your consent</li>
-              <li>To comply with legal obligations</li>
-              <li>To protect our rights and safety</li>
-              <li>With service providers under strict confidentiality agreements</li>
-            </ul>
-          </section>
-
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">5. Your Rights</h2>
-            <p className="text-gray-600 mb-4">You have the right to:</p>
-            <ul className="list-disc pl-6 text-gray-600 space-y-2">
-              <li>Access your personal information</li>
-              <li>Correct inaccurate information</li>
-              <li>Delete your account and data</li>
-              <li>Export your data</li>
-              <li>Opt out of marketing communications</li>
-            </ul>
-          </section>
-
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">6. Contact Us</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">4. Contact Us</h2>
             <p className="text-gray-600">If you have any questions about this Privacy Policy, please contact us at:</p>
             <div className="bg-gray-50 p-4 rounded-lg mt-4">
               <p className="text-gray-600">
