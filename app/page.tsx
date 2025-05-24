@@ -1,13 +1,13 @@
-import { ProfessionalHeader } from "@/components/professional-header"
-import { EnhancedHeroSection } from "@/components/enhanced-hero-section"
+import { ZillowInspiredHeader } from "@/components/zillow-inspired-header"
+import { ZillowInspiredHero } from "@/components/zillow-inspired-hero"
 import { FeaturedProperties } from "@/components/featured-properties"
 import { Footer } from "@/components/footer"
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
-      <ProfessionalHeader />
-      <EnhancedHeroSection />
+      <ZillowInspiredHeader />
+      <ZillowInspiredHero />
       <FeaturedProperties />
       <Footer />
     </div>

@@ -1,6 +1,22 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { MapPin, DollarSign, Home, Users } from "lucide-react"
+import { DollarSign, Home, MapPin, Users } from "lucide-react"
+
+interface Property {
+  id: string
+  title: string
+  location: string
+  price: number
+  imageUrl: string
+  beds: number
+  baths: number
+  sqft: number
+}
+
+interface FeaturedPropertiesProps {
+  properties: Property[]
+  loading: boolean
+}
 
 export function FeaturedProperties() {
   const properties = [
@@ -105,3 +121,5 @@ export function FeaturedProperties() {
     </section>
   )
 }
+
+export default FeaturedProperties
