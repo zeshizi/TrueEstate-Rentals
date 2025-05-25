@@ -149,7 +149,10 @@ export default function HomePage() {
                   Access verified property ownership records and landlord credentials to avoid scams
                 </p>
                 <Link href="/search">
-                  <Button variant="outline" className="w-full">
+                  <Button
+                    variant="outline"
+                    className="w-full border-2 border-green-600 text-green-600 hover:bg-green-600 hover:text-white font-semibold transition-all duration-200"
+                  >
                     Verify Properties
                   </Button>
                 </Link>
@@ -185,7 +188,10 @@ export default function HomePage() {
                   Comprehensive landlord ratings, reviews, and credibility scores for safe transactions
                 </p>
                 <Link href="/search">
-                  <Button variant="outline" className="w-full">
+                  <Button
+                    variant="outline"
+                    className="w-full border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white font-semibold transition-all duration-200"
+                  >
                     Check Trust Scores
                   </Button>
                 </Link>
@@ -241,8 +247,7 @@ export default function HomePage() {
             <Link href="/search">
               <Button
                 size="lg"
-                variant="outline"
-                className="border-white text-white hover:bg-white hover:text-blue-600 px-8 py-3"
+                className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-3 font-semibold transition-all duration-200"
               >
                 <Search className="h-5 w-5 mr-2" />
                 Verify Properties
