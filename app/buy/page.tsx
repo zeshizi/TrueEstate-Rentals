@@ -9,60 +9,92 @@ import { Card, CardContent } from "@/components/ui/card"
 import { MapPin, Search, Bed, Bath, Square, DollarSign, Heart, TrendingUp, Shield } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { SearchResults } from "@/components/search-results"
+import { PropertyFilters } from "@/components/property-filters"
 
-const topCities = [
-  "Beverly Hills",
-  "Manhattan",
-  "Malibu",
-  "Aspen",
-  "Miami Beach",
-  "Napa Valley",
-  "The Hamptons",
-  "Scottsdale",
-]
+const topCities = ["Phoenix", "Atlanta", "Dallas", "Denver", "Austin", "Charlotte", "Nashville", "Tampa"]
 
 const featuredProperties = [
   {
     id: 1,
-    title: "Beverly Hills Estate",
-    location: "Beverly Hills, CA",
-    price: 12500000,
-    beds: 6,
-    baths: 8,
-    sqft: 8500,
-    image: "/placeholder.svg?height=200&width=300&text=Beverly+Hills+Estate",
+    title: "Starter Home in Phoenix",
+    location: "Phoenix, AZ",
+    price: 285000,
+    beds: 3,
+    baths: 2,
+    sqft: 1450,
+    image: "/placeholder.svg?height=200&width=300&text=Phoenix+Starter+Home",
+    investmentGrade: "B+",
+    ownerWealth: "Middle Class",
+  },
+  {
+    id: 2,
+    title: "Family Home in Atlanta",
+    location: "Atlanta, GA",
+    price: 485000,
+    beds: 4,
+    baths: 3,
+    sqft: 2200,
+    image: "/placeholder.svg?height=200&width=300&text=Atlanta+Family+Home",
+    investmentGrade: "A-",
+    ownerWealth: "Upper Middle",
+  },
+  {
+    id: 3,
+    title: "Executive Estate in Dallas",
+    location: "Dallas, TX",
+    price: 1250000,
+    beds: 5,
+    baths: 4,
+    sqft: 3800,
+    image: "/placeholder.svg?height=200&width=300&text=Dallas+Executive+Estate",
+    investmentGrade: "A",
+    ownerWealth: "High Net Worth",
+  },
+  {
+    id: 4,
+    title: "Luxury Penthouse in Austin",
+    location: "Austin, TX",
+    price: 2850000,
+    beds: 3,
+    baths: 3,
+    sqft: 2800,
+    image: "/placeholder.svg?height=200&width=300&text=Austin+Luxury+Penthouse",
     investmentGrade: "A+",
     ownerWealth: "Ultra High",
   },
   {
-    id: 2,
-    title: "Manhattan Penthouse",
-    location: "New York, NY",
-    price: 22000000,
-    beds: 4,
-    baths: 5,
-    sqft: 4800,
-    image: "/placeholder.svg?height=200&width=300&text=Manhattan+Penthouse",
-    investmentGrade: "A+",
-    ownerWealth: "Extremely High",
+    id: 5,
+    title: "Affordable Condo in Charlotte",
+    location: "Charlotte, NC",
+    price: 195000,
+    beds: 2,
+    baths: 1,
+    sqft: 950,
+    image: "/placeholder.svg?height=200&width=300&text=Charlotte+Affordable+Condo",
+    investmentGrade: "B",
+    ownerWealth: "Working Class",
   },
   {
-    id: 3,
-    title: "Malibu Ocean Villa",
-    location: "Malibu, CA",
-    price: 18750000,
-    beds: 5,
-    baths: 7,
-    sqft: 6200,
-    image: "/placeholder.svg?height=200&width=300&text=Malibu+Ocean+Villa",
-    investmentGrade: "A",
-    ownerWealth: "Very High",
+    id: 6,
+    title: "Modern Townhouse in Denver",
+    location: "Denver, CO",
+    price: 675000,
+    beds: 3,
+    baths: 3,
+    sqft: 1850,
+    image: "/placeholder.svg?height=200&width=300&text=Denver+Modern+Townhouse",
+    investmentGrade: "A-",
+    ownerWealth: "Professional",
   },
 ]
 
 export default function BuyPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
+  const [searchResults, setSearchResults] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [showResults, setShowResults] = useState(false)
 
   const searchParams = useSearchParams()
 
@@ -70,15 +102,35 @@ export default function BuyPage() {
     const query = searchParams.get("q")
     if (query) {
       setSearchQuery(query)
-      // You can also handle other parameters like price range here
-      console.log("Buy page loaded with search:", query)
+      handleSearch()
     }
   }, [searchParams])
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery)}&type=buy`)
+      setLoading(true)
+      setShowResults(true)
+
+      try {
+        const response = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}&type=buy`)
+        const data = await response.json()
+
+        // Filter for buy properties and add realistic pricing
+        const buyProperties = data.results?.filter((r: any) => r.type === "property") || []
+        setSearchResults(buyProperties)
+      } catch (error) {
+        console.error("Search error:", error)
+        setSearchResults([])
+      } finally {
+        setLoading(false)
+      }
     }
+  }
+
+  const formatPrice = (price: number) => {
+    if (price >= 1000000) return `$${(price / 1000000).toFixed(1)}M`
+    if (price >= 1000) return `$${Math.round(price / 1000)}K`
+    return `$${price.toLocaleString()}`
   }
 
   return (
@@ -91,15 +143,15 @@ export default function BuyPage() {
           {/* Trust Badge */}
           <div className="mb-6">
             <Badge className="bg-emerald-100 text-emerald-800 px-4 py-2 text-sm font-medium">
-              Trusted by luxury investors worldwide
+              Properties for every budget
             </Badge>
           </div>
 
           {/* Main Headlines */}
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-4">Discover luxury properties</h1>
-          <h2 className="text-2xl sm:text-3xl text-gray-700 mb-4">Estates & Investment Opportunities</h2>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-4">Find your dream home</h1>
+          <h2 className="text-2xl sm:text-3xl text-gray-700 mb-4">From Starter Homes to Luxury Estates</h2>
           <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            Find premium properties with verified owner wealth analysis
+            Discover properties across all price ranges with verified owner information
           </p>
 
           {/* Search Bar */}
@@ -108,7 +160,7 @@ export default function BuyPage() {
               <div className="relative">
                 <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <Input
-                  placeholder="Search Luxury Properties..."
+                  placeholder="Search Properties to Buy..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={(e) => e.key === "Enter" && handleSearch()}
@@ -127,7 +179,7 @@ export default function BuyPage() {
           {/* Top Cities */}
           <div className="mb-12">
             <p className="text-sm text-gray-600 mb-4">
-              <span className="font-medium">Premium Locations:</span>
+              <span className="font-medium">Popular Markets:</span>
             </p>
             <div className="flex flex-wrap justify-center gap-2">
               {topCities.map((city) => (
@@ -150,14 +202,26 @@ export default function BuyPage() {
             </div>
           </div>
 
-          {/* Illustration */}
-          <div className="relative mb-12">
-            <div
-              className="w-full h-64 bg-cover bg-center bg-no-repeat rounded-lg"
-              style={{
-                backgroundImage: `url('/placeholder.svg?height=256&width=600&text=Luxury+Real+Estate+Investment+Illustration')`,
-              }}
-            />
+          {/* Price Range Info */}
+          <div className="mb-12">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+              <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+                <div className="text-2xl font-bold text-emerald-600">$150K+</div>
+                <div className="text-sm text-gray-600">Starter Homes</div>
+              </div>
+              <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+                <div className="text-2xl font-bold text-blue-600">$300K+</div>
+                <div className="text-sm text-gray-600">Family Homes</div>
+              </div>
+              <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+                <div className="text-2xl font-bold text-purple-600">$600K+</div>
+                <div className="text-sm text-gray-600">Executive Homes</div>
+              </div>
+              <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+                <div className="text-2xl font-bold text-orange-600">$1M+</div>
+                <div className="text-sm text-gray-600">Luxury Estates</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -166,11 +230,11 @@ export default function BuyPage() {
       <div className="bg-white py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">Featured Investment Properties</h3>
-            <p className="text-gray-600">Curated luxury estates with comprehensive wealth analysis</p>
+            <h3 className="text-3xl font-bold text-gray-900 mb-4">Properties Across All Price Ranges</h3>
+            <p className="text-gray-600">From affordable starter homes to luxury estates</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
             {featuredProperties.map((property) => (
               <Card key={property.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="relative">
@@ -217,7 +281,7 @@ export default function BuyPage() {
                   </div>
 
                   <div className="mb-4">
-                    <div className="text-xs text-gray-500 mb-1">Owner Wealth Level</div>
+                    <div className="text-xs text-gray-500 mb-1">Owner Profile</div>
                     <Badge variant="outline" className="text-xs">
                       {property.ownerWealth}
                     </Badge>
@@ -226,10 +290,10 @@ export default function BuyPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1">
                       <DollarSign className="h-5 w-5 text-gray-500" />
-                      <span className="text-xl font-bold">${(property.price / 1000000).toFixed(1)}M</span>
+                      <span className="text-xl font-bold">{formatPrice(property.price)}</span>
                     </div>
                     <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700">
-                      View Analysis
+                      View Details
                     </Button>
                   </div>
                 </CardContent>
@@ -239,11 +303,38 @@ export default function BuyPage() {
 
           <div className="text-center mt-12">
             <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700">
-              Explore All Properties
+              Browse All Properties
             </Button>
           </div>
         </div>
       </div>
+
+      {/* Search Results Section */}
+      {showResults && (
+        <div className="bg-gray-50 py-16">
+          <div className="container mx-auto px-4">
+            <div className="max-w-7xl mx-auto">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-2xl font-bold text-gray-900">
+                  Properties for Sale {searchQuery && `in ${searchQuery}`}
+                </h3>
+                <Button variant="outline" onClick={() => setShowResults(false)} className="text-gray-600">
+                  Clear Results
+                </Button>
+              </div>
+
+              <div className="grid lg:grid-cols-4 gap-6">
+                <div className="lg:col-span-1">
+                  <PropertyFilters onFiltersChange={(filters) => console.log("Filters:", filters)} />
+                </div>
+                <div className="lg:col-span-3">
+                  <SearchResults results={searchResults} loading={loading} query={searchQuery} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

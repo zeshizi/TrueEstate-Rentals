@@ -62,15 +62,15 @@ export class PropertyService {
   async getMarketStats(location?: string): Promise<any> {
     console.log("🎭 Getting mock market stats for:", location || "all locations")
 
-    // Return mock market stats
+    // Return realistic market stats across all price segments
     return {
       totalProperties: 120,
-      averageValue: 8500000,
-      medianValue: 6800000,
-      minValue: 1800000,
-      maxValue: 32000000,
-      averageWealthOwner: 385000000,
-      dataSource: "mock_data_all_states",
+      averageValue: 650000, // More realistic average
+      medianValue: 485000, // Realistic median
+      minValue: 150000, // Affordable housing
+      maxValue: 12000000, // Luxury properties
+      averageWealthOwner: 2500000, // More realistic wealth
+      dataSource: "mock_data_all_segments",
     }
   }
 

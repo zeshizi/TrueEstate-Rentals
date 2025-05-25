@@ -37,7 +37,7 @@ export function AdvancedSearchFilters({ onFiltersChange, onSearch }: AdvancedSea
   const [filters, setFilters] = useState<AdvancedFilters>({
     location: "",
     propertyType: [],
-    priceRange: [0, 50000000],
+    priceRange: [0, 15000000],
     bedrooms: 0,
     bathrooms: 0,
     sqftRange: [0, 20000],
@@ -108,7 +108,7 @@ export function AdvancedSearchFilters({ onFiltersChange, onSearch }: AdvancedSea
     const defaultFilters: AdvancedFilters = {
       location: "",
       propertyType: [],
-      priceRange: [0, 50000000],
+      priceRange: [0, 15000000],
       bedrooms: 0,
       bathrooms: 0,
       sqftRange: [0, 20000],
@@ -128,7 +128,7 @@ export function AdvancedSearchFilters({ onFiltersChange, onSearch }: AdvancedSea
 
   const formatPrice = (price: number) => {
     if (price >= 1000000) return `$${(price / 1000000).toFixed(1)}M`
-    if (price >= 1000) return `$${(price / 1000).toFixed(0)}K`
+    if (price >= 1000) return `$${Math.round(price / 1000)}K`
     return `$${price.toLocaleString()}`
   }
 
@@ -182,7 +182,7 @@ export function AdvancedSearchFilters({ onFiltersChange, onSearch }: AdvancedSea
                 <input
                   type="range"
                   min="0"
-                  max="50000000"
+                  max="15000000"
                   step="100000"
                   value={filters.priceRange[0]}
                   onChange={(e) => {
@@ -195,7 +195,7 @@ export function AdvancedSearchFilters({ onFiltersChange, onSearch }: AdvancedSea
                 <input
                   type="range"
                   min="0"
-                  max="50000000"
+                  max="15000000"
                   step="100000"
                   value={filters.priceRange[1]}
                   onChange={(e) => {
@@ -209,8 +209,8 @@ export function AdvancedSearchFilters({ onFiltersChange, onSearch }: AdvancedSea
                   <div
                     className="absolute h-2 bg-blue-600 rounded-lg"
                     style={{
-                      left: `${(filters.priceRange[0] / 50000000) * 100}%`,
-                      width: `${((filters.priceRange[1] - filters.priceRange[0]) / 50000000) * 100}%`,
+                      left: `${(filters.priceRange[0] / 15000000) * 100}%`,
+                      width: `${((filters.priceRange[1] - filters.priceRange[0]) / 15000000) * 100}%`,
                     }}
                   />
                 </div>

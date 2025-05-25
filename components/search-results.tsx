@@ -6,9 +6,10 @@ import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MapPin, Building, User, DollarSign, Star, Heart, MessageSquare, Bookmark } from "lucide-react"
+import { MapPin, Building, User, DollarSign, Star, Heart, MessageSquare, Bookmark, Share2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
+import { PropertyShareModal } from "@/components/property-share-modal"
 
 interface SearchResultsProps {
   results: any[]
@@ -19,6 +20,8 @@ interface SearchResultsProps {
 export function SearchResults({ results, loading, query }: SearchResultsProps) {
   const [bookmarkedItems, setBookmarkedItems] = useState<string[]>([])
   const { toast } = useToast()
+  const [shareModalOpen, setShareModalOpen] = useState(false)
+  const [selectedProperty, setSelectedProperty] = useState<any>(null)
 
   useEffect(() => {
     // Load bookmarked items from localStorage
@@ -79,6 +82,14 @@ export function SearchResults({ results, loading, query }: SearchResultsProps) {
     return Array.from({ length: 5 }, (_, i) => (
       <Star key={i} className={`w-4 h-4 ${i < rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`} />
     ))
+  }
+
+  const handleShare = (result: any, event: React.MouseEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+
+    setSelectedProperty(result)
+    setShareModalOpen(true)
   }
 
   if (loading) {
@@ -238,12 +249,38 @@ export function SearchResults({ results, loading, query }: SearchResultsProps) {
                       Reviews ({result.reviewCount || 0})
                     </Button>
                   )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => handleShare(result, e)}
+                    className="hover:text-blue-600 hover:border-blue-600"
+                  >
+                    <Share2 className="h-4 w-4 mr-1" />
+                    Share
+                  </Button>
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
       ))}
+      {/* Share Modal */}
+      {selectedProperty && (
+        <PropertyShareModal
+          isOpen={shareModalOpen}
+          onClose={() => {
+            setShareModalOpen(false)
+            setSelectedProperty(null)
+          }}
+          property={{
+            id: selectedProperty.id,
+            title: selectedProperty.title,
+            address: selectedProperty.subtitle,
+            value: selectedProperty.value || selectedProperty.totalValue,
+            image: selectedProperty.image,
+          }}
+        />
+      )}
     </div>
   )
 }

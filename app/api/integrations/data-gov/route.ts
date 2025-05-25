@@ -183,12 +183,37 @@ function generatePropertyAssessments(limit: number, query?: string | null, locat
     const state = location || states[i % states.length]
     const ownerName = query || `${["Smith", "Johnson", "Williams", "Brown", "Davis", "Miller"][i % 6]} Holdings LLC`
 
+    // Generate diverse price ranges
+    const priceSegments = [
+      { min: 120000, max: 280000, weight: 0.3 }, // Affordable
+      { min: 280000, max: 550000, weight: 0.35 }, // Middle class
+      { min: 550000, max: 1100000, weight: 0.2 }, // Upper middle
+      { min: 1100000, max: 2500000, weight: 0.1 }, // High-end
+      { min: 2500000, max: 12000000, weight: 0.05 }, // Luxury
+    ]
+
+    const getRandomPrice = () => {
+      const random = Math.random()
+      let cumulativeWeight = 0
+
+      for (const segment of priceSegments) {
+        cumulativeWeight += segment.weight
+        if (random <= cumulativeWeight) {
+          return Math.floor(Math.random() * (segment.max - segment.min) + segment.min)
+        }
+      }
+      return 400000
+    }
+
+    const assessedValue = getRandomPrice()
+    const marketValue = Math.floor(assessedValue * (1.1 + Math.random() * 0.3)) // 10-40% higher than assessed
+
     return {
       id: `prop_${state.toLowerCase().replace(/\s+/g, "_")}_${i + 1}`,
       address: `${100 + i * 10} ${["Main St", "Oak Ave", "Park Blvd", "First St", "Broadway"][i % 5]}, ${state}`,
       ownerName,
-      assessedValue: Math.floor(Math.random() * 2000000) + 500000,
-      marketValue: Math.floor(Math.random() * 2500000) + 600000,
+      assessedValue,
+      marketValue,
       propertyType: ["R4", "R6", "C1", "C2", "O"][i % 5],
       yearBuilt: Math.floor(Math.random() * 50) + 1970,
       lotSize: Math.floor(Math.random() * 5000) + 1000,
@@ -257,13 +282,38 @@ function generateRealEstateSales(limit: number, location?: string | null) {
 
   return Array.from({ length: Math.min(limit, 100) }, (_, i) => {
     const state = location || states[i % states.length]
+
+    // Generate diverse price ranges
+    const priceSegments = [
+      { min: 120000, max: 280000, weight: 0.3 }, // Affordable
+      { min: 280000, max: 550000, weight: 0.35 }, // Middle class
+      { min: 550000, max: 1100000, weight: 0.2 }, // Upper middle
+      { min: 1100000, max: 2500000, weight: 0.1 }, // High-end
+      { min: 2500000, max: 12000000, weight: 0.05 }, // Luxury
+    ]
+
+    const getRandomPrice = () => {
+      const random = Math.random()
+      let cumulativeWeight = 0
+
+      for (const segment of priceSegments) {
+        cumulativeWeight += segment.weight
+        if (random <= cumulativeWeight) {
+          return Math.floor(Math.random() * (segment.max - segment.min) + segment.min)
+        }
+      }
+      return 400000
+    }
+
+    const salePrice = getRandomPrice()
+
     return {
       id: `sale_${state.toLowerCase().replace(/\s+/g, "_")}_${i + 1}`,
       address: `${200 + i * 15} ${["Central Ave", "Park St", "Main St", "Oak Rd"][i % 4]}, ${state}`,
       borough: state,
       neighborhood: ["Downtown", "Uptown", "Midtown", "Westside"][i % 4],
       buildingClassCategory: "RESIDENTIAL",
-      salePrice: Math.floor(Math.random() * 4000000) + 1000000,
+      salePrice,
       saleDate: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
       grossSqft: Math.floor(Math.random() * 2000) + 1000,
       landSqft: Math.floor(Math.random() * 2500) + 1200,
