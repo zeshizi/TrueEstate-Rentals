@@ -1,11 +1,14 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MapPin, Building, User, DollarSign, Star, Heart, MessageSquare } from "lucide-react"
+import { MapPin, Building, User, DollarSign, Star, Heart, MessageSquare, Bookmark } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import Link from "next/link"
 
 interface SearchResultsProps {
   results: any[]
@@ -19,19 +22,26 @@ export function SearchResults({ results, loading, query }: SearchResultsProps) {
 
   useEffect(() => {
     // Load bookmarked items from localStorage
-    const bookmarks = JSON.parse(localStorage.getItem("search-bookmarks") || "[]")
+    const bookmarks = JSON.parse(localStorage.getItem("property-bookmarks") || "[]")
     setBookmarkedItems(bookmarks.map((b: any) => b.id))
   }, [])
 
-  const handleBookmark = (result: any) => {
-    const bookmarks = JSON.parse(localStorage.getItem("search-bookmarks") || "[]")
+  const handleBookmark = (result: any, event: React.MouseEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+
+    const bookmarks = JSON.parse(localStorage.getItem("property-bookmarks") || "[]")
     const isBookmarked = bookmarkedItems.includes(result.id)
 
     if (isBookmarked) {
       // Remove bookmark
       const updated = bookmarks.filter((b: any) => b.id !== result.id)
-      localStorage.setItem("search-bookmarks", JSON.stringify(updated))
+      localStorage.setItem("property-bookmarks", JSON.stringify(updated))
       setBookmarkedItems((prev) => prev.filter((id) => id !== result.id))
+
+      // Dispatch custom event for header counter update
+      window.dispatchEvent(new CustomEvent("bookmarkChanged"))
+
       toast({
         title: "Bookmark Removed",
         description: `${result.title} removed from bookmarks`,
@@ -39,12 +49,25 @@ export function SearchResults({ results, loading, query }: SearchResultsProps) {
     } else {
       // Add bookmark
       const bookmark = {
-        ...result,
+        id: result.id,
+        address: result.title || result.subtitle,
+        value: result.value || result.totalValue || 0,
+        ownerName: result.ownerName || "Unknown Owner",
+        ownerWealth: result.ownerWealth || result.totalValue || 0,
+        confidence: result.confidence || "Medium",
         bookmarkedAt: new Date(),
+        title: result.title,
+        location: result.subtitle,
+        propertyType: result.type,
       }
+
       bookmarks.push(bookmark)
-      localStorage.setItem("search-bookmarks", JSON.stringify(bookmarks))
+      localStorage.setItem("property-bookmarks", JSON.stringify(bookmarks))
       setBookmarkedItems((prev) => [...prev, result.id])
+
+      // Dispatch custom event for header counter update
+      window.dispatchEvent(new CustomEvent("bookmarkChanged"))
+
       toast({
         title: "Bookmarked",
         description: `${result.title} added to bookmarks`,
@@ -84,10 +107,19 @@ export function SearchResults({ results, loading, query }: SearchResultsProps) {
 
   return (
     <div className="space-y-4">
-      <div className="text-sm text-gray-600 mb-4">{results.length} results found</div>
+      {/* Header with results count and view bookmarks button */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="text-sm text-gray-600">{results.length} results found</div>
+        <Link href="/bookmarks">
+          <Button variant="outline" size="sm" className="flex items-center gap-2">
+            <Bookmark className="h-4 w-4" />
+            View Bookmarks
+          </Button>
+        </Link>
+      </div>
 
       {results.map((result, index) => (
-        <Card key={index} className="hover:shadow-md transition-shadow cursor-pointer">
+        <Card key={`${result.id}-${index}`} className="hover:shadow-md transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -189,11 +221,12 @@ export function SearchResults({ results, loading, query }: SearchResultsProps) {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleBookmark(result)
-                    }}
-                    className={bookmarkedItems.includes(result.id) ? "text-red-600 border-red-600" : ""}
+                    onClick={(e) => handleBookmark(result, e)}
+                    className={`transition-colors ${
+                      bookmarkedItems.includes(result.id)
+                        ? "text-red-600 border-red-600 bg-red-50 hover:bg-red-100"
+                        : "hover:text-red-600 hover:border-red-600"
+                    }`}
                   >
                     <Heart className={`h-4 w-4 ${bookmarkedItems.includes(result.id) ? "fill-current" : ""}`} />
                   </Button>
