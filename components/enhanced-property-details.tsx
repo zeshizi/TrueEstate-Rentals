@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -28,6 +28,12 @@ interface EnhancedPropertyDetailsProps {
 export function EnhancedPropertyDetails({ property }: EnhancedPropertyDetailsProps) {
   const [isBookmarked, setIsBookmarked] = useState(false)
   const { toast } = useToast()
+
+  useEffect(() => {
+    // Check if property is already bookmarked
+    const bookmarks = JSON.parse(localStorage.getItem("property-bookmarks") || "[]")
+    setIsBookmarked(bookmarks.some((b: any) => b.id === property.id))
+  }, [property.id])
 
   const handleBookmark = () => {
     const bookmarks = JSON.parse(localStorage.getItem("property-bookmarks") || "[]")

@@ -1,11 +1,11 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { MapPin, DollarSign, Bookmark, Download, ExternalLink } from "lucide-react"
-import { PropertyReviews } from "./property-reviews"
-import { PropertyRemarks } from "./property-remarks"
+import { useToast } from "@/hooks/use-toast"
 
 interface PropertyDetailsProps {
   property: {
@@ -18,60 +18,42 @@ interface PropertyDetailsProps {
   }
 }
 
-const mockReviews = [
-  {
-    id: "1",
-    userId: "user1",
-    userName: "Sarah Johnson",
-    rating: 5,
-    title: "Exceptional investment opportunity",
-    comment:
-      "This property represents outstanding value in the current market. The location is prime and the owner's wealth profile suggests stability.",
-    date: "2024-01-15",
-    verified: true,
-    helpful: 12,
-    category: "investment" as const,
-  },
-  {
-    id: "2",
-    userId: "user2",
-    userName: "Michael Chen",
-    rating: 4,
-    title: "Great location, solid fundamentals",
-    comment: "Excellent neighborhood with strong appreciation potential. Property condition is well-maintained.",
-    date: "2024-01-10",
-    verified: true,
-    helpful: 8,
-    category: "location" as const,
-  },
-]
-
-const mockRemarks = [
-  {
-    id: "1",
-    type: "appraiser" as const,
-    author: "David Wilson, Certified Appraiser",
-    content: "Property valuation aligns with recent comparable sales. Market conditions favor continued appreciation.",
-    date: "2024-01-20",
-    isPublic: true,
-    category: "pricing" as const,
-  },
-  {
-    id: "2",
-    type: "agent" as const,
-    author: "Lisa Rodriguez, Luxury Real Estate Specialist",
-    content:
-      "Owner is motivated and open to reasonable offers. Property has been well-maintained with recent upgrades.",
-    date: "2024-01-18",
-    isPublic: true,
-    category: "market" as const,
-  },
-]
-
 export function PropertyDetails({ property }: PropertyDetailsProps) {
+  const [isBookmarked, setIsBookmarked] = useState(false)
+  const { toast } = useToast()
+
+  useEffect(() => {
+    // Check if property is already bookmarked
+    const bookmarks = JSON.parse(localStorage.getItem("property-bookmarks") || "[]")
+    setIsBookmarked(bookmarks.some((b: any) => b.id === property.id))
+  }, [property.id])
+
   const handleBookmark = () => {
-    // Implement bookmark functionality
-    console.log("Bookmarking property:", property.id)
+    const bookmarks = JSON.parse(localStorage.getItem("property-bookmarks") || "[]")
+
+    if (isBookmarked) {
+      // Remove bookmark
+      const updated = bookmarks.filter((b: any) => b.id !== property.id)
+      localStorage.setItem("property-bookmarks", JSON.stringify(updated))
+      setIsBookmarked(false)
+      toast({
+        title: "Bookmark Removed",
+        description: "Property removed from your bookmarks",
+      })
+    } else {
+      // Add bookmark
+      const bookmark = {
+        ...property,
+        bookmarkedAt: new Date(),
+      }
+      bookmarks.push(bookmark)
+      localStorage.setItem("property-bookmarks", JSON.stringify(bookmarks))
+      setIsBookmarked(true)
+      toast({
+        title: "Property Bookmarked",
+        description: "Property added to your bookmarks",
+      })
+    }
   }
 
   const handleExport = () => {
@@ -85,8 +67,8 @@ export function PropertyDetails({ property }: PropertyDetailsProps) {
         <div className="flex items-start justify-between">
           <CardTitle className="text-lg">Property Details</CardTitle>
           <div className="flex space-x-2">
-            <Button variant="outline" size="sm" onClick={handleBookmark}>
-              <Bookmark className="h-4 w-4" />
+            <Button variant={isBookmarked ? "default" : "outline"} size="sm" onClick={handleBookmark}>
+              <Bookmark className={`h-4 w-4 ${isBookmarked ? "fill-current" : ""}`} />
             </Button>
             <Button variant="outline" size="sm" onClick={handleExport}>
               <Download className="h-4 w-4" />
@@ -168,20 +150,6 @@ export function PropertyDetails({ property }: PropertyDetailsProps) {
           <ExternalLink className="h-4 w-4 mr-2" />
           View Full Report
         </Button>
-
-        <div className="border-t pt-4 mt-6">
-          <PropertyReviews
-            propertyId={property.id}
-            reviews={mockReviews}
-            averageRating={4.5}
-            totalReviews={24}
-            ratingBreakdown={{ 5: 15, 4: 6, 3: 2, 2: 1, 1: 0 }}
-          />
-        </div>
-
-        <div className="border-t pt-4 mt-6">
-          <PropertyRemarks propertyId={property.id} remarks={mockRemarks} canAddRemark={true} userRole="agent" />
-        </div>
       </CardContent>
     </Card>
   )

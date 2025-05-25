@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Heart, Share2, MapPin, Bed, Bath, Square, DollarSign, Eye, Filter } from "lucide-react"
 import Link from "next/link"
+import { useToast } from "@/hooks/use-toast"
 import type { Property } from "@/components/property-card"
 
 interface ModernPropertyGridProps {
@@ -16,15 +17,51 @@ interface ModernPropertyGridProps {
 export function ModernPropertyGrid({ properties = [], loading = false }: ModernPropertyGridProps) {
   const [favorites, setFavorites] = useState<Set<string>>(new Set())
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const { toast } = useToast()
 
-  const toggleFavorite = (propertyId: string) => {
-    const newFavorites = new Set(favorites)
-    if (newFavorites.has(propertyId)) {
-      newFavorites.delete(propertyId)
+  useEffect(() => {
+    // Load favorites from localStorage
+    const bookmarks = JSON.parse(localStorage.getItem("property-bookmarks") || "[]")
+    const bookmarkedIds = new Set(bookmarks.map((b: any) => b.id))
+    setFavorites(bookmarkedIds)
+  }, [])
+
+  const toggleFavorite = (property: Property) => {
+    const bookmarks = JSON.parse(localStorage.getItem("property-bookmarks") || "[]")
+    const isCurrentlyFavorited = favorites.has(property.id)
+
+    if (isCurrentlyFavorited) {
+      // Remove from favorites
+      const updated = bookmarks.filter((b: any) => b.id !== property.id)
+      localStorage.setItem("property-bookmarks", JSON.stringify(updated))
+      setFavorites((prev) => {
+        const newFavorites = new Set(prev)
+        newFavorites.delete(property.id)
+        return newFavorites
+      })
+      toast({
+        title: "Bookmark Removed",
+        description: "Property removed from your bookmarks",
+      })
     } else {
-      newFavorites.add(propertyId)
+      // Add to favorites
+      const bookmark = {
+        id: property.id,
+        address: property.address,
+        value: property.price,
+        ownerName: property.owner?.name || "Unknown",
+        ownerWealth: property.owner?.estimatedNetWorth || 0,
+        confidence: "High" as const,
+        bookmarkedAt: new Date(),
+      }
+      bookmarks.push(bookmark)
+      localStorage.setItem("property-bookmarks", JSON.stringify(bookmarks))
+      setFavorites((prev) => new Set(prev).add(property.id))
+      toast({
+        title: "Property Bookmarked",
+        description: "Property added to your bookmarks",
+      })
     }
-    setFavorites(newFavorites)
   }
 
   const formatPrice = (price: number) => {
@@ -122,7 +159,7 @@ export function ModernPropertyGrid({ properties = [], loading = false }: ModernP
                   size="sm"
                   variant="secondary"
                   className="bg-white/90 hover:bg-white h-8 w-8 p-0"
-                  onClick={() => toggleFavorite(property.id)}
+                  onClick={() => toggleFavorite(property)}
                 >
                   <Heart
                     className={`h-4 w-4 ${favorites.has(property.id) ? "fill-red-500 text-red-500" : "text-gray-600"}`}

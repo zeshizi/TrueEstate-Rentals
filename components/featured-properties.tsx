@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Heart, Share2, Eye, MapPin, Bed, Bath, Square, TrendingUp } from "lucide-react"
 import Link from "next/link"
+import { useToast } from "@/hooks/use-toast"
 
 interface Property {
   id: string
@@ -26,8 +27,14 @@ export function FeaturedProperties() {
   const [properties, setProperties] = useState<Property[]>([])
   const [favorites, setFavorites] = useState<Set<string>>(new Set())
   const [isLoading, setIsLoading] = useState(true)
+  const { toast } = useToast()
 
   useEffect(() => {
+    // Load favorites from localStorage
+    const bookmarks = JSON.parse(localStorage.getItem("property-bookmarks") || "[]")
+    const bookmarkedIds = new Set(bookmarks.map((b: any) => b.id))
+    setFavorites(bookmarkedIds)
+
     // Mock data for featured properties
     const mockProperties: Property[] = [
       {
@@ -90,16 +97,42 @@ export function FeaturedProperties() {
     }, 1000)
   }, [])
 
-  const toggleFavorite = (propertyId: string) => {
-    setFavorites((prev) => {
-      const newFavorites = new Set(prev)
-      if (newFavorites.has(propertyId)) {
-        newFavorites.delete(propertyId)
-      } else {
-        newFavorites.add(propertyId)
+  const toggleFavorite = (property: Property) => {
+    const bookmarks = JSON.parse(localStorage.getItem("property-bookmarks") || "[]")
+    const isCurrentlyFavorited = favorites.has(property.id)
+
+    if (isCurrentlyFavorited) {
+      // Remove from favorites
+      const updated = bookmarks.filter((b: any) => b.id !== property.id)
+      localStorage.setItem("property-bookmarks", JSON.stringify(updated))
+      setFavorites((prev) => {
+        const newFavorites = new Set(prev)
+        newFavorites.delete(property.id)
+        return newFavorites
+      })
+      toast({
+        title: "Bookmark Removed",
+        description: "Property removed from your bookmarks",
+      })
+    } else {
+      // Add to favorites
+      const bookmark = {
+        id: property.id,
+        address: property.title,
+        value: property.price,
+        ownerName: "Property Owner",
+        ownerWealth: Number.parseInt(property.ownerWealth.replace(/[^0-9]/g, "")) * 1000000,
+        confidence: "High" as const,
+        bookmarkedAt: new Date(),
       }
-      return newFavorites
-    })
+      bookmarks.push(bookmark)
+      localStorage.setItem("property-bookmarks", JSON.stringify(bookmarks))
+      setFavorites((prev) => new Set(prev).add(property.id))
+      toast({
+        title: "Property Bookmarked",
+        description: "Property added to your bookmarks",
+      })
+    }
   }
 
   const formatPrice = (price: number) => {
@@ -164,7 +197,7 @@ export function FeaturedProperties() {
                     size="sm"
                     variant="secondary"
                     className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
-                    onClick={() => toggleFavorite(property.id)}
+                    onClick={() => toggleFavorite(property)}
                   >
                     <Heart
                       className={`h-4 w-4 ${
