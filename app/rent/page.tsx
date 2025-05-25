@@ -191,26 +191,76 @@ export default function RentPage() {
       setLoading(true)
       setShowResults(true)
 
-      try {
-        const response = await fetch(
-          `/api/search?q=${encodeURIComponent(searchQuery)}&type=rent&category=${activeCategory}`,
-        )
-        const data = await response.json()
+      // Use only mock data - no API calls
+      const allRentals = featuredRentals.filter((rental) => {
+        if (activeCategory === "apartments") {
+          return rental.type === "apartment"
+        }
+        return rental.type === activeCategory
+      })
 
-        const rentalProperties = data.results || []
-        setSearchResults(rentalProperties)
-      } catch (error) {
-        console.error("Search error:", error)
-        setSearchResults([])
-      } finally {
-        setLoading(false)
-      }
+      const mockResults = allRentals
+        .filter((property) => {
+          const queryLower = searchQuery.toLowerCase()
+          return (
+            property.title.toLowerCase().includes(queryLower) ||
+            property.location.toLowerCase().includes(queryLower) ||
+            queryLower.includes("all")
+          )
+        })
+        .map((property) => ({
+          id: property.id,
+          title: property.title,
+          location: property.location,
+          price: property.price,
+          beds: property.beds,
+          baths: property.baths,
+          sqft: property.sqft,
+          type: "property",
+          category: property.type,
+          image: property.image,
+          rating: property.rating,
+          verified: property.verified,
+          amenities: property.amenities,
+          studentFriendly: property.studentFriendly,
+          roommates: property.roommates,
+          capacity: property.capacity,
+          meals: property.meals,
+        }))
+
+      setSearchResults(mockResults)
+      setLoading(false)
     }
   }
 
   const handleBrowseAll = () => {
-    setSearchQuery(`all ${activeCategory}`)
-    handleSearch()
+    setLoading(true)
+    setShowResults(true)
+
+    // Generate mock search results based on category
+    const mockResults = getFilteredRentals().map((property, index) => ({
+      id: property.id,
+      title: property.title,
+      location: property.location,
+      price: property.price,
+      beds: property.beds,
+      baths: property.baths,
+      sqft: property.sqft,
+      type: "property",
+      category: property.type,
+      image: property.image,
+      rating: property.rating,
+      verified: property.verified,
+      amenities: property.amenities,
+      studentFriendly: property.studentFriendly,
+      roommates: property.roommates,
+      capacity: property.capacity,
+      meals: property.meals,
+    }))
+
+    setSearchResults(mockResults)
+    setSearchQuery(`All ${rentalCategories.find((c) => c.id === activeCategory)?.label}`)
+    setLoading(false)
   }
 
   const formatPrice = (price: number) => {

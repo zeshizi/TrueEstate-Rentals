@@ -106,24 +106,64 @@ export default function BuyPage() {
     }
   }, [searchParams])
 
+  const handleBrowseAll = () => {
+    setLoading(true)
+    setShowResults(true)
+
+    // Generate mock search results for buy properties
+    const mockResults = featuredProperties.map((property, index) => ({
+      id: property.id,
+      title: property.title,
+      location: property.location,
+      price: property.price,
+      beds: property.beds,
+      baths: property.baths,
+      sqft: property.sqft,
+      type: "property",
+      category: "buy",
+      image: property.image,
+      investmentGrade: property.investmentGrade,
+      ownerWealth: property.ownerWealth,
+    }))
+
+    setSearchResults(mockResults)
+    setSearchQuery("All Properties for Sale")
+    setLoading(false)
+  }
+
+  // Also update the existing handleSearch function to handle "all properties" query
   const handleSearch = async () => {
     if (searchQuery.trim()) {
       setLoading(true)
       setShowResults(true)
 
-      try {
-        const response = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}&type=buy`)
-        const data = await response.json()
+      // Use only mock data - no API calls
+      const mockResults = featuredProperties
+        .filter((property) => {
+          const queryLower = searchQuery.toLowerCase()
+          return (
+            property.title.toLowerCase().includes(queryLower) ||
+            property.location.toLowerCase().includes(queryLower) ||
+            queryLower.includes("all")
+          )
+        })
+        .map((property) => ({
+          id: property.id,
+          title: property.title,
+          location: property.location,
+          price: property.price,
+          beds: property.beds,
+          baths: property.baths,
+          sqft: property.sqft,
+          type: "property",
+          category: "buy",
+          image: property.image,
+          investmentGrade: property.investmentGrade,
+          ownerWealth: property.ownerWealth,
+        }))
 
-        // Filter for buy properties and add realistic pricing
-        const buyProperties = data.results?.filter((r: any) => r.type === "property") || []
-        setSearchResults(buyProperties)
-      } catch (error) {
-        console.error("Search error:", error)
-        setSearchResults([])
-      } finally {
-        setLoading(false)
-      }
+      setSearchResults(mockResults)
+      setLoading(false)
     }
   }
 
@@ -302,14 +342,7 @@ export default function BuyPage() {
           </div>
 
           <div className="text-center mt-12">
-            <Button
-              size="lg"
-              className="bg-emerald-600 hover:bg-emerald-700"
-              onClick={() => {
-                setSearchQuery("all properties")
-                handleSearch()
-              }}
-            >
+            <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700" onClick={handleBrowseAll}>
               Browse All Properties
             </Button>
           </div>
