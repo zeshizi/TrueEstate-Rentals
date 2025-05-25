@@ -215,9 +215,11 @@ export function SearchResults({ results, loading, query }: SearchResultsProps) {
 
                 {/* Action Buttons */}
                 <div className="flex items-center gap-2 mt-4">
-                  <Button variant="outline" size="sm">
-                    View Details
-                  </Button>
+                  <Link href={`/properties/${result.id}`}>
+                    <Button variant="outline" size="sm">
+                      View Details
+                    </Button>
+                  </Link>
                   <Button
                     variant="outline"
                     size="sm"

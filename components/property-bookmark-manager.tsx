@@ -58,6 +58,10 @@ export function PropertyBookmarkManager() {
     const updated = bookmarks.filter((b) => b.id !== propertyId)
     setBookmarks(updated)
     localStorage.setItem("property-bookmarks", JSON.stringify(updated))
+
+    // Dispatch custom event for header counter update
+    window.dispatchEvent(new CustomEvent("bookmarkChanged"))
+
     toast({
       title: "Bookmark Removed",
       description: "Property removed from your bookmarks",
@@ -102,6 +106,10 @@ export function PropertyBookmarkManager() {
   const clearAllBookmarks = () => {
     setBookmarks([])
     localStorage.removeItem("property-bookmarks")
+
+    // Dispatch custom event for header counter update
+    window.dispatchEvent(new CustomEvent("bookmarkChanged"))
+
     toast({
       title: "All Bookmarks Cleared",
       description: "All bookmarked properties have been removed",
