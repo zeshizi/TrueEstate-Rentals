@@ -171,13 +171,14 @@ export function AdvancedSearchFilters({ onFiltersChange, onSearch }: AdvancedSea
             />
           </div>
 
+          {/* Enhanced Price Range with better mobile support */}
           <div>
             <Label className="flex items-center gap-2">
               <DollarSign className="h-4 w-4" />
               Price Range
             </Label>
             <div className="px-3 py-2">
-              {/* Custom Dual Range Slider */}
+              {/* Enhanced Dual Range Slider with better mobile support */}
               <div className="relative mb-4">
                 <input
                   type="range"
@@ -190,7 +191,8 @@ export function AdvancedSearchFilters({ onFiltersChange, onSearch }: AdvancedSea
                     const newMax = Math.max(newMin, filters.priceRange[1])
                     handlePriceRangeChange([newMin, newMax])
                   }}
-                  className="absolute w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer range-slider"
+                  className="absolute w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer range-slider-enhanced"
+                  style={{ background: "transparent" }}
                 />
                 <input
                   type="range"
@@ -203,11 +205,12 @@ export function AdvancedSearchFilters({ onFiltersChange, onSearch }: AdvancedSea
                     const newMin = Math.min(filters.priceRange[0], newMax)
                     handlePriceRangeChange([newMin, newMax])
                   }}
-                  className="absolute w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer range-slider"
+                  className="absolute w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer range-slider-enhanced"
+                  style={{ background: "transparent" }}
                 />
-                <div className="relative h-2 bg-gray-200 rounded-lg">
+                <div className="relative h-3 bg-gray-200 rounded-lg">
                   <div
-                    className="absolute h-2 bg-blue-600 rounded-lg"
+                    className="absolute h-3 bg-blue-600 rounded-lg"
                     style={{
                       left: `${(filters.priceRange[0] / 15000000) * 100}%`,
                       width: `${((filters.priceRange[1] - filters.priceRange[0]) / 15000000) * 100}%`,
@@ -216,8 +219,8 @@ export function AdvancedSearchFilters({ onFiltersChange, onSearch }: AdvancedSea
                 </div>
               </div>
               <div className="flex justify-between text-sm text-gray-500">
-                <span>{formatPrice(filters.priceRange[0])}</span>
-                <span>{formatPrice(filters.priceRange[1])}</span>
+                <span className="font-semibold text-blue-600">{formatPrice(filters.priceRange[0])}</span>
+                <span className="font-semibold text-blue-600">{formatPrice(filters.priceRange[1])}</span>
               </div>
             </div>
           </div>
@@ -505,28 +508,45 @@ export function AdvancedSearchFilters({ onFiltersChange, onSearch }: AdvancedSea
         </div>
       </CardContent>
 
-      {/* Custom CSS for range sliders */}
+      {/* Enhanced CSS for range sliders */}
       <style jsx>{`
-        .range-slider::-webkit-slider-thumb {
+        .range-slider::-webkit-slider-thumb,
+        .range-slider-enhanced::-webkit-slider-thumb {
           appearance: none;
-          height: 20px;
-          width: 20px;
+          height: 24px;
+          width: 24px;
           border-radius: 50%;
           background: #2563eb;
           cursor: pointer;
-          border: 2px solid #ffffff;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          border: 3px solid #ffffff;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
           z-index: 10;
         }
         
-        .range-slider::-moz-range-thumb {
-          height: 20px;
-          width: 20px;
+        .range-slider::-moz-range-thumb,
+        .range-slider-enhanced::-moz-range-thumb {
+          height: 24px;
+          width: 24px;
           border-radius: 50%;
           background: #2563eb;
           cursor: pointer;
-          border: 2px solid #ffffff;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          border: 3px solid #ffffff;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Enhanced mobile touch targets */
+        @media (max-width: 640px) {
+          .range-slider-enhanced::-webkit-slider-thumb {
+            height: 28px;
+            width: 28px;
+            border: 4px solid #ffffff;
+          }
+          
+          .range-slider-enhanced::-moz-range-thumb {
+            height: 28px;
+            width: 28px;
+            border: 4px solid #ffffff;
+          }
         }
       `}</style>
     </Card>

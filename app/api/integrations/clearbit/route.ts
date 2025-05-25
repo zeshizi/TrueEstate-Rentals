@@ -1,275 +1,133 @@
-// This API uses mock data by default and falls back to RapidAPI only when RAPIDAPI_KEY is configured
+import { NextResponse } from "next/server"
 
-import { type NextRequest, NextResponse } from "next/server"
-
-// Using People Data Labs API via RapidAPI as Clearbit alternative
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
-  const companyDomain = searchParams.get("domain")
-  const personEmail = searchParams.get("email")
-  const companyName = searchParams.get("company")
+  const domain = searchParams.get("domain")
+  const email = searchParams.get("email")
 
-  try {
-    // Company enrichment using Global Company Data API (RapidAPI)
-    if (companyDomain || companyName) {
-      const companyData = await enrichCompanyDataRapidAPI(companyDomain, companyName)
-      if (companyData) {
-        return NextResponse.json({ company: companyData })
-      }
-    }
+  console.log("🏢 Clearbit API - Using comprehensive mock data")
 
-    // Person enrichment using People Data Labs API (RapidAPI)
-    if (personEmail) {
-      const personData = await enrichPersonDataRapidAPI(personEmail)
-      if (personData) {
-        return NextResponse.json({ person: personData })
-      }
-    }
-
-    return NextResponse.json({ error: "No data found" }, { status: 404 })
-  } catch (error) {
-    console.error("RapidAPI enrichment error:", error)
-    return getMockEnrichmentData(companyDomain, personEmail, companyName)
-  }
-}
-
-async function enrichCompanyDataRapidAPI(domain?: string | null, companyName?: string | null) {
-  if (!process.env.RAPIDAPI_KEY) {
-    console.warn("RAPIDAPI_KEY not found, using mock data")
-    return getMockEnrichmentData(domain, null, companyName).then((res) => res.company || null)
-  }
-  try {
-    // Global Company Data API via RapidAPI
-    const searchQuery = domain || companyName
-    if (!searchQuery) return null
-
-    const response = await fetch(`https://global-company-data-api.p.rapidapi.com/company/search`, {
-      method: "POST",
-      headers: {
-        "X-RapidAPI-Key": process.env.RAPIDAPI_KEY!,
-        "X-RapidAPI-Host": "global-company-data-api.p.rapidapi.com",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        query: searchQuery,
-        limit: 1,
-      }),
-    })
-
-    if (response.ok) {
-      const data = await response.json()
-      if (data.companies && data.companies.length > 0) {
-        const company = data.companies[0]
-        return {
-          name: company.name,
-          domain: company.domain || domain,
-          industry: company.industry || "Unknown",
-          employees: company.employee_count,
-          revenue: company.annual_revenue,
-          founded: company.founded_year,
-          location: `${company.city}, ${company.country}`,
-          description: company.description,
-          website: company.website || `https://${domain}`,
-          linkedin: company.linkedin_url,
-          twitter: company.twitter_url,
-          source: "Global Company Data API (RapidAPI)",
-        }
-      }
-    }
-
-    // Fallback to Company Enrichment API
-    return await fallbackCompanyEnrichment(domain, companyName)
-  } catch (error) {
-    console.error("Global Company Data API failed:", error)
-    return await fallbackCompanyEnrichment(domain, companyName)
-  }
-}
-
-async function enrichPersonDataRapidAPI(email: string) {
-  if (!process.env.RAPIDAPI_KEY) {
-    console.warn("RAPIDAPI_KEY not found, using mock data")
-    return getMockEnrichmentData(null, email, null).then((res) => res.person || null)
-  }
-  try {
-    // People Data Labs API via RapidAPI
-    const response = await fetch(`https://people-data-labs-api.p.rapidapi.com/person/enrich`, {
-      method: "POST",
-      headers: {
-        "X-RapidAPI-Key": process.env.RAPIDAPI_KEY!,
-        "X-RapidAPI-Host": "people-data-labs-api.p.rapidapi.com",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: email,
-      }),
-    })
-
-    if (response.ok) {
-      const data = await response.json()
-      if (data.person) {
-        const person = data.person
-        console.log("✅ People Data Labs API successful:", { email, source: "People Data Labs" })
-        return {
-          name: `${person.first_name} ${person.last_name}`,
-          email: email,
-          title: person.job_title,
-          company: person.job_company_name,
-          industry: person.job_company_industry,
-          location: `${person.location_city}, ${person.location_country}`,
-          linkedin: person.linkedin_url,
-          twitter: person.twitter_url,
-          experience: person.experience?.map((exp: any) => ({
-            company: exp.company_name,
-            title: exp.title,
-            duration: `${exp.start_date} - ${exp.end_date || "Present"}`,
-          })),
-          education: person.education?.map((edu: any) => ({
-            school: edu.school_name,
-            degree: edu.degree_name,
-            field: edu.field_of_study,
-          })),
-          source: "People Data Labs API (RapidAPI)",
-        }
-      }
-    }
-
-    // Fallback to Hunter.io for basic email verification
-    return await fallbackPersonEnrichment(email)
-  } catch (error) {
-    console.error("People Data Labs API failed:", error)
-    return await fallbackPersonEnrichment(email)
-  }
-}
-
-async function fallbackCompanyEnrichment(domain?: string | null, companyName?: string | null) {
-  try {
-    // Company Enrichment API via RapidAPI (alternative)
-    const searchQuery = domain || companyName
-    if (!searchQuery) return null
-
-    const response = await fetch(`https://company-enrichment-api.p.rapidapi.com/enrich`, {
-      method: "POST",
-      headers: {
-        "X-RapidAPI-Key": process.env.RAPIDAPI_KEY!,
-        "X-RapidAPI-Host": "company-enrichment-api.p.rapidapi.com",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        domain: domain || `${companyName?.toLowerCase().replace(/\s+/g, "")}.com`,
-      }),
-    })
-
-    if (response.ok) {
-      const data = await response.json()
-      return {
-        name: data.name || companyName,
-        domain: data.domain || domain,
-        industry: data.industry || "Technology",
-        employees: data.employees,
-        location: data.location,
-        description: data.description,
-        website: data.website,
-        source: "Company Enrichment API (RapidAPI)",
-      }
-    }
-
-    // Final fallback to basic analysis
-    return await getBasicCompanyInfo(domain, companyName)
-  } catch (error) {
-    console.error("Fallback company enrichment failed:", error)
-    return await getBasicCompanyInfo(domain, companyName)
-  }
-}
-
-async function fallbackPersonEnrichment(email: string) {
-  try {
-    // Use Hunter.io API (already configured) for email verification
-    const hunterResponse = await fetch(`/api/integrations/hunter-io?email=${encodeURIComponent(email)}&action=verify`)
-
-    if (hunterResponse.ok) {
-      const hunterData = await hunterResponse.json()
-      return {
-        name: extractNameFromEmail(email),
-        email: email,
-        company: hunterData.company || "Unknown",
-        verified: hunterData.result === "deliverable",
-        source: "Hunter.io + Analysis",
-      }
-    }
-
-    return null
-  } catch (error) {
-    console.error("Fallback person enrichment failed:", error)
-    return null
-  }
-}
-
-async function getBasicCompanyInfo(domain?: string | null, companyName?: string | null) {
-  // Basic company info extraction
-  return {
-    name: companyName || domain?.replace(/\.(com|org|net|io)$/, "") || "Unknown Company",
-    domain: domain,
-    industry: "Technology", // Default assumption
-    source: "Basic Analysis",
-    website: domain ? `https://${domain}` : undefined,
-    description: `Company ${domain ? `operating at ${domain}` : companyName || ""}`,
-  }
-}
-
-function extractNameFromEmail(email: string): string {
-  const localPart = email.split("@")[0]
-  return localPart
-    .split(/[._-]/)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ")
-}
-
-function getMockEnrichmentData(
-  companyDomain?: string | null,
-  personEmail?: string | null,
-  companyName?: string | null,
-) {
+  // Generate realistic company and person data
   const mockCompanyData = {
-    name: companyName || "Smith Enterprises LLC",
-    domain: companyDomain || "smithenterprises.com",
-    industry: "Real Estate Investment",
-    employees: 25,
-    revenue: 50000000,
-    founded: 2018,
-    location: "Beverly Hills, CA",
-    description: "Real estate investment and development company",
-    website: "https://smithenterprises.com",
-    linkedin: "https://linkedin.com/company/smith-enterprises",
-    source: "Mock Data",
+    name: domain
+      ? `${domain.split(".")[0].charAt(0).toUpperCase() + domain.split(".")[0].slice(1)} Corp`
+      : "Sample Company",
+    domain: domain || "example.com",
+    category: {
+      sector: "Technology",
+      industryGroup: "Software & Services",
+      industry: "Software",
+      subIndustry: "Application Software",
+    },
+    metrics: {
+      employees: Math.floor(Math.random() * 10000) + 100,
+      employeesRange: "100-500",
+      marketCap: Math.floor(Math.random() * 10000000000) + 1000000000,
+      raised: Math.floor(Math.random() * 100000000) + 10000000,
+      annualRevenue: Math.floor(Math.random() * 500000000) + 50000000,
+    },
+    location: {
+      city: "San Francisco",
+      state: "California",
+      country: "United States",
+      streetNumber: "123",
+      streetName: "Market Street",
+      postalCode: "94105",
+    },
+    tech: ["React", "Node.js", "AWS", "MongoDB", "TypeScript"],
+    founded: Math.floor(Math.random() * 30) + 1990,
+    description: "Leading technology company focused on innovative solutions.",
+    logo: `/placeholder.svg?height=100&width=100&query=company logo`,
+    website: domain || "https://example.com",
+    phone: "+1-555-123-4567",
+    emailProvider: false,
+    type: "private",
   }
 
-  const mockPersonData = {
-    name: personEmail ? extractNameFromEmail(personEmail) : "John Smith",
-    title: "Chief Executive Officer",
-    company: companyName || "Smith Enterprises LLC",
-    email: personEmail || "john.smith@smithenterprises.com",
-    location: "Beverly Hills, CA",
-    linkedin: "https://linkedin.com/in/john-smith",
-    experience: [
-      {
-        company: "Smith Enterprises LLC",
-        title: "CEO",
-        duration: "2018 - Present",
-      },
-    ],
-    source: "Mock Data",
-  }
-
-  if (companyDomain || companyName) {
-    return NextResponse.json({ company: mockCompanyData })
-  }
-
-  if (personEmail) {
-    return NextResponse.json({ person: mockPersonData })
-  }
+  const mockPersonData = email
+    ? {
+        email: email,
+        name: {
+          fullName: "John Smith",
+          givenName: "John",
+          familyName: "Smith",
+        },
+        location: {
+          city: "San Francisco",
+          state: "California",
+          country: "United States",
+        },
+        employment: {
+          name: mockCompanyData.name,
+          title: "Software Engineer",
+          role: "engineering",
+          seniority: "senior",
+        },
+        social: {
+          linkedin: {
+            handle: "johnsmith",
+          },
+          twitter: {
+            handle: "johnsmith",
+          },
+        },
+        avatar: `/placeholder.svg?height=150&width=150&query=professional headshot`,
+        bio: "Experienced software engineer with expertise in full-stack development.",
+      }
+    : null
 
   return NextResponse.json({
+    success: true,
     company: mockCompanyData,
     person: mockPersonData,
+    dataSource: "clearbit_mock_data",
+    timestamp: new Date().toISOString(),
+  })
+}
+
+export async function POST(request: Request) {
+  const body = await request.json()
+  const { emails } = body
+
+  console.log("🏢 Clearbit Bulk API - Using mock data for", emails?.length || 0, "emails")
+
+  const mockBulkData =
+    emails?.map((email: string, index: number) => ({
+      email,
+      person: {
+        name: {
+          fullName: `Person ${index + 1}`,
+          givenName: `First${index + 1}`,
+          familyName: `Last${index + 1}`,
+        },
+        employment: {
+          name: `Company ${index + 1}`,
+          title: ["CEO", "CTO", "VP Engineering", "Director", "Manager"][index % 5],
+          role: "engineering",
+          seniority: ["executive", "senior", "mid", "junior"][index % 4],
+        },
+        location: {
+          city: ["San Francisco", "New York", "Austin", "Seattle", "Boston"][index % 5],
+          state: ["California", "New York", "Texas", "Washington", "Massachusetts"][index % 5],
+          country: "United States",
+        },
+        netWorth: Math.floor(Math.random() * 5000000) + 500000,
+        avatar: `/placeholder.svg?height=100&width=100&query=person ${index + 1}`,
+      },
+      company: {
+        name: `Company ${index + 1}`,
+        domain: `company${index + 1}.com`,
+        employees: Math.floor(Math.random() * 1000) + 50,
+        industry: ["Technology", "Finance", "Healthcare", "Real Estate", "Manufacturing"][index % 5],
+        revenue: Math.floor(Math.random() * 100000000) + 10000000,
+      },
+    })) || []
+
+  return NextResponse.json({
+    success: true,
+    results: mockBulkData,
+    count: mockBulkData.length,
+    dataSource: "clearbit_bulk_mock_data",
+    timestamp: new Date().toISOString(),
   })
 }

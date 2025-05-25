@@ -1,205 +1,193 @@
-import { type NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 
-// People Data Labs API via RapidAPI (Clearbit alternative)
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const email = searchParams.get("email")
-  const company = searchParams.get("company")
   const name = searchParams.get("name")
+  const company = searchParams.get("company")
 
-  if (!email && !company && !name) {
-    return NextResponse.json({ error: "Email, company, or name is required" }, { status: 400 })
-  }
+  console.log("👥 People Data Labs API - Using comprehensive mock data")
 
-  try {
-    // Person enrichment
-    if (email) {
-      const personData = await enrichPersonData(email)
-      if (personData) {
-        return NextResponse.json({ person: personData })
-      }
-    }
+  const mockPersonData = {
+    id: `pdl_${Math.random().toString(36).substr(2, 9)}`,
+    full_name: name || "Sarah Johnson",
+    first_name: name?.split(" ")[0] || "Sarah",
+    last_name: name?.split(" ")[1] || "Johnson",
+    emails: [email || "sarah.johnson@example.com"],
+    phone_numbers: ["+1-555-987-6543"],
 
-    // Company enrichment
-    if (company) {
-      const companyData = await enrichCompanyData(company)
-      if (companyData) {
-        return NextResponse.json({ company: companyData })
-      }
-    }
+    job_title: "Senior Vice President",
+    job_title_role: "executive",
+    job_title_sub_role: "senior_vice_president",
+    job_title_levels: ["senior", "executive"],
 
-    return NextResponse.json({ error: "No data found" }, { status: 404 })
-  } catch (error) {
-    console.error("People Data Labs API error:", error)
-    return getMockData(email, company, name)
-  }
-}
+    job_company_name: company || "TechCorp Industries",
+    job_company_size: "1001-5000",
+    job_company_industry: "Technology",
+    job_company_location_name: "San Francisco, California, United States",
 
-async function enrichPersonData(email: string) {
-  if (!process.env.RAPIDAPI_KEY) {
-    console.warn("RAPIDAPI_KEY not found, using mock data")
-    return null
-  }
+    location_names: ["San Francisco, California, United States"],
+    location_country: "United States",
+    location_region: "California",
+    location_metro: "San Francisco Bay Area",
 
-  try {
-    const response = await fetch("https://people-data-labs-api.p.rapidapi.com/person/enrich", {
-      method: "POST",
-      headers: {
-        "X-RapidAPI-Key": process.env.RAPIDAPI_KEY!,
-        "X-RapidAPI-Host": "people-data-labs-api.p.rapidapi.com",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: email,
-      }),
-    })
+    linkedin_url: "https://linkedin.com/in/sarahjohnson",
+    linkedin_username: "sarahjohnson",
 
-    if (response.ok) {
-      const data = await response.json()
-      if (data.person) {
-        const person = data.person
-        console.log("✅ People Data Labs API successful for:", email)
+    github_url: "https://github.com/sarahjohnson",
+    github_username: "sarahjohnson",
 
-        return {
-          name: `${person.first_name || ""} ${person.last_name || ""}`.trim(),
-          email: email,
-          title: person.job_title,
-          company: person.job_company_name,
-          industry: person.job_company_industry,
-          location: person.location_name || `${person.location_city || ""}, ${person.location_country || ""}`,
-          linkedin: person.linkedin_url,
-          twitter: person.twitter_url,
-          phone: person.phone_numbers?.[0],
-          experience: person.experience?.slice(0, 3).map((exp: any) => ({
-            company: exp.company?.name,
-            title: exp.title?.name,
-            duration: `${exp.start_date || ""} - ${exp.end_date || "Present"}`,
-          })),
-          education: person.education?.slice(0, 2).map((edu: any) => ({
-            school: edu.school?.name,
-            degree: edu.degree?.name,
-            field: edu.field_of_study,
-          })),
-          skills: person.skills?.slice(0, 10),
-          interests: person.interests?.slice(0, 5),
-          source: "People Data Labs API",
-          confidence: data.likelihood || 0.8,
-        }
-      }
-    }
+    twitter_url: "https://twitter.com/sarahjohnson",
+    twitter_username: "sarahjohnson",
 
-    console.log("❌ People Data Labs API failed for:", email)
-    return null
-  } catch (error) {
-    console.error("People Data Labs API error:", error)
-    return null
-  }
-}
+    facebook_url: "https://facebook.com/sarah.johnson",
+    facebook_username: "sarah.johnson",
 
-async function enrichCompanyData(companyName: string) {
-  if (!process.env.RAPIDAPI_KEY) {
-    console.warn("RAPIDAPI_KEY not found, using mock data")
-    return null
-  }
+    work_email: email || "sarah.johnson@techcorp.com",
+    personal_emails: ["sarah.j.personal@gmail.com"],
 
-  try {
-    // Use Global Company Data API via RapidAPI
-    const response = await fetch("https://global-company-data-api.p.rapidapi.com/company/search", {
-      method: "POST",
-      headers: {
-        "X-RapidAPI-Key": process.env.RAPIDAPI_KEY!,
-        "X-RapidAPI-Host": "global-company-data-api.p.rapidapi.com",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        query: companyName,
-        limit: 1,
-      }),
-    })
+    mobile_phone: "+1-555-987-6543",
 
-    if (response.ok) {
-      const data = await response.json()
-      if (data.companies && data.companies.length > 0) {
-        const company = data.companies[0]
-        console.log("✅ Global Company Data API successful for:", companyName)
+    birth_year: 1985,
+    birth_date: "1985-03-15",
 
-        return {
-          name: company.name,
-          domain: company.domain,
-          industry: company.industry,
-          employees: company.employee_count,
-          revenue: company.annual_revenue,
-          founded: company.founded_year,
-          location: `${company.city || ""}, ${company.country || ""}`,
-          description: company.description,
-          website: company.website,
-          linkedin: company.linkedin_url,
-          twitter: company.twitter_url,
-          phone: company.phone,
-          address: company.address,
-          source: "Global Company Data API",
-          confidence: 0.9,
-        }
-      }
-    }
+    gender: "female",
 
-    console.log("❌ Global Company Data API failed for:", companyName)
-    return null
-  } catch (error) {
-    console.error("Global Company Data API error:", error)
-    return null
-  }
-}
+    location_address_line_2: "Suite 400",
+    location_address_line_1: "123 Market Street",
+    location_postal_code: "94105",
 
-function getMockData(email?: string | null, company?: string | null, name?: string | null) {
-  if (email) {
-    return NextResponse.json({
-      person: {
-        name: extractNameFromEmail(email),
-        email: email,
-        title: "Senior Executive",
-        company: "Premium Holdings LLC",
-        industry: "Real Estate Investment",
-        location: "Beverly Hills, CA",
-        linkedin: "https://linkedin.com/in/executive",
-        experience: [
-          {
-            company: "Premium Holdings LLC",
-            title: "Senior Executive",
-            duration: "2020 - Present",
+    summary:
+      "Experienced technology executive with over 15 years in software development and team leadership. Specializes in scaling engineering organizations and driving product innovation.",
+
+    experience: [
+      {
+        company: {
+          name: company || "TechCorp Industries",
+          size: "1001-5000",
+          industry: "Technology",
+          location: {
+            name: "San Francisco, California, United States",
           },
-        ],
-        source: "Mock Data (People Data Labs Alternative)",
-        confidence: 0.7,
+        },
+        title: {
+          name: "Senior Vice President of Engineering",
+          role: "executive",
+          sub_role: "senior_vice_president",
+        },
+        start_date: "2020-01-01",
+        end_date: null,
+        is_primary: true,
       },
-    })
+      {
+        company: {
+          name: "InnovateTech Solutions",
+          size: "501-1000",
+          industry: "Technology",
+        },
+        title: {
+          name: "Director of Engineering",
+          role: "management",
+          sub_role: "director",
+        },
+        start_date: "2017-06-01",
+        end_date: "2019-12-31",
+      },
+    ],
+
+    education: [
+      {
+        school: {
+          name: "Stanford University",
+          type: "university",
+        },
+        degrees: ["Master of Science"],
+        majors: ["Computer Science"],
+        start_date: "2005-09-01",
+        end_date: "2007-06-01",
+      },
+      {
+        school: {
+          name: "UC Berkeley",
+          type: "university",
+        },
+        degrees: ["Bachelor of Science"],
+        majors: ["Computer Science"],
+        start_date: "2001-09-01",
+        end_date: "2005-06-01",
+      },
+    ],
+
+    skills: [
+      "JavaScript",
+      "Python",
+      "React",
+      "Node.js",
+      "AWS",
+      "Docker",
+      "Kubernetes",
+      "Team Leadership",
+      "Product Management",
+      "Agile",
+    ],
+
+    interests: [
+      "Artificial Intelligence",
+      "Machine Learning",
+      "Startups",
+      "Venture Capital",
+      "Open Source",
+      "Women in Tech",
+    ],
+
+    industry: "Technology",
+
+    net_worth: Math.floor(Math.random() * 5000000) + 1000000,
+
+    likelihood: 0.95,
+
+    data_addendum: {
+      real_estate_properties: Math.floor(Math.random() * 5) + 1,
+      estimated_property_value: Math.floor(Math.random() * 3000000) + 500000,
+      investment_portfolio_size: Math.floor(Math.random() * 2000000) + 200000,
+    },
   }
 
-  if (company) {
-    return NextResponse.json({
-      company: {
-        name: company,
-        domain: `${company.toLowerCase().replace(/\s+/g, "")}.com`,
-        industry: "Real Estate",
-        employees: 150,
-        revenue: 25000000,
-        founded: 2015,
-        location: "Los Angeles, CA",
-        description: `${company} is a leading real estate investment company.`,
-        website: `https://${company.toLowerCase().replace(/\s+/g, "")}.com`,
-        source: "Mock Data (Global Company Data Alternative)",
-        confidence: 0.7,
-      },
-    })
-  }
-
-  return NextResponse.json({ error: "No data available" }, { status: 404 })
+  return NextResponse.json({
+    status: 200,
+    data: mockPersonData,
+    dataSource: "people_data_labs_mock",
+    timestamp: new Date().toISOString(),
+  })
 }
 
-function extractNameFromEmail(email: string): string {
-  const localPart = email.split("@")[0]
-  return localPart
-    .split(/[._-]/)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ")
+export async function POST(request: Request) {
+  const body = await request.json()
+  const { requests } = body
+
+  console.log("👥 People Data Labs Bulk API - Processing", requests?.length || 0, "requests")
+
+  const mockBulkResults =
+    requests?.map((req: any, index: number) => ({
+      status: 200,
+      data: {
+        id: `pdl_bulk_${index}_${Math.random().toString(36).substr(2, 9)}`,
+        full_name: req.params?.name || `Person ${index + 1}`,
+        emails: [req.params?.email || `person${index + 1}@example.com`],
+        job_title: ["CEO", "CTO", "VP Engineering", "Director", "Senior Manager"][index % 5],
+        job_company_name: req.params?.company || `Company ${index + 1}`,
+        location_names: ["San Francisco, CA", "New York, NY", "Austin, TX", "Seattle, WA"][index % 4],
+        linkedin_url: `https://linkedin.com/in/person${index + 1}`,
+        net_worth: Math.floor(Math.random() * 3000000) + 500000,
+        likelihood: 0.8 + Math.random() * 0.2,
+      },
+    })) || []
+
+  return NextResponse.json({
+    status: 200,
+    results: mockBulkResults,
+    count: mockBulkResults.length,
+    dataSource: "people_data_labs_bulk_mock",
+    timestamp: new Date().toISOString(),
+  })
 }
