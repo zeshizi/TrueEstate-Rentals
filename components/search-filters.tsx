@@ -17,7 +17,7 @@ interface SearchFiltersProps {
   }) => void
 }
 
-// At the top of the SearchFilters component, add default filters
+// Update the default filters constant
 const defaultFilters = {
   minValue: 0,
   maxValue: 10000000,
@@ -27,9 +27,15 @@ const defaultFilters = {
 }
 
 export function SearchFilters({ filters = defaultFilters, onFiltersChange }: SearchFiltersProps) {
+  // Ensure filters always has default values
+  const safeFilters = {
+    ...defaultFilters,
+    ...filters,
+  }
+
   const updateFilter = (key: string, value: any) => {
     if (onFiltersChange) {
-      onFiltersChange({ ...filters, [key]: value })
+      onFiltersChange({ ...safeFilters, [key]: value })
     }
   }
 
@@ -46,7 +52,7 @@ export function SearchFilters({ filters = defaultFilters, onFiltersChange }: Sea
         <input
           type="number"
           id="minValue"
-          value={filters?.minValue || 0}
+          value={safeFilters.minValue}
           onChange={(e) => updateFilter("minValue", Number.parseInt(e.target.value))}
         />
       </div>
@@ -55,7 +61,7 @@ export function SearchFilters({ filters = defaultFilters, onFiltersChange }: Sea
         <input
           type="number"
           id="maxValue"
-          value={filters?.maxValue || 10000000}
+          value={safeFilters.maxValue}
           onChange={(e) => updateFilter("maxValue", Number.parseInt(e.target.value))}
         />
       </div>
@@ -63,7 +69,7 @@ export function SearchFilters({ filters = defaultFilters, onFiltersChange }: Sea
         <label htmlFor="propertyType">Property Type:</label>
         <select
           id="propertyType"
-          value={filters?.propertyType || "all"}
+          value={safeFilters.propertyType}
           onChange={(e) => updateFilter("propertyType", e.target.value)}
         >
           <option value="all">All</option>
@@ -75,7 +81,7 @@ export function SearchFilters({ filters = defaultFilters, onFiltersChange }: Sea
         <label htmlFor="ownerType">Owner Type:</label>
         <select
           id="ownerType"
-          value={filters?.ownerType || "all"}
+          value={safeFilters.ownerType}
           onChange={(e) => updateFilter("ownerType", e.target.value)}
         >
           <option value="all">All</option>
@@ -87,7 +93,7 @@ export function SearchFilters({ filters = defaultFilters, onFiltersChange }: Sea
         <label htmlFor="wealthRange">Wealth Range:</label>
         <select
           id="wealthRange"
-          value={filters?.wealthRange || "all"}
+          value={safeFilters.wealthRange}
           onChange={(e) => updateFilter("wealthRange", e.target.value)}
         >
           <option value="all">All</option>

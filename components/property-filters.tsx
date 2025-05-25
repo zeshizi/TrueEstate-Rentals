@@ -1,121 +1,155 @@
 "use client"
 
-import { Label } from "@/components/ui/label"
-import { Slider } from "@/components/ui/slider"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Button } from "@/components/ui/button"
-import { RotateCcw } from "lucide-react"
+import { useState } from "react"
 
 interface PropertyFiltersProps {
-  filters: {
-    minValue: number
-    maxValue: number
-    propertyType: string
-    ownerType: string
-    wealthRange: string
-  }
-  onFiltersChange: (filters: any) => void
+  onFiltersChange?: (filters: any) => void
 }
 
-function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersProps) {
-  const updateFilter = (key: string, value: any) => {
-    onFiltersChange({ ...filters, [key]: value })
-  }
+export function PropertyFilters({ onFiltersChange }: PropertyFiltersProps) {
+  const [filters, setFilters] = useState({
+    minValue: 0,
+    maxValue: 10000000,
+    propertyType: "all",
+    ownerType: "all",
+    wealthRange: "all",
+    bedrooms: 0,
+    bathrooms: 0,
+    studentFriendly: false,
+    furnished: false,
+    verified: false,
+  })
 
-  const resetFilters = () => {
-    onFiltersChange({
-      minValue: 0,
-      maxValue: 10000000,
-      propertyType: "all",
-      ownerType: "all",
-      wealthRange: "all",
-    })
+  // Add safe filter update function
+  const updateFilter = (key: string, value: any) => {
+    const newFilters = { ...filters, [key]: value }
+    setFilters(newFilters)
+    if (onFiltersChange) {
+      onFiltersChange(newFilters)
+    }
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Filters</h2>
-        <Button variant="outline" size="sm" onClick={resetFilters}>
-          <RotateCcw className="h-4 w-4 mr-2" />
-          Reset
-        </Button>
+    <div>
+      <div>
+        <label htmlFor="minValue">Min Value:</label>
+        <input
+          type="number"
+          id="minValue"
+          name="minValue"
+          value={filters.minValue}
+          onChange={(e) => updateFilter("minValue", Number.parseInt(e.target.value))}
+        />
       </div>
 
-      <div className="space-y-4">
-        <div>
-          <Label className="text-sm font-medium">Property Value Range</Label>
-          <div className="mt-2">
-            <Slider
-              value={[filters.minValue, filters.maxValue]}
-              onValueChange={([min, max]) => {
-                updateFilter("minValue", min)
-                updateFilter("maxValue", max)
-              }}
-              max={10000000}
-              step={100000}
-              className="w-full"
-            />
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
-              <span>${(filters.minValue / 1000000).toFixed(1)}M</span>
-              <span>${(filters.maxValue / 1000000).toFixed(1)}M</span>
-            </div>
-          </div>
-        </div>
+      <div>
+        <label htmlFor="maxValue">Max Value:</label>
+        <input
+          type="number"
+          id="maxValue"
+          name="maxValue"
+          value={filters.maxValue}
+          onChange={(e) => updateFilter("maxValue", Number.parseInt(e.target.value))}
+        />
+      </div>
 
-        <div>
-          <Label className="text-sm font-medium">Property Type</Label>
-          <Select value={filters.propertyType} onValueChange={(value) => updateFilter("propertyType", value)}>
-            <SelectTrigger className="mt-2">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="single-family">Single Family</SelectItem>
-              <SelectItem value="condo">Condo</SelectItem>
-              <SelectItem value="townhouse">Townhouse</SelectItem>
-              <SelectItem value="multi-family">Multi Family</SelectItem>
-              <SelectItem value="commercial">Commercial</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      <div>
+        <label htmlFor="propertyType">Property Type:</label>
+        <select
+          id="propertyType"
+          name="propertyType"
+          value={filters.propertyType}
+          onChange={(e) => updateFilter("propertyType", e.target.value)}
+        >
+          <option value="all">All</option>
+          <option value="house">House</option>
+          <option value="apartment">Apartment</option>
+        </select>
+      </div>
 
-        <div>
-          <Label className="text-sm font-medium">Owner Type</Label>
-          <Select value={filters.ownerType} onValueChange={(value) => updateFilter("ownerType", value)}>
-            <SelectTrigger className="mt-2">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Owners</SelectItem>
-              <SelectItem value="individual">Individual</SelectItem>
-              <SelectItem value="corporation">Corporation</SelectItem>
-              <SelectItem value="trust">Trust</SelectItem>
-              <SelectItem value="llc">LLC</SelectItem>
-              <SelectItem value="partnership">Partnership</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      <div>
+        <label htmlFor="ownerType">Owner Type:</label>
+        <select
+          id="ownerType"
+          name="ownerType"
+          value={filters.ownerType}
+          onChange={(e) => updateFilter("ownerType", e.target.value)}
+        >
+          <option value="all">All</option>
+          <option value="landlord">Landlord</option>
+          <option value="agency">Agency</option>
+        </select>
+      </div>
 
-        <div>
-          <Label className="text-sm font-medium">Owner Wealth Range</Label>
-          <Select value={filters.wealthRange} onValueChange={(value) => updateFilter("wealthRange", value)}>
-            <SelectTrigger className="mt-2">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Ranges</SelectItem>
-              <SelectItem value="1m-5m">$1M - $5M</SelectItem>
-              <SelectItem value="5m-10m">$5M - $10M</SelectItem>
-              <SelectItem value="10m-25m">$10M - $25M</SelectItem>
-              <SelectItem value="25m-50m">$25M - $50M</SelectItem>
-              <SelectItem value="50m+">$50M+</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      <div>
+        <label htmlFor="wealthRange">Wealth Range:</label>
+        <select
+          id="wealthRange"
+          name="wealthRange"
+          value={filters.wealthRange}
+          onChange={(e) => updateFilter("wealthRange", e.target.value)}
+        >
+          <option value="all">All</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+      </div>
+
+      <div>
+        <label htmlFor="bedrooms">Bedrooms:</label>
+        <input
+          type="number"
+          id="bedrooms"
+          name="bedrooms"
+          value={filters.bedrooms}
+          onChange={(e) => updateFilter("bedrooms", Number.parseInt(e.target.value))}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="bathrooms">Bathrooms:</label>
+        <input
+          type="number"
+          id="bathrooms"
+          name="bathrooms"
+          value={filters.bathrooms}
+          onChange={(e) => updateFilter("bathrooms", Number.parseInt(e.target.value))}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="studentFriendly">Student Friendly:</label>
+        <input
+          type="checkbox"
+          id="studentFriendly"
+          name="studentFriendly"
+          checked={filters.studentFriendly}
+          onChange={(e) => updateFilter("studentFriendly", e.target.checked)}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="furnished">Furnished:</label>
+        <input
+          type="checkbox"
+          id="furnished"
+          name="furnished"
+          checked={filters.furnished}
+          onChange={(e) => updateFilter("furnished", e.target.checked)}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="verified">Verified:</label>
+        <input
+          type="checkbox"
+          id="verified"
+          name="verified"
+          checked={filters.verified}
+          onChange={(e) => updateFilter("verified", e.target.checked)}
+        />
       </div>
     </div>
   )
 }
-
-export { PropertyFilters }
