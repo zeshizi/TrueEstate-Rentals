@@ -6,37 +6,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import {
-  MapPin,
-  Search,
-  Bed,
-  Bath,
-  Square,
-  DollarSign,
-  Heart,
-  Star,
-  Users,
-  GraduationCap,
-  Home,
-  Building,
-} from "lucide-react"
+import { MapPin, Search, Bed, Bath, Square, DollarSign, Heart, Star, Users, GraduationCap } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { SearchResults } from "@/components/search-results"
-import { PropertyFilters } from "@/components/property-filters"
 
 const topCities = ["Boston", "Austin", "Atlanta", "Phoenix", "Denver", "Nashville", "Charlotte", "Tampa"]
 
-const rentalCategories = [
-  { id: "apartments", label: "Apartments", icon: Building },
-  { id: "rooms", label: "Rooms", icon: Bed },
-  { id: "hostels", label: "Hostels", icon: Users },
-  { id: "pgs", label: "PGs", icon: Home },
-]
-
-// Comprehensive room rental mock data
+// Featured room rentals for display
 const featuredRentals = [
-  // Student Accommodations - Rooms Only
   {
     id: 1,
     title: "Shared Room near Harvard University",
@@ -68,7 +45,7 @@ const featuredRentals = [
     image: "/placeholder.svg?height=200&width=300&text=Austin+Study+Room",
     rating: 4.5,
     verified: true,
-    amenities: ["WiFi", "Study Desk", "AC", "Parking"],
+    amenities: ["WiFi", "Study Desk", "AC"],
     studentFriendly: true,
     roommates: 3,
     gender: "Female Only",
@@ -77,55 +54,53 @@ const featuredRentals = [
   },
   {
     id: 3,
-    title: "Private Room in Shared House",
+    title: "Budget-Friendly Room",
     location: "Atlanta, GA",
     price: 580,
     beds: 1,
     baths: 1,
     sqft: 150,
     type: "room",
-    image: "/placeholder.svg?height=200&width=300&text=Atlanta+Private+Room",
+    image: "/placeholder.svg?height=200&width=300&text=Atlanta+Budget+Room",
     rating: 4.2,
     verified: true,
-    amenities: ["WiFi", "Private Bathroom", "Garden Access", "Kitchen"],
+    amenities: ["WiFi", "Kitchen Access", "Parking"],
     studentFriendly: true,
-    roommates: 2,
-    gender: "Mixed",
-    furnished: false,
+    roommates: 3,
+    gender: "Female Only",
+    furnished: true,
     utilities: "Separate",
   },
   {
     id: 4,
-    title: "Room near University of Phoenix",
+    title: "Premium Student Housing",
     location: "Phoenix, AZ",
-    price: 520,
+    price: 950,
     beds: 1,
     baths: 1,
-    sqft: 160,
-    type: "room",
-    image: "/placeholder.svg?height=200&width=300&text=Phoenix+University+Room",
-    rating: 4.0,
+    sqft: 400,
+    type: "studio",
+    image: "/placeholder.svg?height=200&width=300&text=Phoenix+Premium+Studio",
+    rating: 4.6,
     verified: true,
-    amenities: ["WiFi", "Study Area", "Pool Access", "Gym"],
+    amenities: ["WiFi", "Pool", "Gym", "Concierge"],
     studentFriendly: true,
-    roommates: 4,
-    gender: "Male Only",
     furnished: true,
     utilities: "Included",
   },
   {
     id: 5,
-    title: "Spacious Room in Denver",
+    title: "Cozy Room near University",
     location: "Denver, CO",
     price: 680,
     beds: 1,
     baths: 1,
     sqft: 220,
     type: "room",
-    image: "/placeholder.svg?height=200&width=300&text=Denver+Spacious+Room",
-    rating: 4.6,
+    image: "/placeholder.svg?height=200&width=300&text=Denver+University+Room",
+    rating: 4.4,
     verified: true,
-    amenities: ["WiFi", "Mountain View", "Fireplace", "Balcony"],
+    amenities: ["WiFi", "Mountain View", "Study Area"],
     studentFriendly: true,
     roommates: 2,
     gender: "Mixed",
@@ -134,209 +109,19 @@ const featuredRentals = [
   },
   {
     id: 6,
-    title: "Room near Vanderbilt University",
+    title: "Music City Student Room",
     location: "Nashville, TN",
     price: 620,
     beds: 1,
     baths: 1,
     sqft: 170,
     type: "room",
-    image: "/placeholder.svg?height=200&width=300&text=Nashville+Vanderbilt+Room",
-    rating: 4.4,
-    verified: true,
-    amenities: ["WiFi", "Music Room", "Study Lounge", "Parking"],
-    studentFriendly: true,
-    roommates: 3,
-    gender: "Female Only",
-    furnished: true,
-    utilities: "Included",
-  },
-  {
-    id: 7,
-    title: "Modern Room in Charlotte",
-    location: "Charlotte, NC",
-    price: 590,
-    beds: 1,
-    baths: 1,
-    sqft: 185,
-    type: "room",
-    image: "/placeholder.svg?height=200&width=300&text=Charlotte+Modern+Room",
-    rating: 4.3,
-    verified: true,
-    amenities: ["WiFi", "Modern Kitchen", "Rooftop Access", "Security"],
-    studentFriendly: true,
-    roommates: 2,
-    gender: "Mixed",
-    furnished: true,
-    utilities: "Included",
-  },
-  {
-    id: 8,
-    title: "Room near University of Tampa",
-    location: "Tampa, FL",
-    price: 550,
-    beds: 1,
-    baths: 1,
-    sqft: 165,
-    type: "room",
-    image: "/placeholder.svg?height=200&width=300&text=Tampa+University+Room",
-    rating: 4.1,
-    verified: true,
-    amenities: ["WiFi", "Beach Access", "Pool", "Study Room"],
-    studentFriendly: true,
-    roommates: 3,
-    gender: "Mixed",
-    furnished: true,
-    utilities: "Included",
-  },
-  {
-    id: 9,
-    title: "Quiet Room for Graduate Students",
-    location: "Cambridge, MA",
-    price: 800,
-    beds: 1,
-    baths: 1,
-    sqft: 210,
-    type: "room",
-    image: "/placeholder.svg?height=200&width=300&text=Cambridge+Graduate+Room",
-    rating: 4.7,
-    verified: true,
-    amenities: ["WiFi", "Private Study", "Library Access", "Quiet Hours"],
-    studentFriendly: true,
-    roommates: 1,
-    gender: "Mixed",
-    furnished: true,
-    utilities: "Included",
-  },
-  {
-    id: 10,
-    title: "Affordable Room in Shared Apartment",
-    location: "Austin, TX",
-    price: 480,
-    beds: 1,
-    baths: 1,
-    sqft: 140,
-    type: "room",
-    image: "/placeholder.svg?height=200&width=300&text=Austin+Affordable+Room",
-    rating: 3.9,
-    verified: true,
-    amenities: ["WiFi", "Shared Kitchen", "Laundry", "Bike Storage"],
-    studentFriendly: true,
-    roommates: 4,
-    gender: "Mixed",
-    furnished: false,
-    utilities: "Separate",
-  },
-  {
-    id: 11,
-    title: "Room with Private Entrance",
-    location: "Atlanta, GA",
-    price: 720,
-    beds: 1,
-    baths: 1,
-    sqft: 190,
-    type: "room",
-    image: "/placeholder.svg?height=200&width=300&text=Atlanta+Private+Entrance",
-    rating: 4.5,
-    verified: true,
-    amenities: ["WiFi", "Private Entrance", "Kitchenette", "Parking"],
-    studentFriendly: true,
-    roommates: 1,
-    gender: "Female Only",
-    furnished: true,
-    utilities: "Included",
-  },
-  {
-    id: 12,
-    title: "Room in Tech Professional House",
-    location: "Phoenix, AZ",
-    price: 650,
-    beds: 1,
-    baths: 1,
-    sqft: 175,
-    type: "room",
-    image: "/placeholder.svg?height=200&width=300&text=Phoenix+Tech+House",
-    rating: 4.4,
-    verified: true,
-    amenities: ["WiFi", "Home Office", "High-Speed Internet", "Gaming Room"],
-    studentFriendly: true,
-    roommates: 3,
-    gender: "Mixed",
-    furnished: true,
-    utilities: "Included",
-  },
-  {
-    id: 13,
-    title: "Room near Downtown Denver",
-    location: "Denver, CO",
-    price: 750,
-    beds: 1,
-    baths: 1,
-    sqft: 200,
-    type: "room",
-    image: "/placeholder.svg?height=200&width=300&text=Denver+Downtown+Room",
-    rating: 4.2,
-    verified: true,
-    amenities: ["WiFi", "City View", "Public Transport", "Restaurants Nearby"],
-    studentFriendly: true,
-    roommates: 2,
-    gender: "Mixed",
-    furnished: true,
-    utilities: "Included",
-  },
-  {
-    id: 14,
-    title: "Room in Music City",
-    location: "Nashville, TN",
-    price: 580,
-    beds: 1,
-    baths: 1,
-    sqft: 155,
-    type: "room",
     image: "/placeholder.svg?height=200&width=300&text=Nashville+Music+Room",
     rating: 4.3,
     verified: true,
-    amenities: ["WiFi", "Soundproof", "Music Studio", "Creative Space"],
+    amenities: ["WiFi", "Music Room", "Study Lounge"],
     studentFriendly: true,
-    roommates: 2,
-    gender: "Mixed",
-    furnished: true,
-    utilities: "Included",
-  },
-  {
-    id: 15,
-    title: "Room in Banking District",
-    location: "Charlotte, NC",
-    price: 670,
-    beds: 1,
-    baths: 1,
-    sqft: 180,
-    type: "room",
-    image: "/placeholder.svg?height=200&width=300&text=Charlotte+Banking+Room",
-    rating: 4.1,
-    verified: true,
-    amenities: ["WiFi", "Business Center", "Networking Events", "Professional"],
-    studentFriendly: true,
-    roommates: 2,
-    gender: "Mixed",
-    furnished: true,
-    utilities: "Included",
-  },
-  {
-    id: 16,
-    title: "Beachside Room",
-    location: "Tampa, FL",
-    price: 690,
-    beds: 1,
-    baths: 1,
-    sqft: 195,
-    type: "room",
-    image: "/placeholder.svg?height=200&width=300&text=Tampa+Beachside+Room",
-    rating: 4.6,
-    verified: true,
-    amenities: ["WiFi", "Beach View", "Surfboard Storage", "Outdoor Shower"],
-    studentFriendly: true,
-    roommates: 2,
+    roommates: 3,
     gender: "Mixed",
     furnished: true,
     utilities: "Included",
@@ -345,11 +130,7 @@ const featuredRentals = [
 
 export default function RentPage() {
   const [searchQuery, setSearchQuery] = useState("")
-  const [activeCategory, setActiveCategory] = useState("rooms")
   const router = useRouter()
-  const [searchResults, setSearchResults] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [showResults, setShowResults] = useState(false)
 
   const searchParams = useSearchParams()
 
@@ -360,19 +141,16 @@ export default function RentPage() {
       const maxValue = searchParams.get("maxValue")
       const category = searchParams.get("category")
 
-      console.log("Rent page - Raw searchParams object:", searchParams)
-      console.log("Rent page - Individual params:", {
+      if (query) {
+        setSearchQuery(query)
+      }
+
+      console.log("Rent page search params:", {
         query,
         minValue,
         maxValue,
         category,
-        searchParamsEntries: searchParams ? Object.fromEntries(searchParams.entries()) : "searchParams is null",
       })
-
-      if (query) {
-        setSearchQuery(query)
-        handleSearch()
-      }
     } catch (error) {
       console.error("Error in Rent page useEffect:", error)
     }
@@ -380,93 +158,34 @@ export default function RentPage() {
 
   const handleSearch = async () => {
     if (searchQuery.trim()) {
-      setLoading(true)
-      setShowResults(true)
-
-      // Filter only room properties
-      const allRentals = featuredRentals.filter((rental) => rental.type === "room")
-
-      const mockResults = allRentals
-        .filter((property) => {
-          const queryLower = searchQuery.toLowerCase()
-          return (
-            property.title.toLowerCase().includes(queryLower) ||
-            property.location.toLowerCase().includes(queryLower) ||
-            queryLower.includes("all")
-          )
-        })
-        .map((property) => ({
-          id: property.id,
-          title: property.title,
-          location: property.location,
-          price: property.price,
-          beds: property.beds,
-          baths: property.baths,
-          sqft: property.sqft,
-          type: "property",
-          category: property.type,
-          image: property.image,
-          rating: property.rating,
-          verified: property.verified,
-          amenities: property.amenities,
-          studentFriendly: property.studentFriendly,
-          roommates: property.roommates,
-          gender: property.gender,
-          furnished: property.furnished,
-          utilities: property.utilities,
-        }))
-
-      setSearchResults(mockResults)
-      setLoading(false)
+      // Redirect to property-owner-search page with search parameters
+      const searchParams = new URLSearchParams({
+        q: searchQuery,
+        type: "rent",
+      })
+      router.push(`/property-owner-search?${searchParams.toString()}`)
     }
   }
 
   const handleBrowseAll = () => {
-    setLoading(true)
-    setShowResults(true)
-
-    // Generate mock search results - only rooms
-    const mockResults = featuredRentals.map((property) => ({
-      id: property.id,
-      title: property.title,
-      location: property.location,
-      price: property.price,
-      beds: property.beds,
-      baths: property.baths,
-      sqft: property.sqft,
-      type: "property",
-      category: property.type,
-      image: property.image,
-      rating: property.rating,
-      verified: property.verified,
-      amenities: property.amenities,
-      studentFriendly: property.studentFriendly,
-      roommates: property.roommates,
-      gender: property.gender,
-      furnished: property.furnished,
-      utilities: property.utilities,
-    }))
-
-    setSearchResults(mockResults)
-    setSearchQuery("All Rooms")
-    setLoading(false)
+    // Redirect to property-owner-search page for all rental properties
+    const searchParams = new URLSearchParams({
+      q: "all rooms",
+      type: "rent",
+    })
+    router.push(`/property-owner-search?${searchParams.toString()}`)
   }
 
   const formatPrice = (price: number) => {
     return `$${price.toLocaleString()}`
   }
 
-  const getFilteredRentals = () => {
-    // Always return room properties only
-    return featuredRentals.filter((r) => r.type === "room")
-  }
-
   const getCategoryInfo = () => {
     return {
       title: "Find compatible roommates",
-      subtitle: "Shared Rooms & Flatmates",
-      description: "Share your room with right roommates",
-      priceRange: "$480 - $800",
+      subtitle: "Shared Rooms & Student Housing",
+      description: "Discover affordable student accommodations with great roommates",
+      priceRange: "$480 - $950",
       illustration: "Student+Roommates+Illustration",
     }
   }
@@ -498,7 +217,7 @@ export default function RentPage() {
               <div className="relative">
                 <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <Input
-                  placeholder="Search Places..."
+                  placeholder="Search Student Housing..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={(e) => e.key === "Enter" && handleSearch()}
@@ -564,69 +283,70 @@ export default function RentPage() {
       <div className="bg-white py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">Featured Shared Rooms</h3>
+            <h3 className="text-3xl font-bold text-gray-900 mb-4">Featured Student Housing</h3>
             <p className="text-gray-600">{categoryInfo.priceRange} per month</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-            {getFilteredRentals()
-              .slice(0, 6)
-              .map((property) => (
-                <Card key={property.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="relative">
-                    <img
-                      src={property.image || "/placeholder.svg"}
-                      alt={property.title}
-                      className="w-full h-48 object-cover"
-                    />
-                    <Button variant="ghost" size="icon" className="absolute top-2 right-2 bg-white/80 hover:bg-white">
-                      <Heart className="h-4 w-4" />
-                    </Button>
-                    {property.verified && (
-                      <Badge className="absolute top-2 left-2 bg-green-500 text-white">Verified</Badge>
-                    )}
-                    <Badge className="absolute bottom-2 left-2 bg-blue-500 text-white">
-                      <GraduationCap className="h-3 w-3 mr-1" />
-                      Student Friendly
-                    </Badge>
-                    {property.furnished && (
-                      <Badge className="absolute bottom-2 right-2 bg-orange-500 text-white">Furnished</Badge>
-                    )}
+            {featuredRentals.map((property) => (
+              <Card key={property.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                <div className="relative">
+                  <img
+                    src={property.image || "/placeholder.svg"}
+                    alt={property.title}
+                    className="w-full h-48 object-cover"
+                  />
+                  <Button variant="ghost" size="icon" className="absolute top-2 right-2 bg-white/80 hover:bg-white">
+                    <Heart className="h-4 w-4" />
+                  </Button>
+                  {property.verified && (
+                    <Badge className="absolute top-2 left-2 bg-green-500 text-white">Verified</Badge>
+                  )}
+                  <Badge className="absolute bottom-2 left-2 bg-blue-500 text-white">
+                    <GraduationCap className="h-3 w-3 mr-1" />
+                    Student Friendly
+                  </Badge>
+                  {property.furnished && (
+                    <Badge className="absolute bottom-2 right-2 bg-orange-500 text-white">Furnished</Badge>
+                  )}
+                </div>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-lg">{property.title}</h4>
+                    <div className="flex items-center gap-1">
+                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      <span className="text-sm text-gray-600">{property.rating}</span>
+                    </div>
                   </div>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-semibold text-lg">{property.title}</h4>
-                      <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm text-gray-600">{property.rating}</span>
-                      </div>
-                    </div>
 
-                    <div className="flex items-center gap-2 mb-3">
-                      <MapPin className="h-4 w-4 text-gray-500" />
-                      <span className="text-gray-600">{property.location}</span>
-                    </div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <MapPin className="h-4 w-4 text-gray-500" />
+                    <span className="text-gray-600">{property.location}</span>
+                  </div>
 
-                    <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
-                      <div className="flex items-center gap-1">
-                        <Bed className="h-4 w-4" />
-                        <span>{property.beds}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Bath className="h-4 w-4" />
-                        <span>{property.baths}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Square className="h-4 w-4" />
-                        <span>{property.sqft} sqft</span>
-                      </div>
+                  <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
+                    <div className="flex items-center gap-1">
+                      <Bed className="h-4 w-4" />
+                      <span>{property.beds === 0 ? "Studio" : property.beds}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Bath className="h-4 w-4" />
+                      <span>{property.baths}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Square className="h-4 w-4" />
+                      <span>{property.sqft} sqft</span>
+                    </div>
+                    {property.roommates && (
                       <div className="flex items-center gap-1">
                         <Users className="h-4 w-4" />
                         <span>{property.roommates}</span>
                       </div>
-                    </div>
+                    )}
+                  </div>
 
-                    {/* Room Details */}
+                  {/* Room Details */}
+                  {property.gender && (
                     <div className="mb-4 text-sm">
                       <div className="flex justify-between items-center mb-1">
                         <span className="text-gray-600">Gender:</span>
@@ -637,65 +357,41 @@ export default function RentPage() {
                         <span className="font-medium">{property.utilities}</span>
                       </div>
                     </div>
+                  )}
 
-                    {/* Amenities */}
-                    <div className="mb-4">
-                      <div className="flex flex-wrap gap-1">
-                        {property.amenities.slice(0, 3).map((amenity, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
-                            {amenity}
-                          </Badge>
-                        ))}
-                      </div>
+                  {/* Amenities */}
+                  <div className="mb-4">
+                    <div className="flex flex-wrap gap-1">
+                      {property.amenities.slice(0, 3).map((amenity, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs">
+                          {amenity}
+                        </Badge>
+                      ))}
                     </div>
+                  </div>
 
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1">
-                        <DollarSign className="h-5 w-5 text-gray-500" />
-                        <span className="text-2xl font-bold">{formatPrice(property.price)}</span>
-                        <span className="text-gray-500">/month</span>
-                      </div>
-                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-                        View Details
-                      </Button>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <DollarSign className="h-5 w-5 text-gray-500" />
+                      <span className="text-2xl font-bold">{formatPrice(property.price)}</span>
+                      <span className="text-gray-500">/month</span>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                      View Details
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
 
           <div className="text-center mt-12">
             <Button size="lg" className="bg-blue-600 hover:bg-blue-700" onClick={handleBrowseAll}>
-              Browse All Rooms
+              Browse All Student Housing
             </Button>
           </div>
         </div>
       </div>
-
-      {/* Search Results Section */}
-      {showResults && (
-        <div className="bg-gray-50 py-16">
-          <div className="container mx-auto px-4">
-            <div className="max-w-7xl mx-auto">
-              <div className="flex items-center justify-between mb-8">
-                <h3 className="text-2xl font-bold text-gray-900">Shared Rooms {searchQuery && `in ${searchQuery}`}</h3>
-                <Button variant="outline" onClick={() => setShowResults(false)} className="text-gray-600">
-                  Clear Results
-                </Button>
-              </div>
-
-              <div className="grid lg:grid-cols-4 gap-6">
-                <div className="lg:col-span-1">
-                  <PropertyFilters onFiltersChange={(filters) => console.log("Filters:", filters)} />
-                </div>
-                <div className="lg:col-span-3">
-                  <SearchResults results={searchResults} loading={loading} query={searchQuery} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       <Footer />
     </div>

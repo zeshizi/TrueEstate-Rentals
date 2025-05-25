@@ -9,8 +9,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import { MapPin, Search, Bed, Bath, Square, DollarSign, Heart, TrendingUp, Shield } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { SearchResults } from "@/components/search-results"
-import { PropertyFilters } from "@/components/property-filters"
 
 const topCities = ["Phoenix", "Atlanta", "Dallas", "Denver", "Austin", "Charlotte", "Nashville", "Tampa"]
 
@@ -92,9 +90,6 @@ const featuredProperties = [
 export default function BuyPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
-  const [searchResults, setSearchResults] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [showResults, setShowResults] = useState(false)
 
   const searchParams = useSearchParams()
 
@@ -105,83 +100,39 @@ export default function BuyPage() {
       const maxValue = searchParams.get("maxValue")
       const propertyType = searchParams.get("propertyType")
 
-      console.log("Buy page - Raw searchParams object:", searchParams)
-      console.log("Buy page - Individual params:", {
+      if (query) {
+        setSearchQuery(query)
+      }
+
+      console.log("Buy page search params:", {
         query,
         minValue,
         maxValue,
         propertyType,
-        searchParamsEntries: searchParams ? Object.fromEntries(searchParams.entries()) : "searchParams is null",
       })
-
-      if (query) {
-        setSearchQuery(query)
-        handleSearch()
-      }
     } catch (error) {
       console.error("Error in Buy page useEffect:", error)
     }
   }, [searchParams])
 
-  const handleBrowseAll = () => {
-    setLoading(true)
-    setShowResults(true)
-
-    // Generate mock search results for buy properties
-    const mockResults = featuredProperties.map((property, index) => ({
-      id: property.id,
-      title: property.title,
-      location: property.location,
-      price: property.price,
-      beds: property.beds,
-      baths: property.baths,
-      sqft: property.sqft,
-      type: "property",
-      category: "buy",
-      image: property.image,
-      investmentGrade: property.investmentGrade,
-      ownerWealth: property.ownerWealth,
-    }))
-
-    setSearchResults(mockResults)
-    setSearchQuery("All Properties for Sale")
-    setLoading(false)
-  }
-
-  // Also update the existing handleSearch function to handle "all properties" query
   const handleSearch = async () => {
     if (searchQuery.trim()) {
-      setLoading(true)
-      setShowResults(true)
-
-      // Use only mock data - no API calls
-      const mockResults = featuredProperties
-        .filter((property) => {
-          const queryLower = searchQuery.toLowerCase()
-          return (
-            property.title.toLowerCase().includes(queryLower) ||
-            property.location.toLowerCase().includes(queryLower) ||
-            queryLower.includes("all")
-          )
-        })
-        .map((property) => ({
-          id: property.id,
-          title: property.title,
-          location: property.location,
-          price: property.price,
-          beds: property.beds,
-          baths: property.baths,
-          sqft: property.sqft,
-          type: "property",
-          category: "buy",
-          image: property.image,
-          investmentGrade: property.investmentGrade,
-          ownerWealth: property.ownerWealth,
-        }))
-
-      setSearchResults(mockResults)
-      setLoading(false)
+      // Redirect to property-owner-search page with search parameters
+      const searchParams = new URLSearchParams({
+        q: searchQuery,
+        type: "buy",
+      })
+      router.push(`/property-owner-search?${searchParams.toString()}`)
     }
+  }
+
+  const handleBrowseAll = () => {
+    // Redirect to property-owner-search page for all buy properties
+    const searchParams = new URLSearchParams({
+      q: "all properties",
+      type: "buy",
+    })
+    router.push(`/property-owner-search?${searchParams.toString()}`)
   }
 
   const formatPrice = (price: number) => {
@@ -365,33 +316,6 @@ export default function BuyPage() {
           </div>
         </div>
       </div>
-
-      {/* Search Results Section */}
-      {showResults && (
-        <div className="bg-gray-50 py-16">
-          <div className="container mx-auto px-4">
-            <div className="max-w-7xl mx-auto">
-              <div className="flex items-center justify-between mb-8">
-                <h3 className="text-2xl font-bold text-gray-900">
-                  Properties for Sale {searchQuery && `in ${searchQuery}`}
-                </h3>
-                <Button variant="outline" onClick={() => setShowResults(false)} className="text-gray-600">
-                  Clear Results
-                </Button>
-              </div>
-
-              <div className="grid lg:grid-cols-4 gap-6">
-                <div className="lg:col-span-1">
-                  <PropertyFilters onFiltersChange={(filters) => console.log("Filters:", filters)} />
-                </div>
-                <div className="lg:col-span-3">
-                  <SearchResults results={searchResults} loading={loading} query={searchQuery} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       <Footer />
     </div>
