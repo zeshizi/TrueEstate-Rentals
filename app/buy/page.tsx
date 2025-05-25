@@ -302,7 +302,14 @@ export default function BuyPage() {
           </div>
 
           <div className="text-center mt-12">
-            <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700">
+            <Button
+              size="lg"
+              className="bg-emerald-600 hover:bg-emerald-700"
+              onClick={() => {
+                setSearchQuery("all properties")
+                handleSearch()
+              }}
+            >
               Browse All Properties
             </Button>
           </div>
