@@ -48,6 +48,41 @@ export interface Property {
     }>
   }
 
+  // Reviews and ratings
+  reviews?: Array<{
+    id: string
+    userId: string
+    userName: string
+    userAvatar?: string
+    rating: number // 1-5 stars
+    title: string
+    comment: string
+    date: string
+    verified: boolean
+    helpful: number
+    category: "location" | "value" | "condition" | "neighborhood" | "investment"
+  }>
+  averageRating?: number
+  totalReviews?: number
+  ratingBreakdown?: {
+    5: number
+    4: number
+    3: number
+    2: number
+    1: number
+  }
+
+  // Property remarks and notes
+  remarks?: Array<{
+    id: string
+    type: "agent" | "owner" | "inspector" | "appraiser"
+    author: string
+    content: string
+    date: string
+    isPublic: boolean
+    category: "condition" | "pricing" | "market" | "investment" | "legal"
+  }>
+
   // Metadata
   createdAt: Date
   updatedAt: Date
