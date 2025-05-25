@@ -1,6 +1,6 @@
 "use client"
 
-import { Building2, LogOut, User, Settings, Download, Menu } from "lucide-react"
+import { Building2, LogOut, User, Settings, Download, Menu, Bookmark } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useSession, signOut } from "next-auth/react"
@@ -12,11 +12,43 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 export function Header() {
   const { data: session } = useSession()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [bookmarkCount, setBookmarkCount] = useState(0)
+
+  useEffect(() => {
+    // Update bookmark count when localStorage changes
+    const updateBookmarkCount = () => {
+      try {
+        const saved = localStorage.getItem("property-bookmarks")
+        if (saved) {
+          const bookmarks = JSON.parse(saved)
+          setBookmarkCount(bookmarks.length)
+        } else {
+          setBookmarkCount(0)
+        }
+      } catch (error) {
+        setBookmarkCount(0)
+      }
+    }
+
+    // Initial count
+    updateBookmarkCount()
+
+    // Listen for storage changes
+    window.addEventListener("storage", updateBookmarkCount)
+
+    // Listen for custom bookmark events
+    window.addEventListener("bookmarkChanged", updateBookmarkCount)
+
+    return () => {
+      window.removeEventListener("storage", updateBookmarkCount)
+      window.removeEventListener("bookmarkChanged", updateBookmarkCount)
+    }
+  }, [])
 
   return (
     <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
@@ -71,6 +103,23 @@ export function Header() {
 
           {/* Right Side Actions */}
           <div className="flex items-center space-x-4">
+            {/* Bookmarks Button */}
+            <Link href="/bookmarks">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="relative text-sm font-medium text-gray-600 hover:text-gray-900"
+              >
+                <Bookmark className="w-4 h-4 mr-2" />
+                Bookmarks
+                {bookmarkCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {bookmarkCount > 9 ? "9+" : bookmarkCount}
+                  </span>
+                )}
+              </Button>
+            </Link>
+
             {session ? (
               <>
                 <Button
@@ -104,6 +153,12 @@ export function Header() {
                       <Link href="/profile" className="flex items-center text-sm">
                         <User className="mr-2 h-4 w-4" />
                         Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/bookmarks" className="flex items-center text-sm">
+                        <Bookmark className="mr-2 h-4 w-4" />
+                        My Bookmarks ({bookmarkCount})
                       </Link>
                     </DropdownMenuItem>
                     {session.user.role === "admin" && (
@@ -177,6 +232,13 @@ export function Header() {
                 className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors px-3 py-2 rounded-md hover:bg-gray-50"
               >
                 For Agents
+              </Link>
+              <Link
+                href="/bookmarks"
+                className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors px-3 py-2 rounded-md hover:bg-gray-50 flex items-center"
+              >
+                <Bookmark className="w-4 h-4 mr-2" />
+                Bookmarks ({bookmarkCount})
               </Link>
             </nav>
           </div>
