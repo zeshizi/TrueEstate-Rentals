@@ -7,8 +7,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Building2, TrendingUp, DollarSign, BarChart3, Search, MapPin, Star } from "lucide-react"
+import { useState } from "react"
 
 export default function ForOwnersPage() {
+  const [selectedProperty, setSelectedProperty] = useState<any>(null)
+  const [showAnalytics, setShowAnalytics] = useState(false)
+
   return (
     <div className="min-h-screen bg-white">
       <Header />
@@ -188,7 +192,15 @@ export default function ForOwnersPage() {
                         <span className="font-semibold text-green-600 ml-1">{property.appreciation}</span>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" className="w-full mt-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full mt-3"
+                      onClick={() => {
+                        setSelectedProperty(property)
+                        setShowAnalytics(true)
+                      }}
+                    >
                       View Analytics
                     </Button>
                   </CardContent>
@@ -464,6 +476,169 @@ export default function ForOwnersPage() {
           </div>
         </div>
       </section>
+
+      {/* Property Analytics Modal */}
+      {showAnalytics && selectedProperty && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Property Analytics</h2>
+                  <p className="text-gray-600">{selectedProperty.address}</p>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => setShowAnalytics(false)}>
+                  ✕
+                </Button>
+              </div>
+
+              {/* Analytics Content */}
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Financial Performance */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <DollarSign className="h-5 w-5 mr-2" />
+                      Financial Performance
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Current Value</span>
+                        <span className="font-semibold">{selectedProperty.value}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Monthly Income</span>
+                        <span className="font-semibold text-green-600">{selectedProperty.monthlyIncome}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Annual ROI</span>
+                        <span className="font-semibold text-green-600">{selectedProperty.roi}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Appreciation</span>
+                        <span className="font-semibold text-green-600">{selectedProperty.appreciation}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Cap Rate</span>
+                        <span className="font-semibold">6.8%</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Market Analysis */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <TrendingUp className="h-5 w-5 mr-2" />
+                      Market Analysis
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Market Value</span>
+                        <span className="font-semibold">{selectedProperty.value}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Comparable Sales</span>
+                        <span className="font-semibold">$8.2M avg</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Days on Market</span>
+                        <span className="font-semibold">45 days</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Market Trend</span>
+                        <span className="font-semibold text-green-600">+12.5% YoY</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Investment Grade</span>
+                        <Badge className="bg-green-600">A+</Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Performance Chart */}
+                <Card className="md:col-span-2">
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <BarChart3 className="h-5 w-5 mr-2" />
+                      12-Month Performance
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {[
+                        { month: "Jan 2024", value: "$7.8M", income: "$42K", growth: "+2.1%" },
+                        { month: "Mar 2024", value: "$8.0M", income: "$43K", growth: "+2.6%" },
+                        { month: "Jun 2024", value: "$8.2M", income: "$44K", growth: "+2.5%" },
+                        { month: "Sep 2024", value: "$8.4M", income: "$45K", growth: "+2.4%" },
+                        { month: "Dec 2024", value: "$8.5M", income: "$45K", growth: "+1.2%" },
+                      ].map((data, index) => (
+                        <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded">
+                          <span className="font-medium">{data.month}</span>
+                          <div className="flex gap-4 text-sm">
+                            <span>Value: {data.value}</span>
+                            <span>Income: {data.income}</span>
+                            <span className="text-green-600">{data.growth}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Recommendations */}
+                <Card className="md:col-span-2">
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Building2 className="h-5 w-5 mr-2" />
+                      AI Recommendations
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="p-3 bg-blue-50 rounded border-l-4 border-blue-500">
+                        <div className="font-semibold text-blue-900">Rent Optimization</div>
+                        <div className="text-blue-700 text-sm">
+                          Consider increasing rent by 8% based on market analysis
+                        </div>
+                      </div>
+                      <div className="p-3 bg-green-50 rounded border-l-4 border-green-500">
+                        <div className="font-semibold text-green-900">Tax Strategy</div>
+                        <div className="text-green-700 text-sm">
+                          Eligible for 1031 exchange - potential $180K tax savings
+                        </div>
+                      </div>
+                      <div className="p-3 bg-purple-50 rounded border-l-4 border-purple-500">
+                        <div className="font-semibold text-purple-900">Market Timing</div>
+                        <div className="text-purple-700 text-sm">
+                          Optimal selling window: Q2 2025 based on market trends
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-4 mt-6 pt-6 border-t">
+                <Button className="flex-1">Download Report</Button>
+                <Button variant="outline" className="flex-1">
+                  Schedule Consultation
+                </Button>
+                <Button variant="outline" className="flex-1">
+                  Share Analytics
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

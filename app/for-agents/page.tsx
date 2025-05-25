@@ -1,14 +1,100 @@
 "use client"
 
+import { useState } from "react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Phone, Mail, MapPin, Building, Calendar, TrendingUp } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Users, BarChart3, Target, TrendingUp, MapPin, DollarSign, Search, Star, Award } from "lucide-react"
+import { Users, BarChart3, Target, TrendingUpIcon, MapPinIcon, DollarSign, Search, Star, Award } from "lucide-react"
 
 export default function ForAgentsPage() {
+  const [selectedProspect, setSelectedProspect] = useState<any>(null)
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false)
+
+  const prospects = [
+    {
+      id: 1,
+      name: "David Chen",
+      title: "Tech CEO",
+      company: "InnovateTech Solutions",
+      image: "tech+ceo+luxury+home",
+      netWorth: "$45M",
+      location: "Palo Alto, CA",
+      likelihood: "92%",
+      badge: "Hot Lead",
+      phone: "+1 (650) 555-0123",
+      email: "david.chen@innovatetech.com",
+      propertyInterests: ["Luxury Homes", "Tech Hub Locations", "Investment Properties"],
+      recentActivity: "Viewed 3 properties in Palo Alto last week",
+      budget: "$8M - $15M",
+      timeline: "Next 3 months",
+      notes: "Looking for a luxury home near tech companies. Prefers modern architecture.",
+    },
+    {
+      id: 2,
+      name: "Sarah Williams",
+      title: "Finance Executive",
+      company: "Goldman Sachs",
+      image: "finance+executive+penthouse",
+      netWorth: "$28M",
+      location: "Manhattan, NY",
+      likelihood: "87%",
+      badge: "High Interest",
+      phone: "+1 (212) 555-0456",
+      email: "sarah.williams@gs.com",
+      propertyInterests: ["Penthouses", "Manhattan", "Luxury Condos"],
+      recentActivity: "Scheduled viewing for 2 penthouses this month",
+      budget: "$5M - $12M",
+      timeline: "Next 6 months",
+      notes: "Interested in high-floor penthouses with city views. Prefers move-in ready properties.",
+    },
+    {
+      id: 3,
+      name: "Michael Rodriguez",
+      title: "Entertainment Mogul",
+      company: "Rodriguez Entertainment",
+      image: "entertainment+mogul+estate",
+      netWorth: "$65M",
+      location: "Beverly Hills, CA",
+      likelihood: "94%",
+      badge: "Premium Client",
+      phone: "+1 (310) 555-0789",
+      email: "michael@rodriguezent.com",
+      propertyInterests: ["Estates", "Beverly Hills", "Entertainment Properties"],
+      recentActivity: "Inquired about 5 luxury estates in the last 2 weeks",
+      budget: "$15M - $30M",
+      timeline: "Immediate",
+      notes: "Looking for a statement property for entertaining. Needs privacy and luxury amenities.",
+    },
+    {
+      id: 4,
+      name: "Jennifer Park",
+      title: "Oil Executive",
+      company: "Park Energy Corp",
+      image: "oil+executive+ranch",
+      netWorth: "$38M",
+      location: "Houston, TX",
+      likelihood: "89%",
+      badge: "Qualified Buyer",
+      phone: "+1 (713) 555-0321",
+      email: "jennifer.park@parkenergy.com",
+      propertyInterests: ["Ranches", "Large Properties", "Investment Land"],
+      recentActivity: "Requested information on 3 ranch properties",
+      budget: "$3M - $8M",
+      timeline: "Next 4 months",
+      notes: "Interested in large properties with land. Prefers properties with investment potential.",
+    },
+  ]
+
+  const handleViewProfile = (prospect: any) => {
+    setSelectedProspect(prospect)
+    setIsProfileModalOpen(true)
+  }
+
   return (
     <div className="min-h-screen bg-white">
       <Header />
@@ -34,7 +120,7 @@ export default function ForAgentsPage() {
 
             {/* Search Bar */}
             <div className="bg-white rounded-lg p-2 max-w-2xl mx-auto flex items-center shadow-lg">
-              <MapPin className="h-5 w-5 text-gray-400 ml-3" />
+              <MapPinIcon className="h-5 w-5 text-gray-400 ml-3" />
               <Input
                 placeholder="Find wealthy prospects by location or property type"
                 className="border-0 text-lg flex-1 focus-visible:ring-0"
@@ -56,7 +142,7 @@ export default function ForAgentsPage() {
               <span className="text-sm text-gray-600">Used by 5,000+ top agents</span>
             </div>
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-green-600" />
+              <TrendingUpIcon className="h-5 w-5 text-green-600" />
               <span className="text-sm text-gray-600">45% increase in deal value</span>
             </div>
             <div className="flex items-center gap-2">
@@ -78,36 +164,7 @@ export default function ForAgentsPage() {
           </div>
 
           <div className="grid md:grid-cols-4 gap-6">
-            {[
-              {
-                image: "tech+ceo+luxury+home",
-                netWorth: "$45M",
-                location: "Palo Alto, CA",
-                likelihood: "92%",
-                badge: "Hot Lead",
-              },
-              {
-                image: "finance+executive+penthouse",
-                netWorth: "$28M",
-                location: "Manhattan, NY",
-                likelihood: "87%",
-                badge: "High Interest",
-              },
-              {
-                image: "entertainment+mogul+estate",
-                netWorth: "$65M",
-                location: "Beverly Hills, CA",
-                likelihood: "94%",
-                badge: "Premium Client",
-              },
-              {
-                image: "oil+executive+ranch",
-                netWorth: "$38M",
-                location: "Houston, TX",
-                likelihood: "89%",
-                badge: "Qualified Buyer",
-              },
-            ].map((prospect, index) => (
+            {prospects.map((prospect, index) => (
               <Card key={index} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="relative">
                   <img
@@ -123,7 +180,7 @@ export default function ForAgentsPage() {
                     <span className="text-sm font-semibold text-green-600">{prospect.likelihood}</span>
                   </div>
                   <p className="text-gray-600 text-sm mb-3">{prospect.location}</p>
-                  <Button variant="outline" size="sm" className="w-full">
+                  <Button variant="outline" size="sm" className="w-full" onClick={() => handleViewProfile(prospect)}>
                     View Profile
                   </Button>
                 </CardContent>
@@ -168,7 +225,7 @@ export default function ForAgentsPage() {
             <Card className="border-0 shadow-lg">
               <CardHeader className="text-center">
                 <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <MapPin className="h-8 w-8 text-green-600" />
+                  <MapPinIcon className="h-8 w-8 text-green-600" />
                 </div>
                 <CardTitle>Territory Mapping</CardTitle>
               </CardHeader>
@@ -223,7 +280,7 @@ export default function ForAgentsPage() {
               <CardContent className="p-8">
                 <div className="flex items-start gap-4">
                   <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center">
-                    <TrendingUp className="h-6 w-6 text-blue-600" />
+                    <TrendingUpIcon className="h-6 w-6 text-blue-600" />
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold mb-2">3x Higher Deal Value</h3>
@@ -316,6 +373,139 @@ export default function ForAgentsPage() {
           </div>
         </div>
       </section>
+
+      {/* Profile Modal */}
+      <Dialog open={isProfileModalOpen} onOpenChange={setIsProfileModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">Prospect Profile</DialogTitle>
+          </DialogHeader>
+
+          {selectedProspect && (
+            <div className="space-y-6">
+              {/* Header Info */}
+              <div className="flex items-start gap-4">
+                <img
+                  src={`/placeholder.svg?height=100&width=100&query=${selectedProspect.image}`}
+                  alt={selectedProspect.name}
+                  className="w-20 h-20 rounded-full object-cover"
+                />
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold">{selectedProspect.name}</h3>
+                  <p className="text-gray-600">{selectedProspect.title}</p>
+                  <p className="text-sm text-gray-500">{selectedProspect.company}</p>
+                  <Badge className="mt-2 bg-green-600">{selectedProspect.badge}</Badge>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-blue-600">{selectedProspect.netWorth}</div>
+                  <div className="text-sm text-green-600 font-semibold">{selectedProspect.likelihood} match</div>
+                </div>
+              </div>
+
+              {/* Contact Info */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <Card>
+                  <CardContent className="p-4">
+                    <h4 className="font-semibold mb-3 flex items-center gap-2">
+                      <Phone className="h-4 w-4" />
+                      Contact Information
+                    </h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-3 w-3 text-gray-400" />
+                        <span>{selectedProspect.phone}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Mail className="h-3 w-3 text-gray-400" />
+                        <span>{selectedProspect.email}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-3 w-3 text-gray-400" />
+                        <span>{selectedProspect.location}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Building className="h-3 w-3 text-gray-400" />
+                        <span>{selectedProspect.company}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-4">
+                    <h4 className="font-semibold mb-3 flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4" />
+                      Buying Profile
+                    </h4>
+                    <div className="space-y-2 text-sm">
+                      <div>
+                        <span className="font-medium">Budget:</span> {selectedProspect.budget}
+                      </div>
+                      <div>
+                        <span className="font-medium">Timeline:</span> {selectedProspect.timeline}
+                      </div>
+                      <div>
+                        <span className="font-medium">Net Worth:</span> {selectedProspect.netWorth}
+                      </div>
+                      <div>
+                        <span className="font-medium">Match Score:</span> {selectedProspect.likelihood}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Property Interests */}
+              <Card>
+                <CardContent className="p-4">
+                  <h4 className="font-semibold mb-3">Property Interests</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedProspect.propertyInterests.map((interest: string, idx: number) => (
+                      <Badge key={idx} variant="secondary">
+                        {interest}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Recent Activity */}
+              <Card>
+                <CardContent className="p-4">
+                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    Recent Activity
+                  </h4>
+                  <p className="text-sm text-gray-600">{selectedProspect.recentActivity}</p>
+                </CardContent>
+              </Card>
+
+              {/* Notes */}
+              <Card>
+                <CardContent className="p-4">
+                  <h4 className="font-semibold mb-3">Agent Notes</h4>
+                  <p className="text-sm text-gray-600">{selectedProspect.notes}</p>
+                </CardContent>
+              </Card>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                <Button className="flex-1">
+                  <Phone className="h-4 w-4 mr-2" />
+                  Call Now
+                </Button>
+                <Button variant="outline" className="flex-1">
+                  <Mail className="h-4 w-4 mr-2" />
+                  Send Email
+                </Button>
+                <Button variant="outline" className="flex-1">
+                  Schedule Meeting
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>
