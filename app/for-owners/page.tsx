@@ -350,110 +350,6 @@ export default function ForOwnersPage() {
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Choose Your Plan</h2>
-            <p className="text-lg text-gray-600">Flexible pricing for property owners of all portfolio sizes</p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <Card className="border-2 border-gray-200">
-              <CardHeader className="text-center">
-                <CardTitle className="text-2xl">Starter</CardTitle>
-                <div className="text-4xl font-bold text-gray-900 mt-4">
-                  $49<span className="text-lg text-gray-500">/mo</span>
-                </div>
-                <p className="text-gray-600 mt-2">Perfect for new investors</p>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3 mb-6">
-                  <li className="flex items-center">
-                    <span className="text-green-600 mr-2">✓</span>Up to 5 properties
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-600 mr-2">✓</span>Basic analytics dashboard
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-600 mr-2">✓</span>Monthly market reports
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-600 mr-2">✓</span>Email support
-                  </li>
-                </ul>
-                <Button className="w-full" variant="outline">
-                  Get Started
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-2 border-blue-500 relative">
-              <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600">Most Popular</Badge>
-              <CardHeader className="text-center">
-                <CardTitle className="text-2xl">Professional</CardTitle>
-                <div className="text-4xl font-bold text-gray-900 mt-4">
-                  $149<span className="text-lg text-gray-500">/mo</span>
-                </div>
-                <p className="text-gray-600 mt-2">For serious investors</p>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3 mb-6">
-                  <li className="flex items-center">
-                    <span className="text-green-600 mr-2">✓</span>Up to 25 properties
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-600 mr-2">✓</span>Advanced analytics & AI insights
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-600 mr-2">✓</span>Property management tools
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-600 mr-2">✓</span>Tax optimization features
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-600 mr-2">✓</span>Priority support
-                  </li>
-                </ul>
-                <Button className="w-full bg-blue-600 hover:bg-blue-700">Get Started</Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-2 border-gray-200">
-              <CardHeader className="text-center">
-                <CardTitle className="text-2xl">Enterprise</CardTitle>
-                <div className="text-4xl font-bold text-gray-900 mt-4">
-                  $399<span className="text-lg text-gray-500">/mo</span>
-                </div>
-                <p className="text-gray-600 mt-2">For large portfolios</p>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3 mb-6">
-                  <li className="flex items-center">
-                    <span className="text-green-600 mr-2">✓</span>Unlimited properties
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-600 mr-2">✓</span>Custom analytics & reporting
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-600 mr-2">✓</span>API access & integrations
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-600 mr-2">✓</span>White-label options
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-600 mr-2">✓</span>Dedicated account manager
-                  </li>
-                </ul>
-                <Button className="w-full" variant="outline">
-                  Contact Sales
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section className="py-16 bg-blue-600">
         <div className="container mx-auto px-4 text-center">
@@ -627,11 +523,54 @@ export default function ForOwnersPage() {
 
               {/* Action Buttons */}
               <div className="flex gap-4 mt-6 pt-6 border-t">
-                <Button className="flex-1">Download Report</Button>
+                <Button
+                  className="flex-1"
+                  onClick={() => {
+                    // Create and download analytics report
+                    const reportData = {
+                      property: selectedProperty.address,
+                      value: selectedProperty.value,
+                      roi: selectedProperty.roi,
+                      monthlyIncome: selectedProperty.monthlyIncome,
+                      appreciation: selectedProperty.appreciation,
+                      generatedAt: new Date().toISOString(),
+                    }
+                    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: "application/json" })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement("a")
+                    a.href = url
+                    a.download = `property-analytics-${selectedProperty.address.replace(/[^a-zA-Z0-9]/g, "-")}.json`
+                    document.body.appendChild(a)
+                    a.click()
+                    document.body.removeChild(a)
+                    URL.revokeObjectURL(url)
+                  }}
+                >
+                  Download Report
+                </Button>
                 <Button variant="outline" className="flex-1">
                   Schedule Consultation
                 </Button>
-                <Button variant="outline" className="flex-1">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    // Share analytics via Web Share API or fallback to clipboard
+                    if (navigator.share) {
+                      navigator.share({
+                        title: `Property Analytics - ${selectedProperty.address}`,
+                        text: `Check out the analytics for ${selectedProperty.address}: ${selectedProperty.value} value, ${selectedProperty.roi} ROI`,
+                        url: window.location.href,
+                      })
+                    } else {
+                      // Fallback to clipboard
+                      const shareText = `Property Analytics - ${selectedProperty.address}\nValue: ${selectedProperty.value}\nROI: ${selectedProperty.roi}\nMonthly Income: ${selectedProperty.monthlyIncome}`
+                      navigator.clipboard.writeText(shareText).then(() => {
+                        alert("Analytics copied to clipboard!")
+                      })
+                    }
+                  }}
+                >
                   Share Analytics
                 </Button>
               </div>
