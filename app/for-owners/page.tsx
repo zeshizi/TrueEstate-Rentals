@@ -67,70 +67,198 @@ export default function ForOwnersPage() {
         </div>
       </section>
 
-      {/* Featured Properties */}
+      {/* Portfolio Analytics Dashboard */}
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Optimize your property portfolio with PropertyAbility™
-            </h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Your Portfolio Analytics Dashboard</h2>
             <p className="text-lg text-gray-600">
-              Answer a few questions. We'll highlight properties you're likely to maximize returns on.
+              Real-time insights from your property portfolio based on current market data
             </p>
           </div>
 
-          <div className="grid md:grid-cols-4 gap-6">
-            {[
-              {
-                image: "luxury+penthouse+manhattan",
-                price: "$8.5M",
-                location: "Manhattan, NY",
-                roi: "15.2%",
-                badge: "Premium ROI",
-              },
-              {
-                image: "modern+estate+beverly+hills",
-                price: "$12.8M",
-                location: "Beverly Hills, CA",
-                roi: "18.7%",
-                badge: "High Growth",
-              },
-              {
-                image: "waterfront+mansion+miami",
-                price: "$6.2M",
-                location: "Miami Beach, FL",
-                roi: "22.1%",
-                badge: "Top Performer",
-              },
-              {
-                image: "tech+executive+home+seattle",
-                price: "$4.9M",
-                location: "Seattle, WA",
-                roi: "14.8%",
-                badge: "Stable Returns",
-              },
-            ].map((property, index) => (
-              <Card key={index} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="relative">
-                  <img
-                    src={`/placeholder.svg?height=200&width=300&query=${property.image}`}
-                    alt={property.location}
-                    className="w-full h-48 object-cover"
-                  />
-                  <Badge className="absolute top-3 left-3 bg-green-600">{property.badge}</Badge>
+          {/* Key Metrics Cards */}
+          <div className="grid md:grid-cols-4 gap-6 mb-12">
+            <Card className="border-0 shadow-lg">
+              <CardContent className="p-6 text-center">
+                <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Building2 className="h-8 w-8 text-blue-600" />
                 </div>
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="text-xl font-bold text-blue-600">{property.price}</span>
-                    <span className="text-sm font-semibold text-green-600">+{property.roi}</span>
+                <div className="text-3xl font-bold text-gray-900 mb-2">24</div>
+                <div className="text-sm text-gray-600">Total Properties</div>
+                <div className="text-xs text-green-600 mt-1">+3 this quarter</div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-lg">
+              <CardContent className="p-6 text-center">
+                <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <DollarSign className="h-8 w-8 text-green-600" />
+                </div>
+                <div className="text-3xl font-bold text-gray-900 mb-2">$42.8M</div>
+                <div className="text-sm text-gray-600">Portfolio Value</div>
+                <div className="text-xs text-green-600 mt-1">+12.5% YoY</div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-lg">
+              <CardContent className="p-6 text-center">
+                <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <TrendingUp className="h-8 w-8 text-purple-600" />
+                </div>
+                <div className="text-3xl font-bold text-gray-900 mb-2">18.7%</div>
+                <div className="text-sm text-gray-600">Average ROI</div>
+                <div className="text-xs text-green-600 mt-1">+2.3% vs market</div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-lg">
+              <CardContent className="p-6 text-center">
+                <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <BarChart3 className="h-8 w-8 text-orange-600" />
+                </div>
+                <div className="text-3xl font-bold text-gray-900 mb-2">$285K</div>
+                <div className="text-sm text-gray-600">Monthly Revenue</div>
+                <div className="text-xs text-green-600 mt-1">+8.2% this month</div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Top Performing Properties */}
+          <div className="mb-12">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">Top Performing Properties</h3>
+            <div className="grid md:grid-cols-3 gap-6">
+              {[
+                {
+                  image: "luxury+penthouse+manhattan",
+                  address: "432 Park Avenue, Manhattan, NY",
+                  value: "$8.5M",
+                  roi: "22.1%",
+                  monthlyIncome: "$45K",
+                  appreciation: "+15.2%",
+                  badge: "Top Performer",
+                  badgeColor: "bg-green-600",
+                },
+                {
+                  image: "waterfront+mansion+miami",
+                  address: "1200 Ocean Drive, Miami Beach, FL",
+                  value: "$3.2M",
+                  roi: "19.8%",
+                  monthlyIncome: "$18K",
+                  appreciation: "+12.7%",
+                  badge: "High Growth",
+                  badgeColor: "bg-blue-600",
+                },
+                {
+                  image: "modern+estate+beverly+hills",
+                  address: "9876 Sunset Blvd, Beverly Hills, CA",
+                  value: "$2.85M",
+                  roi: "18.5%",
+                  monthlyIncome: "$16K",
+                  appreciation: "+11.3%",
+                  badge: "Stable Returns",
+                  badgeColor: "bg-purple-600",
+                },
+              ].map((property, index) => (
+                <Card key={index} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="relative">
+                    <img
+                      src={`/placeholder.svg?height=200&width=300&query=${property.image}`}
+                      alt={property.address}
+                      className="w-full h-48 object-cover"
+                    />
+                    <Badge className={`absolute top-3 left-3 ${property.badgeColor}`}>{property.badge}</Badge>
                   </div>
-                  <p className="text-gray-600 text-sm">{property.location}</p>
-                  <Button variant="outline" size="sm" className="w-full mt-3">
-                    Analyze Property
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+                  <CardContent className="p-4">
+                    <div className="mb-3">
+                      <div className="text-lg font-bold text-blue-600 mb-1">{property.value}</div>
+                      <div className="text-sm text-gray-600">{property.address}</div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <span className="text-gray-500">ROI:</span>
+                        <span className="font-semibold text-green-600 ml-1">{property.roi}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Monthly:</span>
+                        <span className="font-semibold ml-1">{property.monthlyIncome}</span>
+                      </div>
+                      <div className="col-span-2">
+                        <span className="text-gray-500">Appreciation:</span>
+                        <span className="font-semibold text-green-600 ml-1">{property.appreciation}</span>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm" className="w-full mt-3">
+                      View Analytics
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Market Insights */}
+          <div className="grid md:grid-cols-2 gap-8">
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <TrendingUp className="h-5 w-5 mr-2" />
+                  Market Performance
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Your Portfolio vs Market</span>
+                    <span className="text-sm font-semibold text-green-600">+5.2% ahead</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-green-600 h-2 rounded-full" style={{ width: "75%" }}></div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <div className="text-gray-500">Market Average</div>
+                      <div className="font-semibold">13.4% ROI</div>
+                    </div>
+                    <div>
+                      <div className="text-gray-500">Your Average</div>
+                      <div className="font-semibold text-green-600">18.7% ROI</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <BarChart3 className="h-5 w-5 mr-2" />
+                  Geographic Distribution
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {[
+                    { location: "California", properties: 8, value: "$18.2M", percentage: 42 },
+                    { location: "New York", properties: 6, value: "$12.8M", percentage: 30 },
+                    { location: "Florida", properties: 4, value: "$6.4M", percentage: 15 },
+                    { location: "Texas", properties: 6, value: "$5.4M", percentage: 13 },
+                  ].map((item, index) => (
+                    <div key={index} className="space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span className="font-medium">{item.location}</span>
+                        <span className="text-gray-600">
+                          {item.properties} properties • {item.value}
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${item.percentage}%` }}></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
