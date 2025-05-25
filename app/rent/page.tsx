@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   MapPin,
   Search,
@@ -20,6 +19,7 @@ import {
   GraduationCap,
   Home,
   Building,
+  Utensils,
 } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -36,24 +36,42 @@ const rentalCategories = [
 ]
 
 const featuredRentals = [
-  // Student Accommodations
+  // Student Accommodations - Rooms
   {
     id: 1,
-    title: "Shared Room near University",
-    location: "Boston, MA",
-    price: 650,
+    title: "Shared Room near Harvard",
+    location: "Cambridge, MA",
+    price: 750,
     beds: 1,
     baths: 1,
     sqft: 200,
     type: "room",
-    image: "/placeholder.svg?height=200&width=300&text=Boston+Shared+Room",
+    image: "/placeholder.svg?height=200&width=300&text=Harvard+Shared+Room",
     rating: 4.3,
     verified: true,
-    amenities: ["WiFi", "Study Area", "Laundry"],
+    amenities: ["WiFi", "Study Desk", "Shared Kitchen"],
     studentFriendly: true,
+    roommates: 2,
   },
   {
     id: 2,
+    title: "Cozy Room with Study Space",
+    location: "Austin, TX",
+    price: 650,
+    beds: 1,
+    baths: 1,
+    sqft: 180,
+    type: "room",
+    image: "/placeholder.svg?height=200&width=300&text=Austin+Study+Room",
+    rating: 4.5,
+    verified: true,
+    amenities: ["WiFi", "Study Desk", "AC"],
+    studentFriendly: true,
+    roommates: 3,
+  },
+  // Hostels
+  {
+    id: 3,
     title: "Modern Student Hostel",
     location: "Austin, TX",
     price: 450,
@@ -61,17 +79,35 @@ const featuredRentals = [
     baths: 1,
     sqft: 150,
     type: "hostel",
-    image: "/placeholder.svg?height=200&width=300&text=Austin+Student+Hostel",
+    image: "/placeholder.svg?height=200&width=300&text=Austin+Modern+Hostel",
     rating: 4.1,
     verified: true,
     amenities: ["WiFi", "Common Kitchen", "Study Room"],
     studentFriendly: true,
+    capacity: 8,
   },
   {
-    id: 3,
-    title: "Premium PG for Students",
+    id: 4,
+    title: "Budget Hostel near Campus",
     location: "Atlanta, GA",
-    price: 850,
+    price: 380,
+    beds: 1,
+    baths: 1,
+    sqft: 120,
+    type: "hostel",
+    image: "/placeholder.svg?height=200&width=300&text=Atlanta+Budget+Hostel",
+    rating: 3.9,
+    verified: true,
+    amenities: ["WiFi", "Shared Kitchen", "Study Area"],
+    studentFriendly: true,
+    capacity: 12,
+  },
+  // PGs
+  {
+    id: 5,
+    title: "Premium PG with Meals",
+    location: "Atlanta, GA",
+    price: 950,
     beds: 1,
     baths: 1,
     sqft: 180,
@@ -79,12 +115,29 @@ const featuredRentals = [
     image: "/placeholder.svg?height=200&width=300&text=Atlanta+Premium+PG",
     rating: 4.6,
     verified: true,
-    amenities: ["Meals Included", "WiFi", "AC", "Security"],
+    amenities: ["Meals Included", "WiFi", "AC", "Housekeeping"],
     studentFriendly: true,
+    meals: true,
+  },
+  {
+    id: 6,
+    title: "Budget PG near University",
+    location: "Nashville, TN",
+    price: 750,
+    beds: 1,
+    baths: 1,
+    sqft: 160,
+    type: "pg",
+    image: "/placeholder.svg?height=200&width=300&text=Nashville+Budget+PG",
+    rating: 4.2,
+    verified: true,
+    amenities: ["Meals Included", "WiFi", "Study Area"],
+    studentFriendly: true,
+    meals: true,
   },
   // Regular Apartments
   {
-    id: 4,
+    id: 7,
     title: "Affordable Studio Apartment",
     location: "Phoenix, AZ",
     price: 1200,
@@ -99,7 +152,7 @@ const featuredRentals = [
     studentFriendly: false,
   },
   {
-    id: 5,
+    id: 8,
     title: "Family Townhouse",
     location: "Denver, CO",
     price: 2800,
@@ -111,21 +164,6 @@ const featuredRentals = [
     rating: 4.7,
     verified: true,
     amenities: ["Garage", "Garden", "Pet Friendly"],
-    studentFriendly: false,
-  },
-  {
-    id: 6,
-    title: "Luxury High-Rise Apartment",
-    location: "Charlotte, NC",
-    price: 4500,
-    beds: 2,
-    baths: 2,
-    sqft: 1300,
-    type: "apartment",
-    image: "/placeholder.svg?height=200&width=300&text=Charlotte+Luxury+Apartment",
-    rating: 4.9,
-    verified: true,
-    amenities: ["Concierge", "Rooftop Pool", "Gym"],
     studentFriendly: false,
   },
 ]
@@ -159,7 +197,7 @@ export default function RentPage() {
         )
         const data = await response.json()
 
-        const rentalProperties = data.results?.filter((r: any) => r.type === "property") || []
+        const rentalProperties = data.results || []
         setSearchResults(rentalProperties)
       } catch (error) {
         console.error("Search error:", error)
@@ -241,20 +279,29 @@ export default function RentPage() {
             </Badge>
           </div>
 
-          {/* Category Tabs */}
-          <Tabs value={activeCategory} onValueChange={setActiveCategory} className="mb-8">
-            <TabsList className="grid w-full grid-cols-4 max-w-2xl mx-auto">
+          {/* Category Navigation */}
+          <div className="mb-8">
+            <div className="flex flex-wrap justify-center gap-2 max-w-2xl mx-auto">
               {rentalCategories.map((category) => {
                 const Icon = category.icon
+                const isActive = activeCategory === category.id
                 return (
-                  <TabsTrigger key={category.id} value={category.id} className="flex items-center gap-2">
+                  <Button
+                    key={category.id}
+                    variant={isActive ? "default" : "outline"}
+                    size="sm"
+                    className={`flex items-center gap-2 ${
+                      isActive ? "bg-blue-600 text-white" : "bg-white text-gray-700 hover:bg-blue-50 border-gray-300"
+                    }`}
+                    onClick={() => setActiveCategory(category.id)}
+                  >
                     <Icon className="h-4 w-4" />
-                    <span className="hidden sm:inline">{category.label}</span>
-                  </TabsTrigger>
+                    <span>{category.label}</span>
+                  </Button>
                 )
               })}
-            </TabsList>
-          </Tabs>
+            </div>
+          </div>
 
           {/* Dynamic Headlines */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-4">{categoryInfo.title}</h1>
@@ -267,7 +314,7 @@ export default function RentPage() {
               <div className="relative">
                 <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <Input
-                  placeholder={activeCategory === "apartments" ? "Search Places..." : "Search Places..."}
+                  placeholder="Search Places..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={(e) => e.key === "Enter" && handleSearch()}
@@ -308,6 +355,14 @@ export default function RentPage() {
               <Button variant="outline" size="sm" className="rounded-full bg-white hover:bg-blue-50 border-gray-300">
                 More →
               </Button>
+            </div>
+          </div>
+
+          {/* Price Range Info */}
+          <div className="mb-12">
+            <div className="text-center p-4 bg-white rounded-lg shadow-sm max-w-md mx-auto">
+              <div className="text-2xl font-bold text-blue-600">{categoryInfo.priceRange}</div>
+              <div className="text-sm text-gray-600">per month</div>
             </div>
           </div>
 
@@ -360,6 +415,12 @@ export default function RentPage() {
                       Student Friendly
                     </Badge>
                   )}
+                  {property.meals && (
+                    <Badge className="absolute bottom-2 right-2 bg-orange-500 text-white">
+                      <Utensils className="h-3 w-3 mr-1" />
+                      Meals
+                    </Badge>
+                  )}
                 </div>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-2">
@@ -388,6 +449,18 @@ export default function RentPage() {
                       <Square className="h-4 w-4" />
                       <span>{property.sqft} sqft</span>
                     </div>
+                    {property.roommates && (
+                      <div className="flex items-center gap-1">
+                        <Users className="h-4 w-4" />
+                        <span>{property.roommates}</span>
+                      </div>
+                    )}
+                    {property.capacity && (
+                      <div className="flex items-center gap-1">
+                        <Users className="h-4 w-4" />
+                        <span>{property.capacity}</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Amenities */}
