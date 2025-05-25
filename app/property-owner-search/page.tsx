@@ -1,11 +1,32 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Input } from "@/components/ui/input"
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { MagnifyingGlassIcon } from "@radix-ui/react-icons"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent } from "@/components/ui/card"
+import {
+  MapPin,
+  Search,
+  Bed,
+  Bath,
+  Square,
+  DollarSign,
+  Heart,
+  Star,
+  Users,
+  GraduationCap,
+  Home,
+  User,
+  TrendingUp,
+  Shield,
+  Bookmark,
+} from "lucide-react"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { SearchResults } from "@/components/search-results"
+import { PropertyFilters } from "@/components/property-filters"
 
 interface Owner {
   id: string
@@ -21,6 +42,418 @@ interface Owner {
   source: string
 }
 
+const topCities = ["Boston", "Austin", "Atlanta", "Phoenix", "Denver", "Nashville", "Charlotte", "Tampa"]
+
+// Comprehensive mock data for all US states - student rentals and properties for sale
+const allProperties = [
+  // CALIFORNIA
+  {
+    id: 1,
+    title: "Shared Room near UCLA",
+    location: "Los Angeles, CA",
+    price: 1200,
+    beds: 1,
+    baths: 1,
+    sqft: 180,
+    type: "rent",
+    category: "room",
+    image: "/placeholder.svg?height=200&width=300&text=UCLA+Shared+Room",
+    rating: 4.4,
+    verified: true,
+    amenities: ["WiFi", "Study Desk", "Pool", "Gym"],
+    studentFriendly: true,
+    roommates: 2,
+    gender: "Mixed",
+    furnished: true,
+    utilities: "Included",
+    ownerName: "California Student Housing Corp",
+    ownerWealth: "Corporate",
+    ownerType: "Company",
+    value: 1200,
+    confidence: "High",
+    subtitle: "Los Angeles, CA - Student Housing",
+    reviewCount: 45,
+    reviewSummary: "Great location near campus with excellent amenities",
+    reviewAuthor: "Student Reviewer",
+  },
+  {
+    id: 2,
+    title: "Luxury Condo in San Francisco",
+    location: "San Francisco, CA",
+    price: 2850000,
+    beds: 3,
+    baths: 3,
+    sqft: 2200,
+    type: "buy",
+    category: "condo",
+    image: "/placeholder.svg?height=200&width=300&text=SF+Luxury+Condo",
+    verified: true,
+    investmentGrade: "A+",
+    ownerName: "Tech Executive Holdings",
+    ownerWealth: "Ultra High Net Worth",
+    ownerType: "Individual",
+    value: 2850000,
+    confidence: "High",
+    subtitle: "San Francisco, CA - Luxury Real Estate",
+    reviewCount: 12,
+    reviewSummary: "Stunning views and premium finishes throughout",
+    reviewAuthor: "Real Estate Expert",
+  },
+
+  // TEXAS
+  {
+    id: 3,
+    title: "Modern Student Apartment",
+    location: "Austin, TX",
+    price: 1200,
+    beds: 2,
+    baths: 1,
+    sqft: 800,
+    type: "rent",
+    category: "apartment",
+    image: "/placeholder.svg?height=200&width=300&text=Austin+Student+Apartment",
+    rating: 4.5,
+    verified: true,
+    amenities: ["WiFi", "Pool", "Gym", "Study Lounge"],
+    studentFriendly: true,
+    furnished: true,
+    utilities: "Included",
+    ownerName: "Austin Student Housing LLC",
+    ownerWealth: "Corporate",
+    ownerType: "Company",
+    value: 1200,
+    confidence: "High",
+    subtitle: "Austin, TX - Student Apartment Complex",
+    reviewCount: 78,
+    reviewSummary: "Perfect for students with great amenities and location",
+    reviewAuthor: "UT Student",
+  },
+  {
+    id: 4,
+    title: "Executive Estate in Dallas",
+    location: "Dallas, TX",
+    price: 1250000,
+    beds: 5,
+    baths: 4,
+    sqft: 3800,
+    type: "buy",
+    category: "house",
+    image: "/placeholder.svg?height=200&width=300&text=Dallas+Executive+Estate",
+    verified: true,
+    investmentGrade: "A",
+    ownerName: "Texas Oil Executive",
+    ownerWealth: "High Net Worth",
+    ownerType: "Individual",
+    value: 1250000,
+    confidence: "High",
+    subtitle: "Dallas, TX - Executive Estate",
+    reviewCount: 8,
+    reviewSummary: "Impressive estate with luxury amenities",
+    reviewAuthor: "Luxury Buyer",
+  },
+
+  // NEW YORK
+  {
+    id: 5,
+    title: "Manhattan Studio near NYU",
+    location: "New York, NY",
+    price: 2800,
+    beds: 0,
+    baths: 1,
+    sqft: 400,
+    type: "rent",
+    category: "studio",
+    image: "/placeholder.svg?height=200&width=300&text=NYU+Studio",
+    rating: 4.2,
+    verified: true,
+    amenities: ["WiFi", "Doorman", "Rooftop"],
+    studentFriendly: true,
+    furnished: true,
+    utilities: "Separate",
+    ownerName: "Manhattan Properties Inc",
+    ownerWealth: "Corporate",
+    ownerType: "Company",
+    value: 2800,
+    confidence: "High",
+    subtitle: "New York, NY - Manhattan Studio",
+    reviewCount: 34,
+    reviewSummary: "Prime location in the heart of Manhattan",
+    reviewAuthor: "NYU Student",
+  },
+  {
+    id: 6,
+    title: "Penthouse in Manhattan",
+    location: "New York, NY",
+    price: 8500000,
+    beds: 4,
+    baths: 4,
+    sqft: 3500,
+    type: "buy",
+    category: "condo",
+    image: "/placeholder.svg?height=200&width=300&text=Manhattan+Penthouse",
+    verified: true,
+    investmentGrade: "A++",
+    ownerName: "Wall Street Executive",
+    ownerWealth: "Ultra High Net Worth",
+    ownerType: "Individual",
+    value: 8500000,
+    confidence: "High",
+    subtitle: "New York, NY - Luxury Penthouse",
+    reviewCount: 5,
+    reviewSummary: "Unparalleled luxury in prime Manhattan location",
+    reviewAuthor: "Luxury Real Estate Agent",
+  },
+
+  // FLORIDA
+  {
+    id: 7,
+    title: "Beach House Student Room",
+    location: "Miami, FL",
+    price: 950,
+    beds: 1,
+    baths: 1,
+    sqft: 220,
+    type: "rent",
+    category: "room",
+    image: "/placeholder.svg?height=200&width=300&text=Miami+Beach+Room",
+    rating: 4.6,
+    verified: true,
+    amenities: ["WiFi", "Beach Access", "Pool"],
+    studentFriendly: true,
+    roommates: 3,
+    gender: "Mixed",
+    furnished: true,
+    utilities: "Included",
+    ownerName: "Florida Beach Properties",
+    ownerWealth: "High Net Worth",
+    ownerType: "Company",
+    value: 950,
+    confidence: "High",
+    subtitle: "Miami, FL - Beach House Room",
+    reviewCount: 67,
+    reviewSummary: "Amazing beach access and vibrant student community",
+    reviewAuthor: "Miami Student",
+  },
+  {
+    id: 8,
+    title: "Waterfront Villa",
+    location: "Miami, FL",
+    price: 3200000,
+    beds: 6,
+    baths: 5,
+    sqft: 4500,
+    type: "buy",
+    category: "house",
+    image: "/placeholder.svg?height=200&width=300&text=Miami+Waterfront+Villa",
+    verified: true,
+    investmentGrade: "A+",
+    ownerName: "Miami Real Estate Mogul",
+    ownerWealth: "Ultra High Net Worth",
+    ownerType: "Individual",
+    value: 3200000,
+    confidence: "High",
+    subtitle: "Miami, FL - Waterfront Villa",
+    reviewCount: 15,
+    reviewSummary: "Spectacular waterfront views and luxury amenities",
+    reviewAuthor: "Luxury Home Buyer",
+  },
+
+  // MASSACHUSETTS
+  {
+    id: 9,
+    title: "Shared Room near Harvard",
+    location: "Cambridge, MA",
+    price: 750,
+    beds: 1,
+    baths: 1,
+    sqft: 200,
+    type: "rent",
+    category: "room",
+    image: "/placeholder.svg?height=200&width=300&text=Harvard+Shared+Room",
+    rating: 4.3,
+    verified: true,
+    amenities: ["WiFi", "Study Desk", "Library Access"],
+    studentFriendly: true,
+    roommates: 2,
+    gender: "Mixed",
+    furnished: true,
+    utilities: "Included",
+    ownerName: "Harvard Area Properties",
+    ownerWealth: "Upper Middle Class",
+    ownerType: "Individual",
+    value: 750,
+    confidence: "High",
+    subtitle: "Cambridge, MA - Harvard Area",
+    reviewCount: 89,
+    reviewSummary: "Perfect location for Harvard students",
+    reviewAuthor: "Harvard Student",
+  },
+  {
+    id: 10,
+    title: "Historic Boston Townhouse",
+    location: "Boston, MA",
+    price: 1850000,
+    beds: 4,
+    baths: 3,
+    sqft: 2800,
+    type: "buy",
+    category: "house",
+    image: "/placeholder.svg?height=200&width=300&text=Boston+Historic+Townhouse",
+    verified: true,
+    investmentGrade: "A",
+    ownerName: "Boston Heritage Trust",
+    ownerWealth: "High Net Worth",
+    ownerType: "Trust",
+    value: 1850000,
+    confidence: "High",
+    subtitle: "Boston, MA - Historic Townhouse",
+    reviewCount: 22,
+    reviewSummary: "Beautiful historic charm with modern updates",
+    reviewAuthor: "Boston Resident",
+  },
+
+  // GEORGIA
+  {
+    id: 11,
+    title: "Budget-Friendly Room",
+    location: "Atlanta, GA",
+    price: 580,
+    beds: 1,
+    baths: 1,
+    sqft: 150,
+    type: "rent",
+    category: "room",
+    image: "/placeholder.svg?height=200&width=300&text=Atlanta+Budget+Room",
+    rating: 4.2,
+    verified: true,
+    amenities: ["WiFi", "Kitchen Access", "Parking"],
+    studentFriendly: true,
+    roommates: 3,
+    gender: "Female Only",
+    furnished: true,
+    utilities: "Separate",
+    ownerName: "Georgia Student Housing",
+    ownerWealth: "Middle Class",
+    ownerType: "Individual",
+    value: 580,
+    confidence: "Medium",
+    subtitle: "Atlanta, GA - Budget Student Room",
+    reviewCount: 156,
+    reviewSummary: "Great value for money in safe neighborhood",
+    reviewAuthor: "Georgia Tech Student",
+  },
+  {
+    id: 12,
+    title: "Modern Atlanta Home",
+    location: "Atlanta, GA",
+    price: 485000,
+    beds: 4,
+    baths: 3,
+    sqft: 2200,
+    type: "buy",
+    category: "house",
+    image: "/placeholder.svg?height=200&width=300&text=Atlanta+Modern+Home",
+    verified: true,
+    investmentGrade: "A-",
+    ownerName: "Atlanta Development Group",
+    ownerWealth: "Upper Middle Class",
+    ownerType: "Company",
+    value: 485000,
+    confidence: "High",
+    subtitle: "Atlanta, GA - Modern Family Home",
+    reviewCount: 31,
+    reviewSummary: "Well-designed modern home in growing neighborhood",
+    reviewAuthor: "Atlanta Family",
+  },
+
+  // Add more states...
+  {
+    id: 13,
+    title: "Premium Student Housing",
+    location: "Phoenix, AZ",
+    price: 950,
+    beds: 1,
+    baths: 1,
+    sqft: 400,
+    type: "rent",
+    category: "studio",
+    image: "/placeholder.svg?height=200&width=300&text=Phoenix+Premium+Studio",
+    rating: 4.6,
+    verified: true,
+    amenities: ["WiFi", "Pool", "Gym", "Concierge"],
+    studentFriendly: true,
+    furnished: true,
+    utilities: "Included",
+    ownerName: "Arizona Student Living",
+    ownerWealth: "High Net Worth",
+    ownerType: "Company",
+    value: 950,
+    confidence: "High",
+    subtitle: "Phoenix, AZ - Premium Student Studio",
+    reviewCount: 43,
+    reviewSummary: "Luxury amenities perfect for students",
+    reviewAuthor: "ASU Student",
+  },
+  {
+    id: 14,
+    title: "Mountain View Student Room",
+    location: "Denver, CO",
+    price: 680,
+    beds: 1,
+    baths: 1,
+    sqft: 220,
+    type: "rent",
+    category: "room",
+    image: "/placeholder.svg?height=200&width=300&text=Denver+Mountain+Room",
+    rating: 4.4,
+    verified: true,
+    amenities: ["WiFi", "Mountain View", "Ski Storage"],
+    studentFriendly: true,
+    roommates: 2,
+    gender: "Mixed",
+    furnished: true,
+    utilities: "Included",
+    ownerName: "Colorado Mountain Properties",
+    ownerWealth: "Professional",
+    ownerType: "Individual",
+    value: 680,
+    confidence: "High",
+    subtitle: "Denver, CO - Mountain View Room",
+    reviewCount: 72,
+    reviewSummary: "Beautiful mountain views and outdoor access",
+    reviewAuthor: "CU Denver Student",
+  },
+  {
+    id: 15,
+    title: "Music City Student Room",
+    location: "Nashville, TN",
+    price: 620,
+    beds: 1,
+    baths: 1,
+    sqft: 170,
+    type: "rent",
+    category: "room",
+    image: "/placeholder.svg?height=200&width=300&text=Nashville+Music+Room",
+    rating: 4.3,
+    verified: true,
+    amenities: ["WiFi", "Music Room", "Recording Studio"],
+    studentFriendly: true,
+    roommates: 3,
+    gender: "Mixed",
+    furnished: true,
+    utilities: "Included",
+    ownerName: "Nashville Music Properties",
+    ownerWealth: "Corporate",
+    ownerType: "Company",
+    value: 620,
+    confidence: "High",
+    subtitle: "Nashville, TN - Music City Room",
+    reviewCount: 98,
+    reviewSummary: "Perfect for music students with recording access",
+    reviewAuthor: "Belmont Student",
+  },
+]
+
 const PropertyOwnerSearch = () => {
   const [ownerSearchQuery, setOwnerSearchQuery] = useState("")
   const [ownerResults, setOwnerResults] = useState<Owner[]>([])
@@ -28,9 +461,11 @@ const PropertyOwnerSearch = () => {
   const [searchQuery, setSearchQuery] = useState("")
   const [loading, setLoading] = useState(false)
   const [showResults, setShowResults] = useState(false)
-  const [propertyType, setPropertyType] = useState("all")
-  const [searchType, setSearchType] = useState("properties")
+  const [propertyType, setPropertyType] = useState<"all" | "rent" | "buy">("all")
+  const [searchType, setSearchType] = useState<"properties" | "owners">("properties")
   const [searchResults, setSearchResults] = useState([])
+  const router = useRouter()
+  const searchParams = useSearchParams()
 
   // Using mock data - no API keys required
   const usingMockData = true
@@ -109,25 +544,23 @@ const PropertyOwnerSearch = () => {
 
   useEffect(() => {
     try {
-      const query = ""
-      const type = ""
+      const query = searchParams?.get("q") || ""
+      const type = searchParams?.get("type") || ""
       const minValue = ""
       const maxValue = ""
 
       if (query) {
-        setOwnerSearchQuery(query)
+        setSearchQuery(query)
+        setShowResults(true)
       }
       if (type && (type === "rent" || type === "buy")) {
-        //setPropertyType(type) //setPropertyType does not exist in this context
+        setPropertyType(type)
       }
 
-      // Auto-search if query is provided OR demonstrate student search
-      if (query || !query) {
-        // For demonstration, let's search for "student" automatically
-        setOwnerSearchQuery("student")
-        //setPropertyType("rent") //setPropertyType does not exist in this context
+      // Auto-search if query is provided
+      if (query) {
         setTimeout(() => {
-          handleStudentSearch()
+          handleSearch()
         }, 100)
       }
 
@@ -140,13 +573,13 @@ const PropertyOwnerSearch = () => {
     } catch (error) {
       console.error("Error in Property Owner Search page useEffect:", error)
     }
-  }, [])
+  }, [searchParams])
 
   // Add a specific student search function
   const handleStudentSearch = async () => {
     try {
       setOwnerLoading(true)
-      //setShowResults(true) //setShowResults does not exist in this context
+      setShowResults(true)
 
       // Mock student data based on search query
       const mockOwners = [
@@ -200,817 +633,344 @@ const PropertyOwnerSearch = () => {
     }
   }
 
+  const handleSearch = async () => {
+    try {
+      if (searchQuery.trim()) {
+        setLoading(true)
+        setShowResults(true)
+
+        // Simulate API delay
+        await new Promise((resolve) => setTimeout(resolve, 500))
+
+        let filteredProperties = allProperties
+
+        // Filter by property type (rent/buy)
+        if (propertyType !== "all") {
+          filteredProperties = filteredProperties.filter((property) => property.type === propertyType)
+        }
+
+        // Enhanced filtering by search query
+        const mockResults = filteredProperties
+          .filter((property) => {
+            const queryLower = searchQuery.toLowerCase()
+            if (searchType === "properties") {
+              return (
+                property.title.toLowerCase().includes(queryLower) ||
+                property.location.toLowerCase().includes(queryLower) ||
+                property.category.toLowerCase().includes(queryLower) ||
+                queryLower.includes("all") ||
+                queryLower === "" ||
+                // State matching
+                property.location
+                  .split(", ")[1]
+                  ?.toLowerCase()
+                  .includes(queryLower) ||
+                // City matching
+                property.location
+                  .split(", ")[0]
+                  ?.toLowerCase()
+                  .includes(queryLower)
+              )
+            } else {
+              // Owner search
+              return (
+                property.ownerName.toLowerCase().includes(queryLower) ||
+                property.ownerWealth.toLowerCase().includes(queryLower) ||
+                property.ownerType.toLowerCase().includes(queryLower)
+              )
+            }
+          })
+          .map((property) => ({
+            id: property.id,
+            title: property.title,
+            subtitle: property.subtitle || property.location,
+            value: property.value || property.price,
+            ownerName: property.ownerName,
+            ownerWealth: property.ownerWealth,
+            confidence: property.confidence || "High",
+            type: "property",
+            rating: property.rating,
+            reviewCount: property.reviewCount || 0,
+            reviewSummary: property.reviewSummary,
+            reviewAuthor: property.reviewAuthor,
+            image: property.image,
+          }))
+
+        setSearchResults(mockResults)
+        setLoading(false)
+      }
+    } catch (error) {
+      console.error("Search error:", error)
+      setLoading(false)
+      setSearchResults([])
+    }
+  }
+
+  const formatPrice = (price: number, type: string) => {
+    if (type === "rent") {
+      return `$${price.toLocaleString()}/month`
+    } else {
+      if (price >= 1000000) return `$${(price / 1000000).toFixed(1)}M`
+      if (price >= 1000) return `$${Math.round(price / 1000)}K`
+      return `$${price.toLocaleString()}`
+    }
+  }
+
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Property Owner Search</h1>
-      <div className="flex items-center space-x-2 mb-4">
-        <Input
-          type="text"
-          placeholder="Enter owner name, company, or email"
-          value={ownerSearchQuery}
-          onChange={(e) => setOwnerSearchQuery(e.target.value)}
-        />
-        <Button onClick={handleOwnerSearch} disabled={ownerLoading}>
-          {ownerLoading ? "Searching..." : "Search"}
-          <MagnifyingGlassIcon className="ml-2 h-4 w-4" />
-        </Button>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+      <Header />
+
+      {/* Hero Section */}
+      <div className="container mx-auto px-4 py-16">
+        <div className="text-center max-w-4xl mx-auto">
+          {/* Trust Badge */}
+          <div className="mb-6">
+            <Badge className="bg-blue-100 text-blue-800 px-4 py-2 text-sm font-medium">
+              Advanced Property & Owner Intelligence
+            </Badge>
+          </div>
+
+          {/* Main Headlines */}
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-4">Property & Owner Search</h1>
+          <h2 className="text-2xl sm:text-3xl text-gray-700 mb-4">Find Properties and Discover Owner Information</h2>
+          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+            Search for rental properties, homes for sale, and get detailed owner insights across all US states
+          </p>
+
+          {/* Search Type Toggle */}
+          <div className="flex justify-center mb-6">
+            <div className="inline-flex bg-white rounded-lg p-1 shadow-lg">
+              <button
+                onClick={() => setSearchType("properties")}
+                className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-all ${
+                  searchType === "properties" ? "bg-blue-600 text-white shadow-md" : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                <Home className="h-4 w-4" />
+                Properties
+              </button>
+              <button
+                onClick={() => setSearchType("owners")}
+                className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-all ${
+                  searchType === "owners" ? "bg-blue-600 text-white shadow-md" : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                <User className="h-4 w-4" />
+                Owners
+              </button>
+            </div>
+          </div>
+
+          {/* Property Type Filter */}
+          <div className="flex justify-center mb-8">
+            <div className="inline-flex bg-white rounded-lg p-1 shadow-lg">
+              {[
+                { key: "all", label: "All" },
+                { key: "rent", label: "Rent" },
+                { key: "buy", label: "Buy" },
+              ].map(({ key, label }) => (
+                <button
+                  key={key}
+                  onClick={() => setPropertyType(key as any)}
+                  className={`px-4 py-2 rounded-md font-medium transition-all ${
+                    propertyType === key ? "bg-blue-600 text-white shadow-md" : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Search Bar */}
+          <Card className="bg-white shadow-lg border-0 max-w-2xl mx-auto mb-8">
+            <CardContent className="p-6">
+              <div className="relative">
+                <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Input
+                  placeholder={
+                    searchType === "properties"
+                      ? "Search by state, city, or property type (e.g., California, Austin, student)..."
+                      : "Search by owner name, wealth level, or type..."
+                  }
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                  className="pl-12 h-14 text-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg"
+                />
+                <Button
+                  onClick={handleSearch}
+                  className="absolute right-2 top-2 h-10 px-6 bg-blue-600 hover:bg-blue-700"
+                >
+                  <Search className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Top Cities */}
+          <div className="mb-12">
+            <p className="text-sm text-gray-600 mb-4">
+              <span className="font-medium">Popular Searches:</span>
+            </p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {["California", "Texas", "New York", "Florida", "student", "luxury"].map((term) => (
+                <Button
+                  key={term}
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full bg-white hover:bg-blue-50 border-gray-300"
+                  onClick={() => {
+                    setSearchQuery(term)
+                    handleSearch()
+                  }}
+                >
+                  {term}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
-      {ownerLoading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[...Array(3)].map((_, i) => (
-            <Card key={`skeleton-${i}`}>
-              <CardHeader>
-                <CardTitle>
-                  <Skeleton />
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-4 w-[80%]" />
-                <Skeleton className="h-4 w-[60%]" />
-                <Skeleton className="h-4 w-[40%]" />
-              </CardContent>
-            </Card>
-          ))}
+      {/* Search Results Section */}
+      {showResults && (
+        <div className="bg-white py-16">
+          <div className="container mx-auto px-4">
+            <div className="max-w-7xl mx-auto">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-2xl font-bold text-gray-900">
+                  {searchType === "properties" ? "Properties" : "Property Owners"}{" "}
+                  {searchQuery && `for "${searchQuery}"`}
+                </h3>
+                <div className="flex items-center gap-4">
+                  <Button variant="outline" onClick={() => router.push("/bookmarks")} className="text-gray-600">
+                    <Bookmark className="h-4 w-4 mr-2" />
+                    View Bookmarks
+                  </Button>
+                  <Button variant="outline" onClick={() => setShowResults(false)} className="text-gray-600">
+                    Clear Results
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid lg:grid-cols-4 gap-6">
+                <div className="lg:col-span-1">
+                  <PropertyFilters onFiltersChange={(filters) => console.log("Filters:", filters)} />
+                </div>
+                <div className="lg:col-span-3">
+                  <SearchResults results={searchResults} loading={loading} query={searchQuery} />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
-      {ownerResults.length > 0 && !ownerLoading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {ownerResults.map((owner) => (
-            <Card key={owner.id}>
-              <CardHeader>
-                <CardTitle>{owner.name}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p>
-                  <strong>Email:</strong> {owner.email}
-                </p>
-                <p>
-                  <strong>Company:</strong> {owner.company}
-                </p>
-                <p>
-                  <strong>Title:</strong> {owner.title}
-                </p>
-                <p>
-                  <strong>Location:</strong> {owner.location}
-                </p>
-                <p>
-                  <strong>Properties:</strong> {owner.properties}
-                </p>
-                <p>
-                  <strong>Total Value:</strong> ${owner.totalValue.toLocaleString()}
-                </p>
-                <p>
-                  <strong>Wealth Level:</strong> {owner.wealthLevel}
-                </p>
-                <p>
-                  <strong>Investment Grade:</strong> {owner.investmentGrade}
-                </p>
-                <p>
-                  <strong>Source:</strong> {owner.source}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
+      {/* Featured Properties Section */}
+      {!showResults && (
+        <div className="bg-white py-16">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h3 className="text-3xl font-bold text-gray-900 mb-4">Featured Properties Across US States</h3>
+              <p className="text-gray-600">Student rentals and properties for sale nationwide</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+              {allProperties.slice(0, 6).map((property) => (
+                <Card key={property.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="relative">
+                    <img
+                      src={property.image || "/placeholder.svg"}
+                      alt={property.title}
+                      className="w-full h-48 object-cover"
+                    />
+                    <Button variant="ghost" size="icon" className="absolute top-2 right-2 bg-white/80 hover:bg-white">
+                      <Heart className="h-4 w-4" />
+                    </Button>
+                    {property.verified && (
+                      <Badge className="absolute top-2 left-2 bg-green-500 text-white">
+                        <Shield className="h-3 w-3 mr-1" />
+                        Verified
+                      </Badge>
+                    )}
+                    {property.studentFriendly && (
+                      <Badge className="absolute bottom-2 left-2 bg-blue-500 text-white">
+                        <GraduationCap className="h-3 w-3 mr-1" />
+                        Student Friendly
+                      </Badge>
+                    )}
+                    {property.investmentGrade && (
+                      <Badge className="absolute bottom-2 right-2 bg-purple-500 text-white">
+                        <TrendingUp className="h-3 w-3 mr-1" />
+                        {property.investmentGrade}
+                      </Badge>
+                    )}
+                  </div>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-semibold text-lg">{property.title}</h4>
+                      {property.rating && (
+                        <div className="flex items-center gap-1">
+                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                          <span className="text-sm text-gray-600">{property.rating}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2 mb-3">
+                      <MapPin className="h-4 w-4 text-gray-500" />
+                      <span className="text-gray-600">{property.location}</span>
+                    </div>
+
+                    <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
+                      <div className="flex items-center gap-1">
+                        <Bed className="h-4 w-4" />
+                        <span>{property.beds}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Bath className="h-4 w-4" />
+                        <span>{property.baths}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Square className="h-4 w-4" />
+                        <span>{property.sqft} sqft</span>
+                      </div>
+                      {property.roommates && (
+                        <div className="flex items-center gap-1">
+                          <Users className="h-4 w-4" />
+                          <span>{property.roommates}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Owner Information */}
+                    <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                      <div className="text-xs text-gray-500 mb-1">Owner Information</div>
+                      <div className="text-sm font-medium">{property.ownerName}</div>
+                      <div className="text-xs text-gray-600">{property.ownerWealth}</div>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1">
+                        <DollarSign className="h-5 w-5 text-gray-500" />
+                        <span className="text-xl font-bold">{formatPrice(property.price, property.type)}</span>
+                      </div>
+                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                        View Details
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 
-      {!ownerLoading && ownerResults.length === 0 && ownerSearchQuery.trim() !== "" && (
-        <p>No owners found matching your search criteria.</p>
-      )}
+      <Footer />
     </div>
   )
 }
 
 export default PropertyOwnerSearch
-// Comprehensive mock data for all US states - student rentals and properties for sale
-const allProperties = [
-  // CALIFORNIA
-  {
-    id: 1,
-    title: "Shared Room near UCLA",
-    location: "Los Angeles, CA",
-    price: 1200,
-    beds: 1,
-    baths: 1,
-    sqft: 180,
-    type: "rent",
-    category: "room",
-    image: "/placeholder.svg?height=200&width=300&text=UCLA+Shared+Room",
-    rating: 4.4,
-    verified: true,
-    amenities: ["WiFi", "Study Desk", "Pool", "Gym"],
-    studentFriendly: true,
-    roommates: 2,
-    gender: "Mixed",
-    furnished: true,
-    utilities: "Included",
-    ownerName: "California Student Housing Corp",
-    ownerWealth: "Corporate",
-    ownerType: "Company",
-  },
-  {
-    id: 2,
-    title: "Luxury Condo in San Francisco",
-    location: "San Francisco, CA",
-    price: 2850000,
-    beds: 3,
-    baths: 3,
-    sqft: 2200,
-    type: "buy",
-    category: "condo",
-    image: "/placeholder.svg?height=200&width=300&text=SF+Luxury+Condo",
-    verified: true,
-    investmentGrade: "A+",
-    ownerName: "Tech Executive Holdings",
-    ownerWealth: "Ultra High Net Worth",
-    ownerType: "Individual",
-  },
-
-  // TEXAS
-  {
-    id: 3,
-    title: "Modern Student Apartment",
-    location: "Austin, TX",
-    price: 1200,
-    beds: 2,
-    baths: 1,
-    sqft: 800,
-    type: "rent",
-    category: "apartment",
-    image: "/placeholder.svg?height=200&width=300&text=Austin+Student+Apartment",
-    rating: 4.5,
-    verified: true,
-    amenities: ["WiFi", "Pool", "Gym", "Study Lounge"],
-    studentFriendly: true,
-    furnished: true,
-    utilities: "Included",
-    ownerName: "Austin Student Housing LLC",
-    ownerWealth: "Corporate",
-    ownerType: "Company",
-  },
-  {
-    id: 4,
-    title: "Executive Estate in Dallas",
-    location: "Dallas, TX",
-    price: 1250000,
-    beds: 5,
-    baths: 4,
-    sqft: 3800,
-    type: "buy",
-    category: "house",
-    image: "/placeholder.svg?height=200&width=300&text=Dallas+Executive+Estate",
-    verified: true,
-    investmentGrade: "A",
-    ownerName: "Texas Oil Executive",
-    ownerWealth: "High Net Worth",
-    ownerType: "Individual",
-  },
-
-  // NEW YORK
-  {
-    id: 5,
-    title: "Manhattan Studio near NYU",
-    location: "New York, NY",
-    price: 2800,
-    beds: 0,
-    baths: 1,
-    sqft: 400,
-    type: "rent",
-    category: "studio",
-    image: "/placeholder.svg?height=200&width=300&text=NYU+Studio",
-    rating: 4.2,
-    verified: true,
-    amenities: ["WiFi", "Doorman", "Rooftop"],
-    studentFriendly: true,
-    furnished: true,
-    utilities: "Separate",
-    ownerName: "Manhattan Properties Inc",
-    ownerWealth: "Corporate",
-    ownerType: "Company",
-  },
-  {
-    id: 6,
-    title: "Penthouse in Manhattan",
-    location: "New York, NY",
-    price: 8500000,
-    beds: 4,
-    baths: 4,
-    sqft: 3500,
-    type: "buy",
-    category: "condo",
-    image: "/placeholder.svg?height=200&width=300&text=Manhattan+Penthouse",
-    verified: true,
-    investmentGrade: "A++",
-    ownerName: "Wall Street Executive",
-    ownerWealth: "Ultra High Net Worth",
-    ownerType: "Individual",
-  },
-
-  // FLORIDA
-  {
-    id: 7,
-    title: "Beach House Student Room",
-    location: "Miami, FL",
-    price: 950,
-    beds: 1,
-    baths: 1,
-    sqft: 220,
-    type: "rent",
-    category: "room",
-    image: "/placeholder.svg?height=200&width=300&text=Miami+Beach+Room",
-    rating: 4.6,
-    verified: true,
-    amenities: ["WiFi", "Beach Access", "Pool"],
-    studentFriendly: true,
-    roommates: 3,
-    gender: "Mixed",
-    furnished: true,
-    utilities: "Included",
-    ownerName: "Florida Beach Properties",
-    ownerWealth: "High Net Worth",
-    ownerType: "Company",
-  },
-  {
-    id: 8,
-    title: "Waterfront Villa",
-    location: "Miami, FL",
-    price: 3200000,
-    beds: 6,
-    baths: 5,
-    sqft: 4500,
-    type: "buy",
-    category: "house",
-    image: "/placeholder.svg?height=200&width=300&text=Miami+Waterfront+Villa",
-    verified: true,
-    investmentGrade: "A+",
-    ownerName: "Miami Real Estate Mogul",
-    ownerWealth: "Ultra High Net Worth",
-    ownerType: "Individual",
-  },
-
-  // MASSACHUSETTS
-  {
-    id: 9,
-    title: "Shared Room near Harvard",
-    location: "Cambridge, MA",
-    price: 750,
-    beds: 1,
-    baths: 1,
-    sqft: 200,
-    type: "rent",
-    category: "room",
-    image: "/placeholder.svg?height=200&width=300&text=Harvard+Shared+Room",
-    rating: 4.3,
-    verified: true,
-    amenities: ["WiFi", "Study Desk", "Library Access"],
-    studentFriendly: true,
-    roommates: 2,
-    gender: "Mixed",
-    furnished: true,
-    utilities: "Included",
-    ownerName: "Harvard Area Properties",
-    ownerWealth: "Upper Middle Class",
-    ownerType: "Individual",
-  },
-  {
-    id: 10,
-    title: "Historic Boston Townhouse",
-    location: "Boston, MA",
-    price: 1850000,
-    beds: 4,
-    baths: 3,
-    sqft: 2800,
-    type: "buy",
-    category: "house",
-    image: "/placeholder.svg?height=200&width=300&text=Boston+Historic+Townhouse",
-    verified: true,
-    investmentGrade: "A",
-    ownerName: "Boston Heritage Trust",
-    ownerWealth: "High Net Worth",
-    ownerType: "Trust",
-  },
-
-  // GEORGIA
-  {
-    id: 11,
-    title: "Budget-Friendly Room",
-    location: "Atlanta, GA",
-    price: 580,
-    beds: 1,
-    baths: 1,
-    sqft: 150,
-    type: "rent",
-    category: "room",
-    image: "/placeholder.svg?height=200&width=300&text=Atlanta+Budget+Room",
-    rating: 4.2,
-    verified: true,
-    amenities: ["WiFi", "Kitchen Access", "Parking"],
-    studentFriendly: true,
-    roommates: 3,
-    gender: "Female Only",
-    furnished: true,
-    utilities: "Separate",
-    ownerName: "Georgia Student Housing",
-    ownerWealth: "Middle Class",
-    ownerType: "Individual",
-  },
-  {
-    id: 12,
-    title: "Modern Atlanta Home",
-    location: "Atlanta, GA",
-    price: 485000,
-    beds: 4,
-    baths: 3,
-    sqft: 2200,
-    type: "buy",
-    category: "house",
-    image: "/placeholder.svg?height=200&width=300&text=Atlanta+Modern+Home",
-    verified: true,
-    investmentGrade: "A-",
-    ownerName: "Atlanta Development Group",
-    ownerWealth: "Upper Middle Class",
-    ownerType: "Company",
-  },
-
-  // ARIZONA
-  {
-    id: 13,
-    title: "Premium Student Housing",
-    location: "Phoenix, AZ",
-    price: 950,
-    beds: 1,
-    baths: 1,
-    sqft: 400,
-    type: "rent",
-    category: "studio",
-    image: "/placeholder.svg?height=200&width=300&text=Phoenix+Premium+Studio",
-    rating: 4.6,
-    verified: true,
-    amenities: ["WiFi", "Pool", "Gym", "Concierge"],
-    studentFriendly: true,
-    furnished: true,
-    utilities: "Included",
-    ownerName: "Arizona Student Living",
-    ownerWealth: "High Net Worth",
-    ownerType: "Company",
-  },
-  {
-    id: 14,
-    title: "Desert Oasis Home",
-    location: "Scottsdale, AZ",
-    price: 750000,
-    beds: 3,
-    baths: 3,
-    sqft: 2100,
-    type: "buy",
-    category: "house",
-    image: "/placeholder.svg?height=200&width=300&text=Scottsdale+Desert+Home",
-    verified: true,
-    investmentGrade: "B+",
-    ownerName: "Desert Properties LLC",
-    ownerWealth: "High Net Worth",
-    ownerType: "Company",
-  },
-
-  // COLORADO
-  {
-    id: 15,
-    title: "Mountain View Student Room",
-    location: "Denver, CO",
-    price: 680,
-    beds: 1,
-    baths: 1,
-    sqft: 220,
-    type: "rent",
-    category: "room",
-    image: "/placeholder.svg?height=200&width=300&text=Denver+Mountain+Room",
-    rating: 4.4,
-    verified: true,
-    amenities: ["WiFi", "Mountain View", "Ski Storage"],
-    studentFriendly: true,
-    roommates: 2,
-    gender: "Mixed",
-    furnished: true,
-    utilities: "Included",
-    ownerName: "Colorado Mountain Properties",
-    ownerWealth: "Professional",
-    ownerType: "Individual",
-  },
-  {
-    id: 16,
-    title: "Mountain Retreat",
-    location: "Aspen, CO",
-    price: 4200000,
-    beds: 5,
-    baths: 4,
-    sqft: 3200,
-    type: "buy",
-    category: "house",
-    image: "/placeholder.svg?height=200&width=300&text=Aspen+Mountain+Retreat",
-    verified: true,
-    investmentGrade: "A++",
-    ownerName: "Aspen Elite Holdings",
-    ownerWealth: "Ultra High Net Worth",
-    ownerType: "Trust",
-  },
-
-  // WASHINGTON
-  {
-    id: 17,
-    title: "Seattle Tech Hub Room",
-    location: "Seattle, WA",
-    price: 1100,
-    beds: 1,
-    baths: 1,
-    sqft: 250,
-    type: "rent",
-    category: "room",
-    image: "/placeholder.svg?height=200&width=300&text=Seattle+Tech+Room",
-    rating: 4.5,
-    verified: true,
-    amenities: ["WiFi", "Tech Hub", "Coffee Bar"],
-    studentFriendly: true,
-    roommates: 2,
-    gender: "Mixed",
-    furnished: true,
-    utilities: "Included",
-    ownerName: "Seattle Tech Properties",
-    ownerWealth: "High Net Worth",
-    ownerType: "Company",
-  },
-  {
-    id: 18,
-    title: "Waterfront Seattle Condo",
-    location: "Seattle, WA",
-    price: 1650000,
-    beds: 2,
-    baths: 2,
-    sqft: 1400,
-    type: "buy",
-    category: "condo",
-    image: "/placeholder.svg?height=200&width=300&text=Seattle+Waterfront+Condo",
-    verified: true,
-    investmentGrade: "A",
-    ownerName: "Pacific Northwest Investments",
-    ownerWealth: "High Net Worth",
-    ownerType: "Company",
-  },
-
-  // ILLINOIS
-  {
-    id: 19,
-    title: "Chicago University District",
-    location: "Chicago, IL",
-    price: 850,
-    beds: 1,
-    baths: 1,
-    sqft: 300,
-    type: "rent",
-    category: "room",
-    image: "/placeholder.svg?height=200&width=300&text=Chicago+University+Room",
-    rating: 4.3,
-    verified: true,
-    amenities: ["WiFi", "Study Lounge", "Transit Access"],
-    studentFriendly: true,
-    roommates: 3,
-    gender: "Mixed",
-    furnished: true,
-    utilities: "Included",
-    ownerName: "Chicago Student Living",
-    ownerWealth: "Corporate",
-    ownerType: "Company",
-  },
-  {
-    id: 20,
-    title: "Downtown Chicago Loft",
-    location: "Chicago, IL",
-    price: 950000,
-    beds: 2,
-    baths: 2,
-    sqft: 1600,
-    type: "buy",
-    category: "loft",
-    image: "/placeholder.svg?height=200&width=300&text=Chicago+Downtown+Loft",
-    verified: true,
-    investmentGrade: "A-",
-    ownerName: "Windy City Properties",
-    ownerWealth: "High Net Worth",
-    ownerType: "Individual",
-  },
-
-  // TENNESSEE
-  {
-    id: 21,
-    title: "Music City Student Room",
-    location: "Nashville, TN",
-    price: 620,
-    beds: 1,
-    baths: 1,
-    sqft: 170,
-    type: "rent",
-    category: "room",
-    image: "/placeholder.svg?height=200&width=300&text=Nashville+Music+Room",
-    rating: 4.3,
-    verified: true,
-    amenities: ["WiFi", "Music Room", "Recording Studio"],
-    studentFriendly: true,
-    roommates: 3,
-    gender: "Mixed",
-    furnished: true,
-    utilities: "Included",
-    ownerName: "Nashville Music Properties",
-    ownerWealth: "Corporate",
-    ownerType: "Company",
-  },
-  {
-    id: 22,
-    title: "Nashville Country Estate",
-    location: "Nashville, TN",
-    price: 1200000,
-    beds: 4,
-    baths: 3,
-    sqft: 3000,
-    type: "buy",
-    category: "house",
-    image: "/placeholder.svg?height=200&width=300&text=Nashville+Country+Estate",
-    verified: true,
-    investmentGrade: "A",
-    ownerName: "Country Music Investments",
-    ownerWealth: "High Net Worth",
-    ownerType: "Trust",
-  },
-
-  // NORTH CAROLINA
-  {
-    id: 23,
-    title: "Research Triangle Student Housing",
-    location: "Durham, NC",
-    price: 720,
-    beds: 1,
-    baths: 1,
-    sqft: 200,
-    type: "rent",
-    category: "room",
-    image: "/placeholder.svg?height=200&width=300&text=Durham+Research+Room",
-    rating: 4.4,
-    verified: true,
-    amenities: ["WiFi", "Research Lab Access", "Study Pods"],
-    studentFriendly: true,
-    roommates: 2,
-    gender: "Mixed",
-    furnished: true,
-    utilities: "Included",
-    ownerName: "Triangle Student Properties",
-    ownerWealth: "Professional",
-    ownerType: "Individual",
-  },
-  {
-    id: 24,
-    title: "Charlotte Business District Condo",
-    location: "Charlotte, NC",
-    price: 425000,
-    beds: 2,
-    baths: 2,
-    sqft: 1200,
-    type: "buy",
-    category: "condo",
-    image: "/placeholder.svg?height=200&width=300&text=Charlotte+Business+Condo",
-    verified: true,
-    investmentGrade: "B+",
-    ownerName: "Carolina Investments",
-    ownerWealth: "Upper Middle Class",
-    ownerType: "Company",
-  },
-
-  // OREGON
-  {
-    id: 25,
-    title: "Portland Eco-Friendly Room",
-    location: "Portland, OR",
-    price: 780,
-    beds: 1,
-    baths: 1,
-    sqft: 180,
-    type: "rent",
-    category: "room",
-    image: "/placeholder.svg?height=200&width=300&text=Portland+Eco+Room",
-    rating: 4.5,
-    verified: true,
-    amenities: ["WiFi", "Solar Power", "Bike Storage"],
-    studentFriendly: true,
-    roommates: 2,
-    gender: "Mixed",
-    furnished: true,
-    utilities: "Included",
-    ownerName: "Green Portland Properties",
-    ownerWealth: "Professional",
-    ownerType: "Individual",
-  },
-  {
-    id: 26,
-    title: "Portland Craftsman Home",
-    location: "Portland, OR",
-    price: 650000,
-    beds: 3,
-    baths: 2,
-    sqft: 1800,
-    type: "buy",
-    category: "house",
-    image: "/placeholder.svg?height=200&width=300&text=Portland+Craftsman+Home",
-    verified: true,
-    investmentGrade: "B+",
-    ownerName: "Pacific Northwest Homes",
-    ownerWealth: "Upper Middle Class",
-    ownerType: "Individual",
-  },
-
-  // NEVADA
-  {
-    id: 27,
-    title: "Las Vegas Student Suite",
-    location: "Las Vegas, NV",
-    price: 890,
-    beds: 1,
-    baths: 1,
-    sqft: 350,
-    type: "rent",
-    category: "studio",
-    image: "/placeholder.svg?height=200&width=300&text=Vegas+Student+Suite",
-    rating: 4.2,
-    verified: true,
-    amenities: ["WiFi", "Pool", "Entertainment District"],
-    studentFriendly: true,
-    furnished: true,
-    utilities: "Included",
-    ownerName: "Vegas Student Living",
-    ownerWealth: "Corporate",
-    ownerType: "Company",
-  },
-  {
-    id: 28,
-    title: "Las Vegas Luxury High-Rise",
-    location: "Las Vegas, NV",
-    price: 1850000,
-    beds: 3,
-    baths: 3,
-    sqft: 2400,
-    type: "buy",
-    category: "condo",
-    image: "/placeholder.svg?height=200&width=300&text=Vegas+Luxury+Highrise",
-    verified: true,
-    investmentGrade: "A",
-    ownerName: "Vegas Elite Properties",
-    ownerWealth: "High Net Worth",
-    ownerType: "Company",
-  },
-
-  // UTAH
-  {
-    id: 29,
-    title: "Salt Lake City Student Room",
-    location: "Salt Lake City, UT",
-    price: 650,
-    beds: 1,
-    baths: 1,
-    sqft: 190,
-    type: "rent",
-    category: "room",
-    image: "/placeholder.svg?height=200&width=300&text=SLC+Student+Room",
-    rating: 4.4,
-    verified: true,
-    amenities: ["WiFi", "Mountain Access", "Ski Pass"],
-    studentFriendly: true,
-    roommates: 2,
-    gender: "Mixed",
-    furnished: true,
-    utilities: "Included",
-    ownerName: "Utah Mountain Properties",
-    ownerWealth: "Professional",
-    ownerType: "Individual",
-  },
-  {
-    id: 30,
-    title: "Park City Ski Lodge",
-    location: "Park City, UT",
-    price: 2200000,
-    beds: 4,
-    baths: 4,
-    sqft: 2800,
-    type: "buy",
-    category: "house",
-    image: "/placeholder.svg?height=200&width=300&text=Park+City+Ski+Lodge",
-    verified: true,
-    investmentGrade: "A+",
-    ownerName: "Mountain Resort Holdings",
-    ownerWealth: "Ultra High Net Worth",
-    ownerType: "Trust",
-  },
-]
-
-const handleSearch = async () => {
-  try {
-    if (searchQuery.trim()) {
-      setLoading(true)
-      setShowResults(true)
-
-      let filteredProperties = allProperties
-
-      // Filter by property type (rent/buy)
-      if (propertyType !== "all") {
-        filteredProperties = filteredProperties.filter((property) => property.type === propertyType)
-      }
-
-      // Enhanced filtering by search query - includes state names and abbreviations
-      const mockResults = filteredProperties
-        .filter((property) => {
-          const queryLower = searchQuery.toLowerCase()
-          if (searchType === "properties") {
-            return (
-              property.title.toLowerCase().includes(queryLower) ||
-              property.location.toLowerCase().includes(queryLower) ||
-              property.category.toLowerCase().includes(queryLower) ||
-              // State name matching
-              property.location
-                .toLowerCase()
-                .includes(queryLower) ||
-              // State abbreviation matching
-              getStateAbbreviation(property.location)
-                .toLowerCase()
-                .includes(queryLower) ||
-              queryLower.includes("all") ||
-              queryLower === ""
-            )
-          } else {
-            // Owner search
-            return (
-              property.ownerName.toLowerCase().includes(queryLower) ||
-              property.ownerWealth.toLowerCase().includes(queryLower) ||
-              property.ownerType.toLowerCase().includes(queryLower)
-            )
-          }
-        })
-        .map((property) => ({
-          id: property.id,
-          title: property.title,
-          location: property.location,
-          price: property.price,
-          beds: property.beds,
-          baths: property.baths,
-          sqft: property.sqft,
-          type: "property",
-          category: property.category,
-          image: property.image,
-          rating: property.rating,
-          verified: property.verified,
-          amenities: property.amenities,
-          studentFriendly: property.studentFriendly,
-          roommates: property.roommates,
-          gender: property.gender,
-          furnished: property.furnished,
-          utilities: property.utilities,
-          ownerName: property.ownerName,
-          ownerWealth: property.ownerWealth,
-          ownerType: property.ownerType,
-          investmentGrade: property.investmentGrade,
-          propertyType: property.type,
-        }))
-
-      setSearchResults(mockResults)
-      setLoading(false)
-    }
-  } catch (error) {
-    console.error("Search error:", error)
-    setLoading(false)
-    setSearchResults([])
-  }
-}
-
-// Helper function to get state abbreviation
-const getStateAbbreviation = (location: string) => {
-  const stateMap: { [key: string]: string } = {
-    California: "CA",
-    Texas: "TX",
-    "New York": "NY",
-    Florida: "FL",
-    Massachusetts: "MA",
-    Georgia: "GA",
-    Arizona: "AZ",
-    Colorado: "CO",
-    Washington: "WA",
-    Illinois: "IL",
-    Tennessee: "TN",
-    "North Carolina": "NC",
-    Oregon: "OR",
-    Nevada: "NV",
-    Utah: "UT",
-  }
-
-  for (const [state, abbrev] of Object.entries(stateMap)) {
-    if (location.includes(state) || location.includes(abbrev)) {
-      return abbrev
-    }
-  }
-  return ""
-}
