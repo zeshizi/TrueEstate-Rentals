@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -99,6 +99,11 @@ export function ZillowInspiredHero() {
     })
     setFilters((prev) => ({ ...prev, priceRange: [validMin, validMax] }))
   }
+
+  useEffect(() => {
+    console.log("ZillowInspiredHero mounted")
+    console.log("Current search params:", Object.fromEntries(new URLSearchParams(window.location.search)))
+  }, [])
 
   return (
     <div className="relative bg-gradient-to-br from-blue-50 to-indigo-100 min-h-[600px] flex items-center">

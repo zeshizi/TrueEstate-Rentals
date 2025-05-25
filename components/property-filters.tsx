@@ -17,7 +17,7 @@ interface PropertyFiltersProps {
   onFiltersChange: (filters: any) => void
 }
 
-export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersProps) {
+function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersProps) {
   const updateFilter = (key: string, value: any) => {
     onFiltersChange({ ...filters, [key]: value })
   }
@@ -117,3 +117,5 @@ export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersPro
     </div>
   )
 }
+
+export { PropertyFilters }

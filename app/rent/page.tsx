@@ -179,23 +179,28 @@ export default function RentPage() {
   const searchParams = useSearchParams()
 
   useEffect(() => {
-    const query = searchParams.get("q")
-    const minValue = searchParams.get("minValue")
-    const maxValue = searchParams.get("maxValue")
-    const category = searchParams.get("category")
+    try {
+      const query = searchParams.get("q")
+      const minValue = searchParams.get("minValue")
+      const maxValue = searchParams.get("maxValue")
+      const category = searchParams.get("category")
 
-    if (query) {
-      setSearchQuery(query)
-      handleSearch()
+      console.log("Rent page - Raw searchParams object:", searchParams)
+      console.log("Rent page - Individual params:", {
+        query,
+        minValue,
+        maxValue,
+        category,
+        searchParamsEntries: searchParams ? Object.fromEntries(searchParams.entries()) : "searchParams is null",
+      })
+
+      if (query) {
+        setSearchQuery(query)
+        handleSearch()
+      }
+    } catch (error) {
+      console.error("Error in Rent page useEffect:", error)
     }
-
-    // Log the parameters for debugging
-    console.log("Rent page search params:", {
-      query,
-      minValue,
-      maxValue,
-      category,
-    })
   }, [searchParams])
 
   const handleSearch = async () => {

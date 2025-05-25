@@ -17,7 +17,7 @@ interface SearchResultsProps {
   query: string
 }
 
-export function SearchResults({ results, loading, query }: SearchResultsProps) {
+function SearchResults({ results, loading, query }: SearchResultsProps) {
   const [bookmarkedItems, setBookmarkedItems] = useState<string[]>([])
   const { toast } = useToast()
   const [shareModalOpen, setShareModalOpen] = useState(false)
@@ -284,3 +284,5 @@ export function SearchResults({ results, loading, query }: SearchResultsProps) {
     </div>
   )
 }
+
+export { SearchResults }

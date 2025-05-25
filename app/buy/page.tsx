@@ -99,23 +99,28 @@ export default function BuyPage() {
   const searchParams = useSearchParams()
 
   useEffect(() => {
-    const query = searchParams.get("q")
-    const minValue = searchParams.get("minValue")
-    const maxValue = searchParams.get("maxValue")
-    const propertyType = searchParams.get("propertyType")
+    try {
+      const query = searchParams.get("q")
+      const minValue = searchParams.get("minValue")
+      const maxValue = searchParams.get("maxValue")
+      const propertyType = searchParams.get("propertyType")
 
-    if (query) {
-      setSearchQuery(query)
-      handleSearch()
+      console.log("Buy page - Raw searchParams object:", searchParams)
+      console.log("Buy page - Individual params:", {
+        query,
+        minValue,
+        maxValue,
+        propertyType,
+        searchParamsEntries: searchParams ? Object.fromEntries(searchParams.entries()) : "searchParams is null",
+      })
+
+      if (query) {
+        setSearchQuery(query)
+        handleSearch()
+      }
+    } catch (error) {
+      console.error("Error in Buy page useEffect:", error)
     }
-
-    // Log the parameters for debugging
-    console.log("Buy page search params:", {
-      query,
-      minValue,
-      maxValue,
-      propertyType,
-    })
   }, [searchParams])
 
   const handleBrowseAll = () => {
