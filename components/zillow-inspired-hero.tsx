@@ -42,16 +42,18 @@ export function ZillowInspiredHero() {
       // Build search URL with parameters
       const searchParams = new URLSearchParams({
         q: filters.location,
-        type: filters.searchType,
         minValue: filters.priceRange[0].toString(),
         maxValue: filters.priceRange[1].toString(),
         propertyType: filters.propertyType,
       })
 
-      if (filters.searchType === "wealth-map") {
+      // Route to appropriate page based on search type
+      if (filters.searchType === "buy") {
+        router.push(`/buy?${searchParams.toString()}`)
+      } else if (filters.searchType === "rent") {
+        router.push(`/rent?${searchParams.toString()}`)
+      } else if (filters.searchType === "wealth-map") {
         router.push(`/wealth-map?${searchParams.toString()}`)
-      } else {
-        router.push(`/search?${searchParams.toString()}`)
       }
     } catch (error) {
       console.error("Search navigation error:", error)

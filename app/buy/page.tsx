@@ -7,8 +7,8 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { MapPin, Search, Bed, Bath, Square, DollarSign, Heart, TrendingUp, Shield } from "lucide-react"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 
 const topCities = [
   "Beverly Hills",
@@ -63,6 +63,17 @@ const featuredProperties = [
 export default function BuyPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
+
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const query = searchParams.get("q")
+    if (query) {
+      setSearchQuery(query)
+      // You can also handle other parameters like price range here
+      console.log("Buy page loaded with search:", query)
+    }
+  }, [searchParams])
 
   const handleSearch = () => {
     if (searchQuery.trim()) {

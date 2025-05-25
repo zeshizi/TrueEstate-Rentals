@@ -1,3 +1,5 @@
+// This API uses mock data by default and falls back to RapidAPI only when RAPIDAPI_KEY is configured
+
 import { type NextRequest, NextResponse } from "next/server"
 
 // Using People Data Labs API via RapidAPI as Clearbit alternative
@@ -34,7 +36,7 @@ export async function GET(request: NextRequest) {
 async function enrichCompanyDataRapidAPI(domain?: string | null, companyName?: string | null) {
   if (!process.env.RAPIDAPI_KEY) {
     console.warn("RAPIDAPI_KEY not found, using mock data")
-    return null
+    return getMockEnrichmentData(domain, null, companyName).then((res) => res.company || null)
   }
   try {
     // Global Company Data API via RapidAPI
@@ -86,7 +88,7 @@ async function enrichCompanyDataRapidAPI(domain?: string | null, companyName?: s
 async function enrichPersonDataRapidAPI(email: string) {
   if (!process.env.RAPIDAPI_KEY) {
     console.warn("RAPIDAPI_KEY not found, using mock data")
-    return null
+    return getMockEnrichmentData(null, email, null).then((res) => res.person || null)
   }
   try {
     // People Data Labs API via RapidAPI
@@ -227,44 +229,47 @@ function getMockEnrichmentData(
   personEmail?: string | null,
   companyName?: string | null,
 ) {
-  if (companyDomain || companyName) {
-    return NextResponse.json({
-      company: {
-        name: companyName || "Smith Enterprises LLC",
-        domain: companyDomain || "smithenterprises.com",
-        industry: "Real Estate Investment",
-        employees: 25,
-        revenue: 50000000,
-        founded: 2018,
-        location: "Beverly Hills, CA",
-        description: "Real estate investment and development company",
-        website: "https://smithenterprises.com",
-        linkedin: "https://linkedin.com/company/smith-enterprises",
-        source: "Mock Data",
+  const mockCompanyData = {
+    name: companyName || "Smith Enterprises LLC",
+    domain: companyDomain || "smithenterprises.com",
+    industry: "Real Estate Investment",
+    employees: 25,
+    revenue: 50000000,
+    founded: 2018,
+    location: "Beverly Hills, CA",
+    description: "Real estate investment and development company",
+    website: "https://smithenterprises.com",
+    linkedin: "https://linkedin.com/company/smith-enterprises",
+    source: "Mock Data",
+  }
+
+  const mockPersonData = {
+    name: personEmail ? extractNameFromEmail(personEmail) : "John Smith",
+    title: "Chief Executive Officer",
+    company: companyName || "Smith Enterprises LLC",
+    email: personEmail || "john.smith@smithenterprises.com",
+    location: "Beverly Hills, CA",
+    linkedin: "https://linkedin.com/in/john-smith",
+    experience: [
+      {
+        company: "Smith Enterprises LLC",
+        title: "CEO",
+        duration: "2018 - Present",
       },
-    })
+    ],
+    source: "Mock Data",
+  }
+
+  if (companyDomain || companyName) {
+    return NextResponse.json({ company: mockCompanyData })
   }
 
   if (personEmail) {
-    return NextResponse.json({
-      person: {
-        name: extractNameFromEmail(personEmail),
-        title: "Chief Executive Officer",
-        company: "Smith Enterprises LLC",
-        email: personEmail,
-        location: "Beverly Hills, CA",
-        linkedin: "https://linkedin.com/in/john-smith",
-        experience: [
-          {
-            company: "Smith Enterprises LLC",
-            title: "CEO",
-            duration: "2018 - Present",
-          },
-        ],
-        source: "Mock Data",
-      },
-    })
+    return NextResponse.json({ person: mockPersonData })
   }
 
-  return NextResponse.json({ error: "Missing parameters" }, { status: 400 })
+  return NextResponse.json({
+    company: mockCompanyData,
+    person: mockPersonData,
+  })
 }
