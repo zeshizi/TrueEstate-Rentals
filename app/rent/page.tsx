@@ -180,10 +180,22 @@ export default function RentPage() {
 
   useEffect(() => {
     const query = searchParams.get("q")
+    const minValue = searchParams.get("minValue")
+    const maxValue = searchParams.get("maxValue")
+    const category = searchParams.get("category")
+
     if (query) {
       setSearchQuery(query)
       handleSearch()
     }
+
+    // Log the parameters for debugging
+    console.log("Rent page search params:", {
+      query,
+      minValue,
+      maxValue,
+      category,
+    })
   }, [searchParams])
 
   const handleSearch = async () => {

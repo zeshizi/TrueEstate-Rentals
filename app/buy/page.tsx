@@ -100,10 +100,22 @@ export default function BuyPage() {
 
   useEffect(() => {
     const query = searchParams.get("q")
+    const minValue = searchParams.get("minValue")
+    const maxValue = searchParams.get("maxValue")
+    const propertyType = searchParams.get("propertyType")
+
     if (query) {
       setSearchQuery(query)
       handleSearch()
     }
+
+    // Log the parameters for debugging
+    console.log("Buy page search params:", {
+      query,
+      minValue,
+      maxValue,
+      propertyType,
+    })
   }, [searchParams])
 
   const handleBrowseAll = () => {

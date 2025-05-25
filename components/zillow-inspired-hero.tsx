@@ -39,21 +39,35 @@ export function ZillowInspiredHero() {
     })
 
     try {
-      // Build search URL with parameters
-      const searchParams = new URLSearchParams({
-        q: filters.location,
-        minValue: filters.priceRange[0].toString(),
-        maxValue: filters.priceRange[1].toString(),
-        propertyType: filters.propertyType,
-      })
+      // Build search URL with parameters - only include non-default values
+      const searchParams = new URLSearchParams()
+
+      if (filters.location.trim()) {
+        searchParams.set("q", filters.location)
+      }
+
+      if (filters.priceRange[0] > 0) {
+        searchParams.set("minValue", filters.priceRange[0].toString())
+      }
+
+      if (filters.priceRange[1] < 10000000) {
+        searchParams.set("maxValue", filters.priceRange[1].toString())
+      }
+
+      if (filters.propertyType !== "all") {
+        searchParams.set("propertyType", filters.propertyType)
+      }
 
       // Route to appropriate page based on search type
+      const searchString = searchParams.toString()
+      const urlSuffix = searchString ? `?${searchString}` : ""
+
       if (filters.searchType === "buy") {
-        router.push(`/buy?${searchParams.toString()}`)
+        router.push(`/buy${urlSuffix}`)
       } else if (filters.searchType === "rent") {
-        router.push(`/rent?${searchParams.toString()}`)
+        router.push(`/rent${urlSuffix}`)
       } else if (filters.searchType === "wealth-map") {
-        router.push(`/wealth-map?${searchParams.toString()}`)
+        router.push(`/wealth-map${urlSuffix}`)
       }
     } catch (error) {
       console.error("Search navigation error:", error)
@@ -74,12 +88,16 @@ export function ZillowInspiredHero() {
   }
 
   const handlePriceRangeChange = (newRange: [number, number]) => {
+    // Ensure valid range values
+    const validMin = Math.max(0, Math.min(newRange[0], 10000000))
+    const validMax = Math.max(validMin, Math.min(newRange[1], 10000000))
+
     console.log("💰 Price range changed:", {
-      from: formatPrice(newRange[0]),
-      to: formatPrice(newRange[1]),
-      rawValues: newRange,
+      from: formatPrice(validMin),
+      to: formatPrice(validMax),
+      rawValues: [validMin, validMax],
     })
-    setFilters((prev) => ({ ...prev, priceRange: newRange }))
+    setFilters((prev) => ({ ...prev, priceRange: [validMin, validMax] }))
   }
 
   return (
