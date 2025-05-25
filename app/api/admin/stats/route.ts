@@ -1,58 +1,52 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getDatabase } from "@/lib/mongodb"
 
 export async function GET(request: NextRequest) {
   try {
-    const db = await getDatabase()
+    console.log("📊 Admin stats API called - using mock data")
 
-    // Get collection stats
-    const [propertiesCount, usersCount, wealthAnalysesCount] = await Promise.all([
-      db.collection("properties").countDocuments({ isActive: true }),
-      db.collection("users").countDocuments({ isActive: true }),
-      db.collection("wealth_analyses").countDocuments({ isActive: true }),
-    ])
-
-    // Get recent activity (mock data for now)
+    // Mock stats data - no database required
     const stats = {
       properties: {
-        total: propertiesCount,
-        addedToday: Math.floor(Math.random() * 10),
-        highValue: Math.floor(propertiesCount * 0.15),
+        total: 24,
+        addedToday: 3,
+        highValue: 8,
       },
       users: {
-        total: usersCount,
-        active: Math.floor(usersCount * 0.8),
-        premium: Math.floor(usersCount * 0.2),
+        total: 1247,
+        active: 998,
+        premium: 249,
       },
       wealthAnalyses: {
-        total: wealthAnalysesCount,
-        highConfidence: Math.floor(wealthAnalysesCount * 0.6),
-        generated: Math.floor(Math.random() * 5),
+        total: 156,
+        highConfidence: 94,
+        generated: 12,
       },
       searches: {
-        today: Math.floor(Math.random() * 100),
-        thisWeek: Math.floor(Math.random() * 500),
-        thisMonth: Math.floor(Math.random() * 2000),
+        today: 89,
+        thisWeek: 456,
+        thisMonth: 1834,
       },
       apiCalls: {
-        today: Math.floor(Math.random() * 200),
-        thisWeek: Math.floor(Math.random() * 1000),
-        thisMonth: Math.floor(Math.random() * 5000),
+        today: 234,
+        thisWeek: 1567,
+        thisMonth: 6789,
       },
     }
 
+    console.log("✅ Admin stats generated successfully")
     return NextResponse.json(stats)
   } catch (error) {
-    console.error("Admin stats error:", error)
-    return NextResponse.json(
-      {
-        properties: { total: 0, addedToday: 0, highValue: 0 },
-        users: { total: 0, active: 0, premium: 0 },
-        wealthAnalyses: { total: 0, highConfidence: 0, generated: 0 },
-        searches: { today: 0, thisWeek: 0, thisMonth: 0 },
-        apiCalls: { today: 0, thisWeek: 0, thisMonth: 0 },
-      },
-      { status: 500 },
-    )
+    console.error("❌ Admin stats error:", error)
+
+    // Return mock data even on error
+    const fallbackStats = {
+      properties: { total: 0, addedToday: 0, highValue: 0 },
+      users: { total: 0, active: 0, premium: 0 },
+      wealthAnalyses: { total: 0, highConfidence: 0, generated: 0 },
+      searches: { today: 0, thisWeek: 0, thisMonth: 0 },
+      apiCalls: { today: 0, thisWeek: 0, thisMonth: 0 },
+    }
+
+    return NextResponse.json(fallbackStats, { status: 200 })
   }
 }

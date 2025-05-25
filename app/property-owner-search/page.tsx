@@ -25,7 +25,6 @@ import {
 } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { SearchResults } from "@/components/search-results"
 import { PropertyFilters } from "@/components/property-filters"
 
 interface Owner {
@@ -98,6 +97,52 @@ const allProperties = [
     reviewCount: 12,
     reviewSummary: "Stunning views and premium finishes throughout",
     reviewAuthor: "Real Estate Expert",
+  },
+  {
+    id: 16,
+    title: "Beverly Hills Mansion",
+    location: "Los Angeles, CA",
+    price: 4500000,
+    beds: 6,
+    baths: 7,
+    sqft: 5200,
+    type: "buy",
+    category: "house",
+    image: "/placeholder.svg?height=200&width=300&text=Beverly+Hills+Mansion",
+    verified: true,
+    investmentGrade: "A++",
+    ownerName: "Hollywood Elite Properties",
+    ownerWealth: "Ultra High Net Worth",
+    ownerType: "Individual",
+    value: 4500000,
+    confidence: "High",
+    subtitle: "Los Angeles, CA - Beverly Hills Estate",
+    reviewCount: 8,
+    reviewSummary: "Stunning celebrity-owned mansion with luxury amenities",
+    reviewAuthor: "Luxury Real Estate Expert",
+  },
+  {
+    id: 17,
+    title: "Downtown LA Loft",
+    location: "Los Angeles, CA",
+    price: 1850000,
+    beds: 2,
+    baths: 2,
+    sqft: 1400,
+    type: "buy",
+    category: "loft",
+    image: "/placeholder.svg?height=200&width=300&text=Downtown+LA+Loft",
+    verified: true,
+    investmentGrade: "A",
+    ownerName: "Urban Development Corp",
+    ownerWealth: "High Net Worth",
+    ownerType: "Company",
+    value: 1850000,
+    confidence: "High",
+    subtitle: "Los Angeles, CA - Downtown Loft",
+    reviewCount: 15,
+    reviewSummary: "Modern loft in the heart of downtown",
+    reviewAuthor: "Urban Living Expert",
   },
 
   // TEXAS
@@ -540,164 +585,110 @@ const PropertyOwnerSearch = () => {
     }
   }
 
-  // Update the useEffect to automatically trigger a search for "student" when the page loads for demonstration
-
   useEffect(() => {
     try {
       const query = searchParams?.get("q") || ""
       const type = searchParams?.get("type") || ""
-      const minValue = ""
-      const maxValue = ""
+
+      console.log("🔍 Property Owner Search page loaded with params:", {
+        query,
+        type,
+      })
 
       if (query) {
         setSearchQuery(query)
         setShowResults(true)
-      }
-      if (type && (type === "rent" || type === "buy")) {
-        setPropertyType(type)
-      }
 
-      // Auto-search if query is provided
-      if (query) {
+        // Set property type filter if provided
+        if (type && (type === "rent" || type === "buy")) {
+          setPropertyType(type)
+        }
+
+        // Auto-search with the provided query
         setTimeout(() => {
-          handleSearch()
+          handleSearchWithParams(query, type)
         }, 100)
       }
-
-      console.log("Property Owner Search page params:", {
-        query,
-        type,
-        minValue,
-        maxValue,
-      })
     } catch (error) {
-      console.error("Error in Property Owner Search page useEffect:", error)
+      console.error("❌ Error in Property Owner Search page useEffect:", error)
     }
   }, [searchParams])
 
-  // Add a specific student search function
-  const handleStudentSearch = async () => {
+  const handleSearchWithParams = async (query: string, type: string) => {
     try {
-      setOwnerLoading(true)
+      console.log("🔍 Starting search with params:", { query, type })
+
+      setLoading(true)
       setShowResults(true)
 
-      // Mock student data based on search query
-      const mockOwners = [
-        {
-          id: "owner-1",
-          name: "Student Smith",
-          email: "student.smith@email.com",
-          company: "Student Real Estate Holdings",
-          title: "CEO & Founder",
-          location: "Beverly Hills, CA",
-          properties: 12,
-          totalValue: 15000000,
-          wealthLevel: "High Net Worth",
-          investmentGrade: "A+",
-          source: "Mock Data",
-        },
-        {
-          id: "owner-2",
-          name: "Student Johnson",
-          email: "student@johnsonproperties.com",
-          company: "Student Property Group",
-          title: "Managing Partner",
-          location: "Manhattan, NY",
-          properties: 8,
-          totalValue: 25000000,
-          wealthLevel: "Ultra High Net Worth",
-          investmentGrade: "A++",
-          source: "Mock Data",
-        },
-        {
-          id: "owner-3",
-          name: "Student Chen",
-          email: "m.chen@chenrealty.com",
-          company: "Student Realty Investments",
-          title: "Principal Investor",
-          location: "San Francisco, CA",
-          properties: 15,
-          totalValue: 18000000,
-          wealthLevel: "High Net Worth",
-          investmentGrade: "A+",
-          source: "Mock Data",
-        },
-      ]
+      // Simulate API delay
+      await new Promise((resolve) => setTimeout(resolve, 500))
 
-      setOwnerResults(mockOwners)
-      setOwnerLoading(false)
+      let filteredProperties = allProperties
+
+      // Filter by property type (rent/buy)
+      if (type && type !== "all") {
+        filteredProperties = filteredProperties.filter((property) => property.type === type)
+        console.log(`🏠 Filtered by type "${type}":`, filteredProperties.length, "properties")
+      }
+
+      // Enhanced filtering by search query
+      const mockResults = filteredProperties
+        .filter((property) => {
+          const queryLower = query.toLowerCase()
+          const matches =
+            property.title.toLowerCase().includes(queryLower) ||
+            property.location.toLowerCase().includes(queryLower) ||
+            property.category.toLowerCase().includes(queryLower) ||
+            queryLower.includes("all") ||
+            queryLower === "" ||
+            // State matching
+            property.location
+              .split(", ")[1]
+              ?.toLowerCase()
+              .includes(queryLower) ||
+            // City matching
+            property.location
+              .split(", ")[0]
+              ?.toLowerCase()
+              .includes(queryLower)
+
+          if (matches) {
+            console.log("✅ Property matched:", property.title, property.location)
+          }
+
+          return matches
+        })
+        .map((property) => ({
+          id: property.id,
+          title: property.title,
+          subtitle: property.subtitle || property.location,
+          value: property.value || property.price,
+          ownerName: property.ownerName,
+          ownerWealth: property.ownerWealth,
+          confidence: property.confidence || "High",
+          type: "property",
+          rating: property.rating,
+          reviewCount: property.reviewCount || 0,
+          reviewSummary: property.reviewSummary,
+          reviewAuthor: property.reviewAuthor,
+          image: property.image,
+        }))
+
+      console.log("📊 Search results:", mockResults.length, "properties found")
+      setSearchResults(mockResults)
+      setLoading(false)
     } catch (error) {
-      console.error("Student search error:", error)
-      setOwnerLoading(false)
-      setOwnerResults([])
+      console.error("❌ Search error:", error)
+      setLoading(false)
+      setSearchResults([])
     }
   }
 
   const handleSearch = async () => {
     try {
       if (searchQuery.trim()) {
-        setLoading(true)
-        setShowResults(true)
-
-        // Simulate API delay
-        await new Promise((resolve) => setTimeout(resolve, 500))
-
-        let filteredProperties = allProperties
-
-        // Filter by property type (rent/buy)
-        if (propertyType !== "all") {
-          filteredProperties = filteredProperties.filter((property) => property.type === propertyType)
-        }
-
-        // Enhanced filtering by search query
-        const mockResults = filteredProperties
-          .filter((property) => {
-            const queryLower = searchQuery.toLowerCase()
-            if (searchType === "properties") {
-              return (
-                property.title.toLowerCase().includes(queryLower) ||
-                property.location.toLowerCase().includes(queryLower) ||
-                property.category.toLowerCase().includes(queryLower) ||
-                queryLower.includes("all") ||
-                queryLower === "" ||
-                // State matching
-                property.location
-                  .split(", ")[1]
-                  ?.toLowerCase()
-                  .includes(queryLower) ||
-                // City matching
-                property.location
-                  .split(", ")[0]
-                  ?.toLowerCase()
-                  .includes(queryLower)
-              )
-            } else {
-              // Owner search
-              return (
-                property.ownerName.toLowerCase().includes(queryLower) ||
-                property.ownerWealth.toLowerCase().includes(queryLower) ||
-                property.ownerType.toLowerCase().includes(queryLower)
-              )
-            }
-          })
-          .map((property) => ({
-            id: property.id,
-            title: property.title,
-            subtitle: property.subtitle || property.location,
-            value: property.value || property.price,
-            ownerName: property.ownerName,
-            ownerWealth: property.ownerWealth,
-            confidence: property.confidence || "High",
-            type: "property",
-            rating: property.rating,
-            reviewCount: property.reviewCount || 0,
-            reviewSummary: property.reviewSummary,
-            reviewAuthor: property.reviewAuthor,
-            image: property.image,
-          }))
-
-        setSearchResults(mockResults)
-        setLoading(false)
+        await handleSearchWithParams(searchQuery, propertyType)
       }
     } catch (error) {
       console.error("Search error:", error)
@@ -814,7 +805,7 @@ const PropertyOwnerSearch = () => {
               <span className="font-medium">Popular Searches:</span>
             </p>
             <div className="flex flex-wrap justify-center gap-2">
-              {["California", "Texas", "New York", "Florida", "student", "luxury"].map((term) => (
+              {["California", "Texas", "New York", "Florida", "Los Angeles", "student", "luxury"].map((term) => (
                 <Button
                   key={term}
                   variant="outline"
@@ -842,6 +833,7 @@ const PropertyOwnerSearch = () => {
                 <h3 className="text-2xl font-bold text-gray-900">
                   {searchType === "properties" ? "Properties" : "Property Owners"}{" "}
                   {searchQuery && `for "${searchQuery}"`}
+                  <span className="text-sm font-normal text-gray-500 ml-2">({searchResults.length} results)</span>
                 </h3>
                 <div className="flex items-center gap-4">
                   <Button variant="outline" onClick={() => router.push("/bookmarks")} className="text-gray-600">
@@ -859,7 +851,84 @@ const PropertyOwnerSearch = () => {
                   <PropertyFilters onFiltersChange={(filters) => console.log("Filters:", filters)} />
                 </div>
                 <div className="lg:col-span-3">
-                  <SearchResults results={searchResults} loading={loading} query={searchQuery} />
+                  {loading ? (
+                    <div className="flex items-center justify-center py-12">
+                      <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                        <p className="text-gray-600">Searching properties...</p>
+                      </div>
+                    </div>
+                  ) : searchResults.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {searchResults.map((result: any) => (
+                        <Card key={result.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                          <div className="relative">
+                            <img
+                              src={result.image || "/placeholder.svg"}
+                              alt={result.title}
+                              className="w-full h-48 object-cover"
+                            />
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="absolute top-2 right-2 bg-white/80 hover:bg-white"
+                            >
+                              <Heart className="h-4 w-4" />
+                            </Button>
+                            <Badge className="absolute top-2 left-2 bg-green-500 text-white">
+                              <Shield className="h-3 w-3 mr-1" />
+                              Verified
+                            </Badge>
+                          </div>
+                          <CardContent className="p-6">
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="font-semibold text-lg">{result.title}</h4>
+                              {result.rating && (
+                                <div className="flex items-center gap-1">
+                                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                  <span className="text-sm text-gray-600">{result.rating}</span>
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-2 mb-3">
+                              <MapPin className="h-4 w-4 text-gray-500" />
+                              <span className="text-gray-600">{result.subtitle}</span>
+                            </div>
+
+                            {/* Owner Information */}
+                            <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                              <div className="text-xs text-gray-500 mb-1">Owner Information</div>
+                              <div className="text-sm font-medium">{result.ownerName}</div>
+                              <div className="text-xs text-gray-600">{result.ownerWealth}</div>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-1">
+                                <DollarSign className="h-5 w-5 text-gray-500" />
+                                <span className="text-xl font-bold">
+                                  {result.value >= 1000000
+                                    ? `$${(result.value / 1000000).toFixed(1)}M`
+                                    : `$${result.value.toLocaleString()}`}
+                                </span>
+                              </div>
+                              <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                                View Details
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="text-gray-500 mb-4">
+                        <Home className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p className="text-lg">No properties found for "{searchQuery}"</p>
+                        <p className="text-sm">Try searching for a different location or property type</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
