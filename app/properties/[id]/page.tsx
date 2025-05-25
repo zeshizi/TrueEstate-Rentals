@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, MapPin, User, Heart, Share2 } from "lucide-react"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
+import { EnhancedPropertyDetails } from "@/components/enhanced-property-details"
+import { PropertyReviews } from "@/components/property-reviews"
 
 interface PropertyDetails {
   id: string
@@ -219,42 +221,61 @@ export default function PropertyDetailPage() {
             </Card>
 
             {/* Property Info */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Property Details</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">{property.bedrooms}</div>
-                    <div className="text-sm text-gray-600">Bedrooms</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">{property.bathrooms}</div>
-                    <div className="text-sm text-gray-600">Bathrooms</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">{property.sqft.toLocaleString()}</div>
-                    <div className="text-sm text-gray-600">Sq Ft</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">{property.propertyType}</div>
-                    <div className="text-sm text-gray-600">Type</div>
-                  </div>
-                </div>
+            <EnhancedPropertyDetails
+              property={{
+                id: property.id,
+                address: property.title,
+                value: property.value,
+                ownerWealth: property.ownerWealth,
+                ownerName: property.ownerName,
+                confidence: "High",
+                propertyType: property.propertyType,
+                bedrooms: property.bedrooms,
+                bathrooms: property.bathrooms,
+                sqft: property.sqft,
+                yearBuilt: 2018,
+                images: property.images,
+              }}
+            />
 
-                <div>
-                  <h3 className="font-semibold mb-3">Features</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {property.features.map((feature, index) => (
-                      <Badge key={index} variant="outline">
-                        {feature}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <PropertyReviews
+              propertyId={property.id}
+              reviews={[
+                {
+                  id: "1",
+                  userId: "user1",
+                  userName: "Sarah Johnson",
+                  rating: 5,
+                  title: "Excellent property in prime location",
+                  comment: "Beautiful property with amazing amenities. The owner is very responsive and professional.",
+                  date: "2024-01-15",
+                  verified: true,
+                  helpful: 8,
+                  category: "location",
+                },
+                {
+                  id: "2",
+                  userId: "user2",
+                  userName: "Michael Chen",
+                  rating: 4,
+                  title: "Great investment opportunity",
+                  comment: "Solid property with good appreciation potential. Well-maintained and in a desirable area.",
+                  date: "2024-01-10",
+                  verified: true,
+                  helpful: 5,
+                  category: "investment",
+                },
+              ]}
+              averageRating={4.5}
+              totalReviews={12}
+              ratingBreakdown={{
+                5: 8,
+                4: 3,
+                3: 1,
+                2: 0,
+                1: 0,
+              }}
+            />
           </div>
 
           {/* Owner Information */}
