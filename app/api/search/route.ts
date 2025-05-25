@@ -163,7 +163,16 @@ export async function GET(request: Request) {
       const matchesLocation =
         property.city.toLowerCase().includes(query) ||
         property.state.toLowerCase().includes(query) ||
-        property.address.toLowerCase().includes(query)
+        property.address.toLowerCase().includes(query) ||
+        property.zipCode.includes(query)
+      if (!matchesLocation) return false
+    }
+
+    // Location filter (separate from query)
+    if (filters.location) {
+      const location = filters.location.toLowerCase()
+      const matchesLocation =
+        property.city.toLowerCase().includes(location) || property.state.toLowerCase().includes(location)
       if (!matchesLocation) return false
     }
 
@@ -178,16 +187,30 @@ export async function GET(request: Request) {
 
     // Property type filtering
     if (filters.propertyType && filters.propertyType !== "all") {
-      if (property.propertyType !== filters.propertyType) return false
+      if (!property.propertyType.toLowerCase().includes(filters.propertyType.toLowerCase())) return false
     }
 
     // Bedrooms filtering
-    if (filters.bedrooms && property.bedrooms < Number.parseInt(filters.bedrooms)) return false
+    if (filters.bedrooms && Number.parseInt(filters.bedrooms) > 0) {
+      if (property.bedrooms < Number.parseInt(filters.bedrooms)) return false
+    }
 
     // Bathrooms filtering
-    if (filters.bathrooms && property.bathrooms < Number.parseInt(filters.bathrooms)) return false
+    if (filters.bathrooms && Number.parseInt(filters.bathrooms) > 0) {
+      if (property.bathrooms < Number.parseInt(filters.bathrooms)) return false
+    }
 
     return true
+  })
+
+  console.log(`🔍 Search API: Found ${filteredProperties.length} properties matching filters:`, {
+    query: filters.query,
+    location: filters.location,
+    type: filters.type,
+    priceRange: `$${filters.minValue} - $${filters.maxValue}`,
+    propertyType: filters.propertyType,
+    bedrooms: filters.bedrooms,
+    bathrooms: filters.bathrooms,
   })
 
   return NextResponse.json(filteredProperties)
