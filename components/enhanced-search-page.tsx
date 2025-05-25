@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Slider } from "@/components/ui/slider"
-import { Search, Filter } from "lucide-react"
+import { Search, Filter, Star, Heart } from "lucide-react"
 
 export function EnhancedSearchPage() {
   const searchParams = useSearchParams()
@@ -29,6 +29,8 @@ export function EnhancedSearchPage() {
     location: "",
     bedrooms: "any",
     bathrooms: "any",
+    minRating: "any",
+    sortBy: "relevance",
   })
 
   const handleSearch = useCallback(async () => {
@@ -43,6 +45,8 @@ export function EnhancedSearchPage() {
         ownerType: filters.ownerType,
         wealthRange: filters.wealthRange,
         location: filters.location,
+        minRating: filters.minRating,
+        sortBy: filters.sortBy,
       })
 
       console.log("🔍 Enhanced search with params:", {
@@ -52,6 +56,8 @@ export function EnhancedSearchPage() {
         maxValue: filters.maxValue[0],
         propertyType: filters.propertyType,
         ownerType: filters.ownerType,
+        minRating: filters.minRating,
+        sortBy: filters.sortBy,
         url: `/api/search?${params.toString()}`,
       })
 
@@ -101,7 +107,9 @@ export function EnhancedSearchPage() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Property & Owner Search</h1>
-              <p className="text-gray-600 mt-2">Discover luxury properties and their wealthy owners</p>
+              <p className="text-gray-600 mt-2">
+                Discover luxury properties with reviews, ratings, and wealth intelligence
+              </p>
             </div>
             <Button variant="outline" onClick={() => setShowFilters(!showFilters)} className="lg:hidden">
               <Filter className="h-4 w-4 mr-2" />
@@ -135,6 +143,7 @@ export function EnhancedSearchPage() {
                   { key: "luxury", label: "Luxury Homes" },
                   { key: "owner", label: "By Owner" },
                   { key: "wealth", label: "Wealth Analysis" },
+                  { key: "top-rated", label: "Top Rated" },
                 ].map((tab) => (
                   <Button
                     key={tab.key}
@@ -144,6 +153,7 @@ export function EnhancedSearchPage() {
                     className="rounded-full"
                   >
                     {tab.label}
+                    {tab.key === "top-rated" && <Star className="h-3 w-3 ml-1 fill-current" />}
                   </Button>
                 ))}
               </div>
@@ -178,6 +188,25 @@ export function EnhancedSearchPage() {
                       <span>{formatPrice(50000000)}</span>
                     </div>
                   </div>
+                </div>
+
+                {/* Rating Filter */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-3 block">Minimum Rating</label>
+                  <Select
+                    value={filters.minRating}
+                    onValueChange={(value) => setFilters({ ...filters, minRating: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="any">Any Rating</SelectItem>
+                      <SelectItem value="4">4+ Stars</SelectItem>
+                      <SelectItem value="3">3+ Stars</SelectItem>
+                      <SelectItem value="2">2+ Stars</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Property Type */}
@@ -221,44 +250,20 @@ export function EnhancedSearchPage() {
                   </Select>
                 </div>
 
-                {/* Wealth Range */}
+                {/* Sort By */}
                 <div>
-                  <label className="text-sm font-medium text-gray-700 mb-3 block">Owner Wealth Range</label>
-                  <Select
-                    value={filters.wealthRange}
-                    onValueChange={(value) => setFilters({ ...filters, wealthRange: value })}
-                  >
+                  <label className="text-sm font-medium text-gray-700 mb-3 block">Sort By</label>
+                  <Select value={filters.sortBy} onValueChange={(value) => setFilters({ ...filters, sortBy: value })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Ranges</SelectItem>
-                      <SelectItem value="1m-5m">$1M - $5M</SelectItem>
-                      <SelectItem value="5m-10m">$5M - $10M</SelectItem>
-                      <SelectItem value="10m-25m">$10M - $25M</SelectItem>
-                      <SelectItem value="25m-50m">$25M - $50M</SelectItem>
-                      <SelectItem value="50m+">$50M+</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Bedrooms */}
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-3 block">Bedrooms</label>
-                  <Select
-                    value={filters.bedrooms}
-                    onValueChange={(value) => setFilters({ ...filters, bedrooms: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="any">Any</SelectItem>
-                      <SelectItem value="1">1+</SelectItem>
-                      <SelectItem value="2">2+</SelectItem>
-                      <SelectItem value="3">3+</SelectItem>
-                      <SelectItem value="4">4+</SelectItem>
-                      <SelectItem value="5">5+</SelectItem>
+                      <SelectItem value="relevance">Relevance</SelectItem>
+                      <SelectItem value="rating">Highest Rated</SelectItem>
+                      <SelectItem value="value-desc">Highest Value</SelectItem>
+                      <SelectItem value="value-asc">Lowest Value</SelectItem>
+                      <SelectItem value="wealth-desc">Wealthiest Owner</SelectItem>
+                      <SelectItem value="newest">Newest Listed</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -280,17 +285,12 @@ export function EnhancedSearchPage() {
                   <h2 className="text-xl font-semibold text-gray-900">{results.length} Properties Found</h2>
                   {query && <Badge variant="outline">Searching: "{query}"</Badge>}
                 </div>
-                <Select defaultValue="value-desc">
-                  <SelectTrigger className="w-48">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="value-desc">Highest Value</SelectItem>
-                    <SelectItem value="value-asc">Lowest Value</SelectItem>
-                    <SelectItem value="wealth-desc">Wealthiest Owner</SelectItem>
-                    <SelectItem value="newest">Newest Listed</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm">
+                    <Heart className="h-4 w-4 mr-1" />
+                    View Bookmarks
+                  </Button>
+                </div>
               </div>
             )}
 
