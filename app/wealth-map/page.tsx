@@ -18,14 +18,17 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/co
 import { Filter, Database, Wrench, X } from "lucide-react"
 
 export default function WealthMapPage() {
-  const [selectedProperty, setSelectedProperty] = useState(null)
-  const [properties, setProperties] = useState([])
+  const [selectedProperty, setSelectedProperty] = useState<any>(null)
+  const [properties, setProperties] = useState<any[]>([])
   const [filters, setFilters] = useState({
     minValue: 0,
     maxValue: 10000000,
     propertyType: "all",
     ownerType: "all",
     wealthRange: "all",
+    verificationStatus: "all",
+    trustScore: 0,
+    location: "",
   })
   const [isMobile, setIsMobile] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
@@ -51,6 +54,9 @@ export default function WealthMapPage() {
         propertyType: filters.propertyType,
         ownerType: filters.ownerType,
         wealthRange: filters.wealthRange,
+        verificationStatus: filters.verificationStatus,
+        trustScore: filters.trustScore.toString(),
+        location: filters.location,
       })
 
       const response = await fetch(`/api/properties?${params}`)
@@ -58,6 +64,7 @@ export default function WealthMapPage() {
       setProperties(data.properties || [])
     } catch (error) {
       console.error("Failed to fetch properties:", error)
+      setProperties([])
     }
   }
 
@@ -67,6 +74,15 @@ export default function WealthMapPage() {
 
   const handleLoadSearch = (searchFilters: any) => {
     setFilters(searchFilters)
+  }
+
+  // Safe value formatting with null checks
+  const formatValue = (value: any) => {
+    if (value === null || value === undefined || isNaN(value)) return "N/A"
+    const numValue = Number(value)
+    if (numValue >= 1000000) return `$${(numValue / 1000000).toFixed(1)}M`
+    if (numValue >= 1000) return `$${(numValue / 1000).toFixed(0)}K`
+    return `$${numValue.toLocaleString()}`
   }
 
   // Mobile Layout
@@ -175,7 +191,9 @@ export default function WealthMapPage() {
             <div className="absolute bottom-4 left-4 right-4 z-20">
               <div className="bg-white rounded-lg shadow-lg p-4 max-h-48 overflow-y-auto">
                 <div className="flex items-start justify-between mb-2">
-                  <h3 className="font-semibold text-sm text-gray-900 flex-1">{selectedProperty.address}</h3>
+                  <h3 className="font-semibold text-sm text-gray-900 flex-1">
+                    {selectedProperty?.address || "Unknown Address"}
+                  </h3>
                   <Button variant="ghost" size="sm" onClick={() => setSelectedProperty(null)} className="p-1 h-auto">
                     <X className="h-3 w-3" />
                   </Button>
@@ -183,15 +201,17 @@ export default function WealthMapPage() {
                 <div className="space-y-1 text-xs">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Value:</span>
-                    <span className="font-medium">${(selectedProperty.value / 1000000).toFixed(1)}M</span>
+                    <span className="font-medium">{formatValue(selectedProperty?.value)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Owner Wealth:</span>
-                    <span className="font-medium">${(selectedProperty.ownerWealth / 1000000).toFixed(1)}M</span>
+                    <span className="font-medium">{formatValue(selectedProperty?.ownerWealth)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Owner:</span>
-                    <span className="font-medium text-right flex-1 ml-2">{selectedProperty.ownerName}</span>
+                    <span className="font-medium text-right flex-1 ml-2">
+                      {selectedProperty?.ownerName || "Unknown Owner"}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -202,7 +222,7 @@ export default function WealthMapPage() {
     )
   }
 
-  // Desktop Layout (unchanged)
+  // Desktop Layout
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -221,7 +241,9 @@ export default function WealthMapPage() {
               <TabsContent value="filters" className="space-y-6">
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900 mb-2">US Wealth Map</h1>
-                  <p className="text-sm text-gray-600">Interactive map with {properties.length} properties loaded</p>
+                  <p className="text-sm text-gray-600">
+                    Interactive map with {properties?.length || 0} properties loaded
+                  </p>
                 </div>
 
                 <PropertyFilters filters={filters} onFiltersChange={setFilters} />
